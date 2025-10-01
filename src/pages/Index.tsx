@@ -1,15 +1,18 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, Clock, History, Settings, Waves } from "lucide-react";
+import { Activity, Clock, History, Settings, Waves, BookOpen } from "lucide-react";
 import { TrainingSession } from "@/components/TrainingSession";
 import { CustomTableBuilder } from "@/components/CustomTableBuilder";
+import { ProgramsView } from "@/components/ProgramsView";
+import { TrainingTable } from "@/types/training";
 
-type View = "home" | "o2-table" | "co2-table" | "custom" | "history" | "settings";
+type View = "home" | "o2-table" | "co2-table" | "custom" | "history" | "settings" | "programs";
 
 const Index = () => {
   const [currentView, setCurrentView] = useState<View>("home");
-  const [customTable, setCustomTable] = useState<any>(null);
+  const [customTable, setCustomTable] = useState<TrainingTable | null>(null);
+  const [programSession, setProgramSession] = useState<TrainingTable | null>(null);
 
   if (currentView === "o2-table") {
     return (
@@ -27,6 +30,33 @@ const Index = () => {
         type="CO2"
         onComplete={() => setCurrentView("home")}
         onBack={() => setCurrentView("home")}
+      />
+    );
+  }
+
+  if (currentView === "programs") {
+    if (!programSession) {
+      return (
+        <ProgramsView
+          onSelectSession={(session) => {
+            setProgramSession(session);
+          }}
+          onBack={() => setCurrentView("home")}
+        />
+      );
+    }
+    return (
+      <TrainingSession
+        type="CUSTOM"
+        customTable={programSession}
+        onComplete={() => {
+          setProgramSession(null);
+          setCurrentView("home");
+        }}
+        onBack={() => {
+          setProgramSession(null);
+          setCurrentView("home");
+        }}
       />
     );
   }
@@ -104,8 +134,28 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Custom Table */}
+        {/* Training Programs */}
         <div className="mb-8 animate-fade-in" style={{ animationDelay: "0.2s" }}>
+          <Card className="bg-card/50 backdrop-blur-sm border-2 hover:shadow-xl transition-all cursor-pointer" onClick={() => setCurrentView("programs")}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-secondary" />
+                Training Programs
+              </CardTitle>
+              <CardDescription>Follow structured beginner to advanced programs</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex gap-2">
+                <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-semibold">Beginner</span>
+                <span className="px-3 py-1 bg-secondary/10 text-secondary rounded-full text-xs font-semibold">Intermediate</span>
+                <span className="px-3 py-1 bg-accent/10 text-accent rounded-full text-xs font-semibold">Advanced</span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Custom Table */}
+        <div className="mb-8 animate-fade-in" style={{ animationDelay: "0.3s" }}>
           <Card className="bg-card/50 backdrop-blur-sm border-2">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -127,7 +177,7 @@ const Index = () => {
         </div>
 
         {/* Stats Preview */}
-        <div className="animate-fade-in" style={{ animationDelay: "0.3s" }}>
+        <div className="animate-fade-in" style={{ animationDelay: "0.4s" }}>
           <Card className="bg-card/50 backdrop-blur-sm border-2">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">

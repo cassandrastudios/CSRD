@@ -2,7 +2,10 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, Pause, Play, SkipForward } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { ArrowLeft, Pause, Play, SkipForward, Volume2, VolumeX } from "lucide-react";
+import { useVoiceGuidance } from "@/hooks/useVoiceGuidance";
 
 type SessionType = "O2" | "CO2" | "CUSTOM";
 type Phase = "ready" | "breathe" | "hold" | "complete";
@@ -36,7 +39,10 @@ export const TrainingSession = ({ type, customTable, onComplete, onBack }: Train
   const [phase, setPhase] = useState<Phase>("ready");
   const [timeLeft, setTimeLeft] = useState(5);
   const [isPaused, setIsPaused] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState(true);
+  const { speak, cancel } = useVoiceGuidance(voiceEnabled);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const hasSpokenRef = useRef(false);
 
   // Get table based on type
   const table = customTable || (type === "O2" ? O2_PRESET : CO2_PRESET);
@@ -66,34 +72,58 @@ export const TrainingSession = ({ type, customTable, onComplete, onBack }: Train
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
+          hasSpokenRef.current = false;
           // Phase transition logic
           if (phase === "ready") {
             playSound(800, 0.2);
+            speak("Begin holding your breath");
             setPhase("hold");
             return table.holdTimes[currentRound];
           } else if (phase === "hold") {
             playSound(600, 0.3);
             if (currentRound < table.rounds - 1) {
+              speak("Breathe and recover");
               setPhase("breathe");
               return table.restTimes[currentRound];
             } else {
               setPhase("complete");
+              speak("Session complete. Excellent work!");
               playSound(1000, 0.5);
               return 0;
             }
           } else if (phase === "breathe") {
             playSound(800, 0.2);
             setCurrentRound((r) => r + 1);
+            speak("Next round. Hold your breath");
             setPhase("hold");
             return table.holdTimes[currentRound + 1];
           }
         }
+        
+        // Give countdown warnings
+        if (phase === "hold" && prev === 10 && !hasSpokenRef.current) {
+          speak("Ten seconds remaining");
+          hasSpokenRef.current = true;
+        }
+        if (phase === "breathe" && prev === 5 && !hasSpokenRef.current) {
+          speak("Prepare for next hold");
+          hasSpokenRef.current = true;
+        }
+        
         return prev - 1;
       });
     }, 1000);
 
-    return () => clearInterval(timer);
-  }, [phase, currentRound, isPaused, table]);
+    return () => {
+      clearInterval(timer);
+    };
+  }, [phase, currentRound, isPaused, table, speak]);
+
+  useEffect(() => {
+    return () => {
+      cancel();
+    };
+  }, [cancel]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -162,7 +192,16 @@ export const TrainingSession = ({ type, customTable, onComplete, onBack }: Train
             <p className="text-primary-foreground/80 text-sm">{type} Table</p>
             <p className="text-primary-foreground font-semibold">Round {currentRound + 1} / {table.rounds}</p>
           </div>
-          <div className="w-10"></div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setVoiceEnabled(!voiceEnabled)}
+              className="text-primary-foreground"
+            >
+              {voiceEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+            </Button>
+          </div>
         </div>
       </div>
 
