@@ -5,49 +5,27 @@ import { Crown, Check, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { StripePayment } from "./StripePayment";
+import { MobilePayment } from "./MobilePayment";
 
 interface PremiumUpgradeProps {
   onClose?: () => void;
 }
 
 export const PremiumUpgrade = ({ onClose }: PremiumUpgradeProps) => {
-  const { profile, refreshProfile } = useAuth();
-  const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
+  const [showPayment, setShowPayment] = useState(false);
+  
+  // Detect if running in mobile app (Capacitor)
+  const isMobileApp = window.location.protocol === 'capacitor:' || 
+                     window.navigator.userAgent.includes('CapacitorApp');
 
-  const handleUpgrade = async () => {
-    setLoading(true);
-    
-    try {
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Update user profile to premium
-      const { error } = await supabase
-        .from('profiles')
-        .update({ is_premium: true })
-        .eq('id', profile?.id);
+  const handleUpgrade = () => {
+    setShowPayment(true);
+  };
 
-      if (error) throw error;
-
-      // Refresh profile to get updated data
-      await refreshProfile();
-
-      toast({
-        title: "Welcome to Premium! 🎉",
-        description: "You now have access to all premium features with no ads.",
-      });
-
-      if (onClose) onClose();
-    } catch (error) {
-      toast({
-        title: "Upgrade failed",
-        description: "There was an error processing your upgrade. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
+  const handlePaymentSuccess = () => {
+    setShowPayment(false);
+    if (onClose) onClose();
   };
 
   const features = [
@@ -58,6 +36,14 @@ export const PremiumUpgrade = ({ onClose }: PremiumUpgradeProps) => {
     "Priority customer support",
     "Unlimited custom tables",
   ];
+
+  if (showPayment) {
+    return isMobileApp ? (
+      <MobilePayment onSuccess={handlePaymentSuccess} onClose={() => setShowPayment(false)} />
+    ) : (
+      <StripePayment onSuccess={handlePaymentSuccess} onClose={() => setShowPayment(false)} />
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
@@ -89,6 +75,16 @@ export const PremiumUpgrade = ({ onClose }: PremiumUpgradeProps) => {
             <div className="text-sm text-muted-foreground">One-time payment</div>
           </div>
 
+          {/* Platform-specific payment method */}
+          <div className="text-center p-3 bg-blue-50 rounded-lg">
+            <p className="text-sm text-blue-700">
+              {isMobileApp ? 
+                "💳 Secure in-app purchase via App Store/Play Store" :
+                "💳 Secure payment powered by Stripe"
+              }
+            </p>
+          </div>
+
           {/* Buttons */}
           <div className="flex gap-3">
             <Button
@@ -100,17 +96,11 @@ export const PremiumUpgrade = ({ onClose }: PremiumUpgradeProps) => {
             </Button>
             <Button
               onClick={handleUpgrade}
-              disabled={loading}
               className="flex-1 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600"
             >
-              {loading ? "Processing..." : "Upgrade Now"}
+              Upgrade Now
             </Button>
           </div>
-
-          {/* Note */}
-          <p className="text-xs text-center text-muted-foreground">
-            This is a demo upgrade. In production, this would integrate with Stripe or RevenueCat.
-          </p>
         </CardContent>
       </Card>
     </div>
