@@ -32,7 +32,7 @@ const AdSense = ({ slot, format = "auto", responsive = true }: AdSenseProps) => 
       <ins
         className="adsbygoogle"
         style={{ display: "block" }}
-        data-ad-client="ca-pub-1234567890123456"
+        data-ad-client="ca-pub-5631064277537055"
         data-ad-slot={slot}
         data-ad-format={format}
         data-full-width-responsive={responsive ? "true" : "false"}

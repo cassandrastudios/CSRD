@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Apnea Trainer</string>
+    <string name="title_activity_main">Apnea Trainer</string>
+    <string name="package_name">com.cassandrastudios.apneatrainer</string>
+    <string name="custom_url_scheme">com.cassandrastudios.apneatrainer</string>
+</resources>

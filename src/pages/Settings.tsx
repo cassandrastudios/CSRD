@@ -8,7 +8,7 @@ import { ArrowLeft, User, Bell, Palette, Globe, CreditCard, LogOut } from "lucid
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
-export const Settings = () => {
+const Settings = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { toast } = useToast();
@@ -237,3 +237,5 @@ export const Settings = () => {
     </div>
   );
 };
+
+export default Settings;
