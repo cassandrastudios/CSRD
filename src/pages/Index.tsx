@@ -225,8 +225,8 @@ const Index = () => {
           <StatsCard />
         </div>
 
-        {/* AdSense for free users */}
-        <AdSense slot="9876543210" />
+        {/* AdMob for free users */}
+        <AdMob adId="ca-app-pub-3940256099942544/6300978111" />
       </div>
 
       {/* Premium Upgrade Modal */}
