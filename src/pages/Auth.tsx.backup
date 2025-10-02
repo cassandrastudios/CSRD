@@ -249,6 +249,6 @@ const Auth = () => {
       </Card>
     </div>
   );
-}; // Fixed syntax
+};
 
 export default Auth;
