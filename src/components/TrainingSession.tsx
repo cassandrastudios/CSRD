@@ -270,8 +270,22 @@ export const TrainingSession = ({ type, customTable, onComplete, onBack }: Train
           {/* Timer Display */}
           <div className="relative">
             <div className="text-center">
-              <div className={`text-9xl font-bold font-mono ${getPhaseColor()} animate-pulse-gentle`}>
+              <div className={`text-8xl md:text-9xl font-bold font-mono ${getPhaseColor()} animate-pulse-gentle`}>
                 {formatTime(timeLeft)}
+              </div>
+              {/* Phase indicator */}
+              <div className="mt-4">
+                <div className={`inline-block px-4 py-2 rounded-full text-sm font-semibold ${
+                  phase === 'ready' ? 'bg-blue-500/20 text-blue-300' :
+                  phase === 'hold' ? 'bg-red-500/20 text-red-300' :
+                  phase === 'breathe' ? 'bg-green-500/20 text-green-300' :
+                  'bg-gray-500/20 text-gray-300'
+                }`}>
+                  {phase === 'ready' ? 'GET READY' :
+                   phase === 'hold' ? 'HOLD YOUR BREATH' :
+                   phase === 'breathe' ? 'BREATHE & RECOVER' :
+                   'COMPLETE'}
+                </div>
               </div>
             </div>
             
@@ -285,14 +299,14 @@ export const TrainingSession = ({ type, customTable, onComplete, onBack }: Train
           </div>
 
           {/* Controls */}
-          <div className="flex justify-center gap-4">
+          <div className="flex justify-center gap-6">
             <Button
               size="lg"
               variant="outline"
               onClick={() => setIsPaused(!isPaused)}
-              className="rounded-full w-16 h-16"
+              className="rounded-full w-20 h-20 bg-white/10 border-white/20 hover:bg-white/20"
             >
-              {isPaused ? <Play className="w-6 h-6" /> : <Pause className="w-6 h-6" />}
+              {isPaused ? <Play className="w-8 h-8" /> : <Pause className="w-8 h-8" />}
             </Button>
             
             {currentRound < table.rounds - 1 && (
@@ -307,9 +321,9 @@ export const TrainingSession = ({ type, customTable, onComplete, onBack }: Train
                   hasSpokenRef.current = false;
                   speak("Next round. Hold your breath");
                 }}
-                className="rounded-full w-16 h-16"
+                className="rounded-full w-20 h-20 bg-red-500/20 border-red-500/30 hover:bg-red-500/30 text-red-300"
               >
-                <SkipForward className="w-6 h-6" />
+                <SkipForward className="w-8 h-8" />
               </Button>
             )}
           </div>

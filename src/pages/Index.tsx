@@ -7,6 +7,7 @@ import { Activity, Clock, History, Settings, Waves, BookOpen, LogIn, Crown } fro
 import { TrainingSession } from "@/components/TrainingSession";
 import { CustomTableBuilder } from "@/components/CustomTableBuilder";
 import { ProgramsView } from "@/components/ProgramsView";
+import { Settings } from "@/pages/Settings";
 import StatsCard from "@/components/StatsCard";
 import AdSense from "@/components/AdSense";
 import { TrainingTable } from "@/types/training";
@@ -98,6 +99,10 @@ const Index = () => {
         }}
       />
     );
+  }
+
+  if (currentView === "settings") {
+    return <Settings />;
   }
 
   return (
