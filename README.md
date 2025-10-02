@@ -75,3 +75,4 @@ Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/c
 # Trigger redeploy Thu Oct  2 16:46:33 CEST 2025
 # Force redeploy after env vars Thu Oct  2 16:52:14 CEST 2025
 # Update Supabase credentials Thu Oct  2 17:28:12 CEST 2025
+# Fresh Supabase working Thu Oct  2 17:36:17 CEST 2025
