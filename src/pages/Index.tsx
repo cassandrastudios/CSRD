@@ -10,6 +10,7 @@ import { ProgramsView } from "@/components/ProgramsView";
 import Settings from "@/pages/Settings";
 import StatsCard from "@/components/StatsCard";
 import AdSense from "@/components/AdSense";
+import { PremiumUpgrade } from "@/components/PremiumUpgrade";
 import { TrainingTable } from "@/types/training";
 
 type View = "home" | "o2-table" | "co2-table" | "custom" | "history" | "settings" | "programs";
@@ -20,6 +21,7 @@ const Index = () => {
   const [currentView, setCurrentView] = useState<View>("home");
   const [customTable, setCustomTable] = useState<TrainingTable | null>(null);
   const [programSession, setProgramSession] = useState<TrainingTable | null>(null);
+  const [showPremiumUpgrade, setShowPremiumUpgrade] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -123,11 +125,19 @@ const Index = () => {
             </Button>
           </div>
           <p className="text-xl text-primary-foreground/80">Master your breath, extend your limits</p>
-          {profile?.is_premium && (
+          {profile?.is_premium ? (
             <div className="mt-2 flex items-center justify-center gap-2 text-premium">
               <Crown className="w-4 h-4" />
               <span className="text-sm font-semibold">Premium Member</span>
             </div>
+          ) : (
+            <Button
+              onClick={() => setShowPremiumUpgrade(true)}
+              className="mt-2 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600"
+            >
+              <Crown className="w-4 h-4 mr-2" />
+              Upgrade to Premium - $4.99
+            </Button>
           )}
         </div>
 
@@ -218,6 +228,11 @@ const Index = () => {
         {/* AdSense for free users */}
         <AdSense slot="9876543210" />
       </div>
+
+      {/* Premium Upgrade Modal */}
+      {showPremiumUpgrade && (
+        <PremiumUpgrade onClose={() => setShowPremiumUpgrade(false)} />
+      )}
     </div>
   );
 };
