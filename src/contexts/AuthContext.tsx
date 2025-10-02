@@ -83,18 +83,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     );
 
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session check:', session?.user?.email);
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        fetchProfile(session.user.id);
-      }
-      
-      setLoading(false);
-    });
+    // Check for existing session with a small delay to allow OAuth processing
+    setTimeout(() => {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        console.log('Initial session check:', session?.user?.email);
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          fetchProfile(session.user.id);
+        }
+        
+        setLoading(false);
+      });
+    }, 100);
 
     return () => subscription.unsubscribe();
   }, []);
