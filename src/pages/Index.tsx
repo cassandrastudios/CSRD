@@ -130,7 +130,7 @@ const Index = () => {
         <AdSense slot="1234567890" />
 
         {/* Quick Start Section */}
-        <div className="mb-8 animate-fade-in" style={{ animationDelay: "0.1s" }}>
+        <div className="mb-8">
           <h2 className="text-2xl font-bold text-primary-foreground mb-4">Quick Start</h2>
           <div className="grid md:grid-cols-2 gap-4">
             <Card className="border-2 hover:shadow-xl transition-all cursor-pointer" onClick={() => setCurrentView("o2-table")}>
@@ -164,7 +164,7 @@ const Index = () => {
         </div>
 
         {/* Training Programs */}
-        <div className="mb-8 animate-fade-in" style={{ animationDelay: "0.2s" }}>
+        <div className="mb-8">
           <Card className="bg-card/50 backdrop-blur-sm border-2 hover:shadow-xl transition-all cursor-pointer" onClick={() => setCurrentView("programs")}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -206,7 +206,7 @@ const Index = () => {
         </div>
 
         {/* Stats Preview */}
-        <div className="animate-fade-in" style={{ animationDelay: "0.4s" }}>
+        <div>
           <StatsCard />
         </div>
 
