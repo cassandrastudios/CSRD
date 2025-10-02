@@ -58,6 +58,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     console.log('URL hash:', window.location.hash);
     console.log('URL search:', window.location.search);
     
+    // Check if we have OAuth parameters in the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    console.log('Search params:', Object.fromEntries(urlParams));
+    console.log('Hash params:', Object.fromEntries(hashParams));
+    
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
