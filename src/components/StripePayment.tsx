@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { loadStripe } from "@stripe/stripe-js";
 import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,9 +6,7 @@ import { Crown, Check } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-
-// Stripe publishable key (use test key for sandbox)
-const stripePromise = loadStripe("pk_test_51234567890abcdefghijklmnopqrstuvwxyz");
+import { getStripe, createPaymentIntent } from "@/lib/stripe";
 
 interface StripePaymentProps {
   onSuccess: () => void;
@@ -31,25 +28,41 @@ const PaymentForm = ({ onSuccess, onClose }: StripePaymentProps) => {
     setLoading(true);
 
     try {
-      // Simulate payment processing (replace with real Stripe integration)
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Create payment intent
+      const { client_secret } = await createPaymentIntent(499); // $4.99 in cents
       
-      // Update user to premium
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ is_premium: true })
-        .eq('id', profile?.id);
+      // Confirm payment with Stripe
+      const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(
+        client_secret,
+        {
+          payment_method: {
+            card: elements.getElement(CardElement)!,
+          }
+        }
+      );
 
-      if (updateError) throw updateError;
+      if (stripeError) {
+        throw new Error(stripeError.message);
+      }
 
-      await refreshProfile();
+      if (paymentIntent?.status === 'succeeded') {
+        // Update user to premium
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({ is_premium: true })
+          .eq('id', profile?.id);
 
-      toast({
-        title: "Payment Successful! 🎉",
-        description: "Welcome to Premium! You now have access to all features.",
-      });
+        if (updateError) throw updateError;
 
-      onSuccess();
+        await refreshProfile();
+
+        toast({
+          title: "Payment Successful! 🎉",
+          description: "Welcome to Premium! You now have access to all features.",
+        });
+
+        onSuccess();
+      }
     } catch (error: any) {
       toast({
         title: "Payment failed",
@@ -141,7 +154,7 @@ export const StripePayment = ({ onSuccess, onClose }: StripePaymentProps) => {
           </div>
 
           {/* Stripe Payment Form */}
-          <Elements stripe={stripePromise}>
+          <Elements stripe={getStripe()}>
             <PaymentForm onSuccess={onSuccess} onClose={onClose} />
           </Elements>
 
