@@ -300,9 +300,12 @@ export const TrainingSession = ({ type, customTable, onComplete, onBack }: Train
                 size="lg"
                 variant="outline"
                 onClick={() => {
-                  setCurrentRound((r) => r + 1);
+                  const nextRound = currentRound + 1;
+                  setCurrentRound(nextRound);
                   setPhase("hold");
-                  setTimeLeft(table.holdTimes[currentRound + 1]);
+                  setTimeLeft(table.holdTimes[nextRound]);
+                  hasSpokenRef.current = false;
+                  speak("Next round. Hold your breath");
                 }}
                 className="rounded-full w-16 h-16"
               >
