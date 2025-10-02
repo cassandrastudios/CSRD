@@ -53,6 +53,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
+    // Debug URL parameters
+    console.log('Current URL:', window.location.href);
+    console.log('URL hash:', window.location.hash);
+    console.log('URL search:', window.location.search);
+    
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
