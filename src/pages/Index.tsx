@@ -9,7 +9,7 @@ import { CustomTableBuilder } from "@/components/CustomTableBuilder";
 import { ProgramsView } from "@/components/ProgramsView";
 import Settings from "@/pages/Settings";
 import StatsCard from "@/components/StatsCard";
-import AdSense from "@/components/AdSense";
+import AdMob from "@/components/AdMob";
 import { PremiumUpgrade } from "@/components/PremiumUpgrade";
 import { TrainingTable } from "@/types/training";
 
@@ -141,8 +141,8 @@ const Index = () => {
           )}
         </div>
 
-        {/* AdSense for free users */}
-        <AdSense slot="1234567890" />
+        {/* AdMob for free users */}
+        <AdMob adId="ca-app-pub-3940256099942544/6300978111" />
 
         {/* Quick Start Section */}
         <div className="mb-8">
