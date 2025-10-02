@@ -68,14 +68,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state change:', event, session?.user?.email);
+        console.log('Full session object:', session);
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
+          console.log('User logged in:', session.user.email);
           setTimeout(() => {
             fetchProfile(session.user.id);
           }, 0);
         } else {
+          console.log('No user session');
           setProfile(null);
         }
         
