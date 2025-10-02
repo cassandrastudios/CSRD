@@ -3,11 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, Clock, History, Settings, Waves, BookOpen, LogIn, Crown } from "lucide-react";
+import { Activity, Clock, History, Settings as SettingsIcon, Waves, BookOpen, LogIn, Crown } from "lucide-react";
 import { TrainingSession } from "@/components/TrainingSession";
 import { CustomTableBuilder } from "@/components/CustomTableBuilder";
 import { ProgramsView } from "@/components/ProgramsView";
-import { Settings } from "@/pages/Settings";
+import Settings from "@/pages/Settings";
 import StatsCard from "@/components/StatsCard";
 import AdSense from "@/components/AdSense";
 import { TrainingTable } from "@/types/training";
@@ -118,8 +118,8 @@ const Index = () => {
               <Waves className="w-12 h-12 text-secondary" />
               <h1 className="text-5xl font-bold text-primary-foreground">Apnea Trainer</h1>
             </div>
-            <Button variant="ghost" size="icon" onClick={() => navigate("/settings")}>
-              <Settings className="w-5 h-5 text-primary-foreground" />
+            <Button variant="ghost" size="icon" onClick={() => setCurrentView("settings")}>
+              <SettingsIcon className="w-5 h-5 text-primary-foreground" />
             </Button>
           </div>
           <p className="text-xl text-primary-foreground/80">Master your breath, extend your limits</p>
@@ -193,7 +193,7 @@ const Index = () => {
           <Card className="bg-card/50 backdrop-blur-sm border-2">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Settings className="w-5 h-5 text-secondary" />
+                <SettingsIcon className="w-5 h-5 text-secondary" />
                 Custom Table
               </CardTitle>
               <CardDescription>Build your own training program</CardDescription>
