@@ -53,32 +53,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    // Debug URL parameters
-    console.log('Current URL:', window.location.href);
-    console.log('URL hash:', window.location.hash);
-    console.log('URL search:', window.location.search);
-    
-    // Check if we have OAuth parameters in the URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const hashParams = new URLSearchParams(window.location.hash.substring(1));
-    console.log('Search params:', Object.fromEntries(urlParams));
-    console.log('Hash params:', Object.fromEntries(hashParams));
-    
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state change:', event, session?.user?.email);
-        console.log('Full session object:', session);
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          console.log('User logged in:', session.user.email);
           setTimeout(() => {
             fetchProfile(session.user.id);
           }, 0);
         } else {
-          console.log('No user session');
           setProfile(null);
         }
         
@@ -86,20 +71,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     );
 
-    // Check for existing session with a small delay to allow OAuth processing
-    setTimeout(() => {
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        console.log('Initial session check:', session?.user?.email);
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          fetchProfile(session.user.id);
-        }
-        
-        setLoading(false);
-      });
-    }, 100);
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        fetchProfile(session.user.id);
+      }
+      
+      setLoading(false);
+    });
 
     return () => subscription.unsubscribe();
   }, []);
