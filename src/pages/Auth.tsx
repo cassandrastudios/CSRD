@@ -65,7 +65,7 @@ const Auth = () => {
     }
   };
 
-  const handleSignIn = async (e: React.FormEvent) => {
+  const handleSignIn = async (e: React.FormEvent) => { {
     e.preventDefault();
     setLoading(true);
 
