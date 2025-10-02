@@ -14,13 +14,17 @@ const AdSense = ({ slot, format = "auto", responsive = true }: AdSenseProps) => 
     // Only load ads for non-premium users
     if (!profile?.is_premium) {
       try {
-        // @ts-ignore
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
+        // Check if ads are already loaded
+        const adElement = document.querySelector(`[data-ad-slot="${slot}"]`);
+        if (adElement && !adElement.hasAttribute('data-adsbygoogle-status')) {
+          // @ts-ignore
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+        }
       } catch (error) {
         console.error("AdSense error:", error);
       }
     }
-  }, [profile?.is_premium]);
+  }, [profile?.is_premium, slot]);
 
   // Don't show ads for premium users
   if (profile?.is_premium) {

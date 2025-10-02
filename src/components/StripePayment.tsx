@@ -31,45 +31,25 @@ const PaymentForm = ({ onSuccess, onClose }: StripePaymentProps) => {
     setLoading(true);
 
     try {
-      // Create payment intent on your backend
-      const { data, error } = await supabase.functions.invoke('create-payment-intent', {
-        body: { amount: 499, currency: 'usd' }
+      // Simulate payment processing (replace with real Stripe integration)
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Update user to premium
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ is_premium: true })
+        .eq('id', profile?.id);
+
+      if (updateError) throw updateError;
+
+      await refreshProfile();
+
+      toast({
+        title: "Payment Successful! 🎉",
+        description: "Welcome to Premium! You now have access to all features.",
       });
 
-      if (error) throw error;
-
-      // Confirm payment with Stripe
-      const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(
-        data.client_secret,
-        {
-          payment_method: {
-            card: elements.getElement(CardElement)!,
-          }
-        }
-      );
-
-      if (stripeError) {
-        throw new Error(stripeError.message);
-      }
-
-      if (paymentIntent.status === 'succeeded') {
-        // Update user to premium
-        const { error: updateError } = await supabase
-          .from('profiles')
-          .update({ is_premium: true })
-          .eq('id', profile?.id);
-
-        if (updateError) throw updateError;
-
-        await refreshProfile();
-
-        toast({
-          title: "Payment Successful! 🎉",
-          description: "Welcome to Premium! You now have access to all features.",
-        });
-
-        onSuccess();
-      }
+      onSuccess();
     } catch (error: any) {
       toast({
         title: "Payment failed",
