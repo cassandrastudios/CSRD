@@ -52,6 +52,7 @@ export default {
           breathe: "hsl(var(--timer-breathe))",
           warning: "hsl(var(--timer-warning))",
         },
+        premium: "hsl(var(--premium))",
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],

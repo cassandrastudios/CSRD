@@ -14,13 +14,154 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      personal_bests: {
+        Row: {
+          created_at: string
+          id: string
+          max_hold_time: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          max_hold_time: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          max_hold_time?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "personal_bests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+          is_premium: boolean
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id: string
+          is_premium?: boolean
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          is_premium?: boolean
+        }
+        Relationships: []
+      }
+      sessions: {
+        Row: {
+          avg_hold: number
+          created_at: string
+          date: string
+          duration: number
+          id: string
+          max_hold: number
+          notes: string | null
+          rounds: number
+          session_type: string
+          user_id: string
+        }
+        Insert: {
+          avg_hold: number
+          created_at?: string
+          date?: string
+          duration: number
+          id?: string
+          max_hold: number
+          notes?: string | null
+          rounds: number
+          session_type: string
+          user_id: string
+        }
+        Update: {
+          avg_hold?: number
+          created_at?: string
+          date?: string
+          duration?: number
+          id?: string
+          max_hold?: number
+          notes?: string | null
+          rounds?: number
+          session_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sessions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      streaks: {
+        Row: {
+          created_at: string
+          id: string
+          last_session_date: string | null
+          streak_count: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_session_date?: string | null
+          streak_count?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_session_date?: string | null
+          streak_count?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "streaks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      update_personal_best: {
+        Args: { p_hold_time: number; p_user_id: string }
+        Returns: undefined
+      }
+      update_streak: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

@@ -6,6 +6,9 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Pause, Play, SkipForward, Volume2, VolumeX } from "lucide-react";
 import { useVoiceGuidance } from "@/hooks/useVoiceGuidance";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 type SessionType = "O2" | "CO2" | "CUSTOM";
 type Phase = "ready" | "breathe" | "hold" | "complete";
@@ -43,6 +46,10 @@ export const TrainingSession = ({ type, customTable, onComplete, onBack }: Train
   const { speak, cancel } = useVoiceGuidance(voiceEnabled);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const hasSpokenRef = useRef(false);
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const sessionStartTime = useRef(Date.now());
+  const completedHolds = useRef<number[]>([]);
 
   // Get table based on type
   const table = customTable || (type === "O2" ? O2_PRESET : CO2_PRESET);
@@ -146,6 +153,53 @@ export const TrainingSession = ({ type, customTable, onComplete, onBack }: Train
   };
 
   const progress = ((currentRound + 1) / table.rounds) * 100;
+
+  const saveSession = async () => {
+    if (!user) return;
+
+    const sessionDuration = Math.floor((Date.now() - sessionStartTime.current) / 1000);
+    const maxHold = Math.max(...table.holdTimes);
+    const avgHold = table.holdTimes.reduce((a, b) => a + b, 0) / table.holdTimes.length;
+
+    try {
+      // Save session
+      await supabase.from("sessions").insert({
+        user_id: user.id,
+        duration: sessionDuration,
+        rounds: table.rounds,
+        max_hold: maxHold,
+        avg_hold: avgHold,
+        session_type: type,
+      });
+
+      // Update streak
+      await supabase.rpc("update_streak", { p_user_id: user.id });
+
+      // Update personal best
+      await supabase.rpc("update_personal_best", { 
+        p_user_id: user.id,
+        p_hold_time: maxHold 
+      });
+
+      toast({
+        title: "Session saved!",
+        description: "Your progress has been recorded.",
+      });
+    } catch (error) {
+      console.error("Error saving session:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save session.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (phase === "complete") {
+      saveSession();
+    }
+  }, [phase, user]);
 
   if (phase === "complete") {
     return (

@@ -1,18 +1,30 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, Clock, History, Settings, Waves, BookOpen } from "lucide-react";
+import { Activity, Clock, History, Settings, Waves, BookOpen, LogIn, Crown } from "lucide-react";
 import { TrainingSession } from "@/components/TrainingSession";
 import { CustomTableBuilder } from "@/components/CustomTableBuilder";
 import { ProgramsView } from "@/components/ProgramsView";
+import StatsCard from "@/components/StatsCard";
+import AdSense from "@/components/AdSense";
 import { TrainingTable } from "@/types/training";
 
 type View = "home" | "o2-table" | "co2-table" | "custom" | "history" | "settings" | "programs";
 
 const Index = () => {
+  const navigate = useNavigate();
+  const { user, profile } = useAuth();
   const [currentView, setCurrentView] = useState<View>("home");
   const [customTable, setCustomTable] = useState<TrainingTable | null>(null);
   const [programSession, setProgramSession] = useState<TrainingTable | null>(null);
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/auth");
+    }
+  }, [user, navigate]);
 
   if (currentView === "o2-table") {
     return (
@@ -93,12 +105,29 @@ const Index = () => {
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Header */}
         <div className="text-center mb-12 animate-fade-in">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <Waves className="w-12 h-12 text-secondary" />
-            <h1 className="text-5xl font-bold text-primary-foreground">Apnea Trainer</h1>
+          <div className="flex items-center justify-between mb-4">
+            <Button variant="ghost" size="icon" onClick={() => navigate("/history")}>
+              <History className="w-5 h-5 text-primary-foreground" />
+            </Button>
+            <div className="flex items-center gap-3">
+              <Waves className="w-12 h-12 text-secondary" />
+              <h1 className="text-5xl font-bold text-primary-foreground">Apnea Trainer</h1>
+            </div>
+            <Button variant="ghost" size="icon" onClick={() => navigate("/settings")}>
+              <Settings className="w-5 h-5 text-primary-foreground" />
+            </Button>
           </div>
           <p className="text-xl text-primary-foreground/80">Master your breath, extend your limits</p>
+          {profile?.is_premium && (
+            <div className="mt-2 flex items-center justify-center gap-2 text-premium">
+              <Crown className="w-4 h-4" />
+              <span className="text-sm font-semibold">Premium Member</span>
+            </div>
+          )}
         </div>
+
+        {/* AdSense for free users */}
+        <AdSense slot="1234567890" />
 
         {/* Quick Start Section */}
         <div className="mb-8 animate-fade-in" style={{ animationDelay: "0.1s" }}>
@@ -178,31 +207,11 @@ const Index = () => {
 
         {/* Stats Preview */}
         <div className="animate-fade-in" style={{ animationDelay: "0.4s" }}>
-          <Card className="bg-card/50 backdrop-blur-sm border-2">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <History className="w-5 h-5 text-secondary" />
-                Your Progress
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div>
-                  <p className="text-3xl font-bold font-mono text-primary">0</p>
-                  <p className="text-sm text-muted-foreground">Sessions</p>
-                </div>
-                <div>
-                  <p className="text-3xl font-bold font-mono text-secondary">0:00</p>
-                  <p className="text-sm text-muted-foreground">Best Hold</p>
-                </div>
-                <div>
-                  <p className="text-3xl font-bold font-mono text-accent">0</p>
-                  <p className="text-sm text-muted-foreground">Day Streak</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <StatsCard />
         </div>
+
+        {/* AdSense for free users */}
+        <AdSense slot="9876543210" />
       </div>
     </div>
   );
