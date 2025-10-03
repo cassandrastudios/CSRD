@@ -31,13 +31,26 @@ export const useVoiceGuidance = (enabled: boolean = true) => {
   }, []);
 
   const speak = (text: string, rate: number = 1.0) => {
-    if (!enabled || !synthRef.current) return;
-
-    // Only cancel if there's an active utterance
-    if (utteranceRef.current) {
-      synthRef.current.cancel();
+    if (!enabled || !synthRef.current) {
+      console.log('Voice guidance disabled or not available');
+      return;
     }
 
+    console.log('Speaking:', text);
+
+    // Cancel any current speech and wait for it to stop
+    if (synthRef.current.speaking) {
+      synthRef.current.cancel();
+      // Wait longer for cancellation to complete
+      setTimeout(() => {
+        performSpeak(text, rate);
+      }, 300);
+    } else {
+      performSpeak(text, rate);
+    }
+  };
+
+  const performSpeak = (text: string, rate: number) => {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = rate;
     utterance.pitch = 1.0;
@@ -51,20 +64,29 @@ export const useVoiceGuidance = (enabled: boolean = true) => {
           voice.name.includes("Female") ||
           voice.name.includes("Samantha") ||
           voice.name.includes("Karen") ||
-          voice.name.includes("Google")
+          voice.name.includes("Google") ||
+          voice.name.includes("Alex") ||
+          voice.name.includes("Daniel") ||
+          voice.name.includes("Microsoft")
       );
       if (preferredVoice) {
         utterance.voice = preferredVoice;
+        console.log('Using voice:', preferredVoice.name);
       }
     }
 
     // Add event listeners to track completion
+    utterance.onstart = () => {
+      console.log('Speech started:', text);
+    };
+
     utterance.onend = () => {
+      console.log('Speech ended:', text);
       utteranceRef.current = null;
     };
 
     utterance.onerror = (event) => {
-      console.warn('Speech synthesis error:', event.error);
+      console.error('Speech synthesis error:', event.error, 'Text:', text);
       utteranceRef.current = null;
     };
 

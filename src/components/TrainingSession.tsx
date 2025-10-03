@@ -84,13 +84,19 @@ export const TrainingSession = ({ type, customTable, onComplete, onBack }: Train
           if (phase === "ready") {
             playSound(800, 0.2);
             speak("Begin holding your breath");
-            setPhase("hold");
+            // Add delay to let voice complete
+            setTimeout(() => {
+              setPhase("hold");
+            }, 2000);
             return table.holdTimes[currentRound];
           } else if (phase === "hold") {
             playSound(600, 0.3);
             if (currentRound < table.rounds - 1) {
               speak("Breathe and recover");
-              setPhase("breathe");
+              // Add delay to let voice complete
+              setTimeout(() => {
+                setPhase("breathe");
+              }, 2000);
               return table.restTimes[currentRound];
             } else {
               setPhase("complete");
@@ -102,7 +108,10 @@ export const TrainingSession = ({ type, customTable, onComplete, onBack }: Train
             playSound(800, 0.2);
             setCurrentRound((r) => r + 1);
             speak("Next round. Hold your breath");
-            setPhase("hold");
+            // Add delay to let voice complete
+            setTimeout(() => {
+              setPhase("hold");
+            }, 2000);
             return table.holdTimes[currentRound + 1];
           }
         }
