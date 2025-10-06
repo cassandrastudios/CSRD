@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Layout } from './layout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -14,10 +14,20 @@ export function MaterialityAssessment() {
   const [topics, setTopics] = useState<ESRS_Topic[]>([])
   const [assessments, setAssessments] = useState<MaterialityAssessmentType[]>([])
   const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
     fetchData()
+  }, [])
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (debouncedUpdate.current) {
+        clearTimeout(debouncedUpdate.current)
+      }
+    }
   }, [])
 
   const fetchData = async () => {
@@ -39,45 +49,59 @@ export function MaterialityAssessment() {
     }
   }
 
-  const updateAssessment = async (topicId: string, impact: number, financial: number) => {
-    try {
-      const { error } = await supabase
-        .from('materiality_assessments')
-        .upsert({
+  // Debounced update function
+  const debouncedUpdate = useRef<NodeJS.Timeout>()
+  
+  const updateAssessment = useCallback((topicId: string, impact: number, financial: number) => {
+    // Clear existing timeout
+    if (debouncedUpdate.current) {
+      clearTimeout(debouncedUpdate.current)
+    }
+
+    // Update local state immediately for responsive UI
+    setAssessments(prev => {
+      const existing = prev.find(a => a.esrs_topic_id === topicId)
+      if (existing) {
+        return prev.map(a => 
+          a.esrs_topic_id === topicId 
+            ? { ...a, impact_materiality: impact, financial_materiality: financial }
+            : a
+        )
+      } else {
+        return [...prev, {
+          id: '',
+          organization_id: '',
           esrs_topic_id: topicId,
           impact_materiality: impact,
-          financial_materiality: financial
-        })
+          financial_materiality: financial,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }]
+      }
+    })
 
-      if (error) throw error
-
-      // Update local state
-      setAssessments(prev => {
-        const existing = prev.find(a => a.esrs_topic_id === topicId)
-        if (existing) {
-          return prev.map(a => 
-            a.esrs_topic_id === topicId 
-              ? { ...a, impact_materiality: impact, financial_materiality: financial }
-              : a
-          )
-        } else {
-          return [...prev, {
-            id: '',
-            organization_id: '',
+    // Debounce the database update
+    debouncedUpdate.current = setTimeout(async () => {
+      setSaving(true)
+      try {
+        const { error } = await supabase
+          .from('materiality_assessments')
+          .upsert({
             esrs_topic_id: topicId,
             impact_materiality: impact,
-            financial_materiality: financial,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          }]
-        }
-      })
+            financial_materiality: financial
+          })
 
-      toast.success('Assessment updated')
-    } catch (error: any) {
-      toast.error('Failed to save assessment: ' + error.message)
-    }
-  }
+        if (error) throw error
+        // Only show success toast once per batch of updates
+        toast.success('Assessment saved')
+      } catch (error: any) {
+        toast.error('Failed to save assessment: ' + error.message)
+      } finally {
+        setSaving(false)
+      }
+    }, 1000) // Wait 1 second after last change
+  }, [supabase])
 
   const getAssessment = (topicId: string) => {
     return assessments.find(a => a.esrs_topic_id === topicId)
@@ -120,7 +144,15 @@ export function MaterialityAssessment() {
         {/* Progress */}
         <Card>
           <CardHeader>
-            <CardTitle>Assessment Progress</CardTitle>
+            <CardTitle className="flex items-center justify-between">
+              Assessment Progress
+              {saving && (
+                <div className="flex items-center text-sm text-blue-600">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                  Saving...
+                </div>
+              )}
+            </CardTitle>
             <CardDescription>
               Complete the materiality assessment for all ESRS topics
             </CardDescription>
