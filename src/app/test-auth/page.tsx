@@ -32,7 +32,7 @@ export default function TestAuthPage() {
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`
+          emailRedirectTo: typeof window !== 'undefined' ? `${window.location.origin}/dashboard` : undefined
         }
       })
       
@@ -141,7 +141,7 @@ export default function TestAuthPage() {
                 
                 <div className="text-xs text-gray-500">
                   <p>Supabase URL: {process.env.NEXT_PUBLIC_SUPABASE_URL}</p>
-                  <p>Current URL: {window.location.origin}</p>
+                  <p>Current URL: {typeof window !== 'undefined' ? window.location.origin : 'Loading...'}</p>
                 </div>
               </>
             )}
