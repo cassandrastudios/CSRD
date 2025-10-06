@@ -1,5 +1,8 @@
 # CSRD Co-Pilot
 
+> **Latest Version**: CSRD Co-Pilot V1 (Tag: CSRD_CO_PILOT_V1)  
+> **Previous Version**: Deep Dive Trainer (Apnea Training App)
+
 A comprehensive SaaS web application that helps small and mid-sized companies prepare for the **Corporate Sustainability Reporting Directive (CSRD)** process, including onboarding, data collection, and AI-assisted reporting.
 
 ## 🚀 Features
