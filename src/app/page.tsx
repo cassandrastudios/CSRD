@@ -1,13 +1,37 @@
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+'use client'
 
-export default async function HomePage() {
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
+
+export default function HomePage() {
+  const router = useRouter()
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) {
-    redirect('/auth')
-  }
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session?.user) {
+          router.push('/dashboard')
+        } else {
+          router.push('/auth')
+        }
+      } catch (error) {
+        console.error('Auth check error:', error)
+        router.push('/auth')
+      }
+    }
 
-  redirect('/dashboard')
+    checkAuth()
+  }, [])
+
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <h1 className="text-2xl font-bold mb-4">CSRD Co-Pilot</h1>
+        <p className="text-gray-600">Redirecting...</p>
+      </div>
+    </div>
+  )
 }

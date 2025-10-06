@@ -1,14 +1,10 @@
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
 import { Dashboard } from '@/components/dashboard'
+import { AuthWrapper } from '@/components/auth-wrapper'
 
-export default async function DashboardPage() {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/auth')
-  }
-
-  return <Dashboard />
+export default function DashboardPage() {
+  return (
+    <AuthWrapper>
+      <Dashboard />
+    </AuthWrapper>
+  )
 }
