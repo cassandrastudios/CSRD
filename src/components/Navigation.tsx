@@ -1,89 +1,57 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+'use client'
+
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { cn } from '@/lib/utils'
 import { 
-  Play, 
-  BarChart3, 
-  Settings, 
-  Calendar,
-  Target,
-  BookOpen,
-  Info,
-  Zap
-} from 'lucide-react';
+  LayoutDashboard, 
+  Target, 
+  Database, 
+  FileText, 
+  CheckCircle, 
+  Settings,
+  BarChart3
+} from 'lucide-react'
 
-type Section = 'train' | 'stats' | 'settings';
+const navigation = [
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Materiality', href: '/materiality', icon: Target },
+  { name: 'Data Hub', href: '/data', icon: Database },
+  { name: 'Report Builder', href: '/report', icon: FileText },
+  { name: 'Compliance', href: '/compliance', icon: CheckCircle },
+  { name: 'Settings', href: '/settings', icon: Settings },
+]
 
-interface NavigationProps {
-  currentSection: Section;
-  onSectionChange: (section: Section) => void;
-}
-
-const Navigation = ({ currentSection, onSectionChange }: NavigationProps) => {
-  const sections = [
-    {
-      id: 'train' as Section,
-      title: 'Train',
-      subtitle: 'Tables & Training Plans',
-      icon: Play,
-      color: 'bg-blue-500',
-      description: 'O2/CO2 tables, custom tables, and training programs'
-    },
-    {
-      id: 'stats' as Section,
-      title: 'Stats & Progress',
-      subtitle: 'Track Your Journey',
-      icon: BarChart3,
-      color: 'bg-green-500',
-      description: 'History, statistics, and personal bests'
-    },
-    {
-      id: 'settings' as Section,
-      title: 'Settings & More',
-      subtitle: 'Customize & Learn',
-      icon: Settings,
-      color: 'bg-purple-500',
-      description: 'Settings, integrations, tips, and about'
-    }
-  ];
+export function Navigation() {
+  const pathname = usePathname()
 
   return (
-    <div className="grid md:grid-cols-3 gap-4 mb-8">
-      {sections.map((section) => {
-        const Icon = section.icon;
-        const isActive = currentSection === section.id;
-        
-        return (
-          <Card 
-            key={section.id}
-            className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
-              isActive ? 'ring-2 ring-blue-500 shadow-lg' : 'hover:shadow-md'
-            }`}
-            onClick={() => onSectionChange(section.id)}
-          >
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-4">
-                <div className={`p-3 rounded-lg ${section.color} text-white`}>
-                  <Icon className="w-6 h-6" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-xl font-bold text-primary-foreground">
-                    {section.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {section.subtitle}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {section.description}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        );
-      })}
+    <div className="flex flex-col w-64 bg-white border-r border-gray-200 min-h-screen">
+      <div className="flex items-center h-16 px-6 border-b border-gray-200">
+        <BarChart3 className="h-8 w-8 text-blue-600" />
+        <span className="ml-2 text-xl font-bold text-gray-900">CSRD Co-Pilot</span>
+      </div>
+      
+      <nav className="flex-1 px-4 py-6 space-y-2">
+        {navigation.map((item) => {
+          const isActive = pathname === item.href
+          return (
+            <Link
+              key={item.name}
+              href={item.href}
+              className={cn(
+                'flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors',
+                isActive
+                  ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700'
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+              )}
+            >
+              <item.icon className="mr-3 h-5 w-5" />
+              {item.name}
+            </Link>
+          )
+        })}
+      </nav>
     </div>
-  );
-};
-
-export default Navigation;
+  )
+}

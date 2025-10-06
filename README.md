@@ -1,80 +1,207 @@
-# Welcome to your Lovable project
+# CSRD Co-Pilot
 
-## Project info
+A comprehensive SaaS web application that helps small and mid-sized companies prepare for the **Corporate Sustainability Reporting Directive (CSRD)** process, including onboarding, data collection, and AI-assisted reporting.
 
-**URL**: https://lovable.dev/projects/b21116dd-0b16-4081-a60a-0b584edd1858
+## 🚀 Features
 
-## How can I edit this code?
+### Core Functionality
+- **Onboarding**: Simple company setup with sector, employee count, and reporting year
+- **Roadmap Dashboard**: Visual progress tracking through CSRD milestones
+- **Materiality Assessment**: Interactive ESRS topic assessment with dual-axis sliders
+- **Data Collection Hub**: ESG metrics management with status tracking
+- **Report Builder**: Rich text editor with AI-powered content generation
+- **Compliance Check**: Real-time compliance monitoring and requirements tracking
+- **Settings**: Organization management and API key configuration
 
-There are several ways of editing your application.
+### Technical Features
+- **Authentication**: Supabase Auth with email/password
+- **Database**: PostgreSQL via Supabase with real-time subscriptions
+- **AI Integration**: OpenAI GPT API for content generation (placeholder)
+- **Charts**: Interactive materiality matrix using Recharts
+- **UI Components**: Modern design with Tailwind CSS and shadcn/ui
+- **Responsive**: Mobile-first design for all screen sizes
 
-**Use Lovable**
+## 🛠 Tech Stack
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/b21116dd-0b16-4081-a60a-0b584edd1858) and start prompting.
+- **Framework**: Next.js 14 with App Router
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS + shadcn/ui components
+- **Database**: Supabase (PostgreSQL)
+- **Authentication**: Supabase Auth
+- **Charts**: Recharts
+- **State Management**: React Query (TanStack Query)
+- **Notifications**: React Hot Toast
+- **Deployment**: Vercel
 
-Changes made via Lovable will be committed automatically to this repo.
+## 📦 Installation
 
-**Use your preferred IDE**
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd csrd-co-pilot
+   ```
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+3. **Set up environment variables**
+   ```bash
+   cp env.example .env.local
+   ```
+   
+   Fill in your environment variables:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url_here
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
+   OPENAI_API_KEY=your_openai_api_key_here
+   AI_SDK_KEY=your_vercel_ai_sdk_key_here
+   ```
 
-Follow these steps:
+4. **Set up Supabase database**
+   - Create a new Supabase project
+   - Run the migration file: `supabase/migrations/20240101000001_initial_schema.sql`
+   - Enable Row Level Security (RLS) policies as needed
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+5. **Run the development server**
+   ```bash
+   npm run dev
+   ```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+6. **Open your browser**
+   Navigate to [http://localhost:3000](http://localhost:3000)
 
-# Step 3: Install the necessary dependencies.
-npm i
+## 🗄 Database Schema
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+### Core Tables
+- **organizations**: Company information and settings
+- **esrs_topics**: ESRS topic definitions and categories
+- **materiality_assessments**: Materiality assessment results
+- **esg_metrics**: ESG data collection tracking
+- **report_sections**: Report content and drafts
+
+### Key Relationships
+- Organizations have many materiality assessments
+- Organizations have many ESG metrics
+- Organizations have many report sections
+- ESRS topics are referenced by assessments and report sections
+
+## 🎯 Usage
+
+### Getting Started
+1. **Sign Up**: Create an account with email/password
+2. **Onboarding**: Complete company information setup
+3. **Materiality Assessment**: Assess ESRS topics for materiality
+4. **Data Collection**: Set up and track ESG metrics
+5. **Report Building**: Create CSRD-compliant report sections
+6. **Compliance Check**: Monitor progress against requirements
+
+### Key Workflows
+- **Materiality Assessment**: Use dual sliders to assess impact and financial materiality
+- **Data Collection**: Add metrics, assign owners, track completion status
+- **Report Building**: Create sections with AI assistance and rich text editing
+- **Compliance Monitoring**: Track progress across all CSRD requirements
+
+## 🔧 Configuration
+
+### Supabase Setup
+1. Create a new Supabase project
+2. Run the provided migration SQL
+3. Set up authentication policies
+4. Configure storage buckets for file uploads
+
+### OpenAI Integration
+1. Get an OpenAI API key
+2. Add to environment variables
+3. Implement AI functions in `src/lib/ai.ts` (placeholder)
+
+### Vercel Deployment
+1. Connect your GitHub repository to Vercel
+2. Set environment variables in Vercel dashboard
+3. Deploy automatically on push to main branch
+
+## 📁 Project Structure
+
+```
+src/
+├── app/                    # Next.js App Router pages
+│   ├── auth/              # Authentication pages
+│   ├── dashboard/         # Main dashboard
+│   ├── materiality/       # Materiality assessment
+│   ├── data/              # Data collection hub
+│   ├── report/            # Report builder
+│   ├── compliance/        # Compliance check
+│   └── settings/          # Settings page
+├── components/            # React components
+│   ├── ui/               # Reusable UI components
+│   └── ...               # Feature-specific components
+├── lib/                  # Utility functions
+│   └── supabase/         # Supabase client configuration
+├── types/                # TypeScript type definitions
+└── integrations/         # External service integrations
 ```
 
-**Edit a file directly in GitHub**
+## 🚀 Deployment
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Vercel (Recommended)
+1. Push code to GitHub
+2. Connect repository to Vercel
+3. Set environment variables
+4. Deploy automatically
 
-**Use GitHub Codespaces**
+### Other Platforms
+- **Netlify**: Compatible with Next.js static export
+- **Railway**: Full-stack deployment with database
+- **AWS**: Use Amplify or custom EC2 setup
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 🔒 Security
 
-## What technologies are used for this project?
+- **Authentication**: Supabase Auth with secure session management
+- **Database**: Row Level Security (RLS) policies
+- **API Keys**: Environment variable protection
+- **Data Validation**: Zod schema validation
+- **HTTPS**: Enforced in production
 
-This project is built with:
+## 🤝 Contributing
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
 
-## How can I deploy this project?
+## 📄 License
 
-Simply open [Lovable](https://lovable.dev/projects/b21116dd-0b16-4081-a60a-0b584edd1858) and click on Share -> Publish.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Can I connect a custom domain to my Lovable project?
+## 🆘 Support
 
-Yes, you can!
+For support and questions:
+- Create an issue in the GitHub repository
+- Check the documentation
+- Contact the development team
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## 🔮 Roadmap
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
-# Force redeploy Thu Oct  2 16:39:59 CEST 2025
-# Trigger redeploy Thu Oct  2 16:46:33 CEST 2025
-# Force redeploy after env vars Thu Oct  2 16:52:14 CEST 2025
-# Update Supabase credentials Thu Oct  2 17:28:12 CEST 2025
-# Fresh Supabase working Thu Oct  2 17:36:17 CEST 2025
-# Update Vercel env vars Thu Oct  2 17:45:16 CEST 2025
-# Force Vercel redeploy Thu Oct  2 17:56:57 CEST 2025
+### Phase 1 (Current)
+- ✅ Core CSRD workflow implementation
+- ✅ Basic AI integration placeholder
+- ✅ Materiality assessment tools
+- ✅ Data collection management
+
+### Phase 2 (Planned)
+- 🔄 Advanced AI content generation
+- 🔄 Team collaboration features
+- 🔄 Advanced reporting templates
+- 🔄 Integration with external data sources
+
+### Phase 3 (Future)
+- 🔄 Automated compliance checking
+- 🔄 Advanced analytics and insights
+- 🔄 Multi-language support
+- 🔄 Mobile application
+
+---
+
+**Built with ❤️ for CSRD compliance**
