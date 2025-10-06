@@ -123,56 +123,25 @@ export function DoubleMaterialityAssessmentSimple() {
       console.log('Topics data:', topicsData)
       console.log('Scores data:', scoresData)
 
-      // If no topics exist, populate them
+      // If no topics exist, use fallback sample topics
       if (topicsData.length === 0) {
-        console.log('No ESRS topics found, populating sample data...')
-        try {
-          const response = await fetch('/api/populate-esrs-topics', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          })
-          
-          if (response.ok) {
-            const result = await response.json()
-            console.log('Successfully populated ESRS topics:', result.message)
-            
-            // Fetch topics again after populating
-            const { data: newTopicsData, error: newTopicsError } = await supabase
-              .from('esrs_topics')
-              .select('*')
-              .order('code')
-            
-            if (newTopicsError) throw newTopicsError
-            console.log('New topics data after population:', newTopicsData)
-            setTopics(newTopicsData || [])
-          } else {
-            console.error('Failed to populate ESRS topics')
-            // Fallback: create sample topics locally
-            const fallbackTopics = [
-              { id: 1, code: 'E1', name: 'Climate Change', description: 'Climate change mitigation and adaptation measures', category: 'Environmental' },
-              { id: 2, code: 'E2', name: 'Pollution', description: 'Pollution prevention and control', category: 'Environmental' },
-              { id: 3, code: 'S1', name: 'Own Workforce', description: 'Rights and working conditions of workforce', category: 'Social' },
-              { id: 4, code: 'G1', name: 'Business Conduct', description: 'Business ethics and conduct', category: 'Governance' }
-            ]
-            console.log('Using fallback topics:', fallbackTopics)
-            setTopics(fallbackTopics)
-          }
-        } catch (populateError) {
-          console.error('Error populating ESRS topics:', populateError)
-          // Fallback: create sample topics locally
-          const fallbackTopics = [
-            { id: 1, code: 'E1', name: 'Climate Change', description: 'Climate change mitigation and adaptation measures', category: 'Environmental' },
-            { id: 2, code: 'E2', name: 'Pollution', description: 'Pollution prevention and control', category: 'Environmental' },
-            { id: 3, code: 'S1', name: 'Own Workforce', description: 'Rights and working conditions of workforce', category: 'Social' },
-            { id: 4, code: 'G1', name: 'Business Conduct', description: 'Business ethics and conduct', category: 'Governance' }
-          ]
-          console.log('Using fallback topics after error:', fallbackTopics)
-          setTopics(fallbackTopics)
-        }
+        console.log('No ESRS topics found, using sample data...')
+        const sampleTopics = [
+          { id: 1, code: 'E1', name: 'Climate Change', description: 'Climate change mitigation and adaptation measures, including greenhouse gas emissions reduction and climate risk management', category: 'Environmental', created_at: new Date().toISOString() },
+          { id: 2, code: 'E2', name: 'Pollution', description: 'Pollution prevention and control, including air, water, and soil pollution management', category: 'Environmental', created_at: new Date().toISOString() },
+          { id: 3, code: 'E3', name: 'Water and Marine Resources', description: 'Water and marine resource management, including water consumption and marine biodiversity protection', category: 'Environmental', created_at: new Date().toISOString() },
+          { id: 4, code: 'E4', name: 'Biodiversity and Ecosystems', description: 'Biodiversity and ecosystem protection, including habitat conservation and species protection', category: 'Environmental', created_at: new Date().toISOString() },
+          { id: 5, code: 'E5', name: 'Resource Use and Circular Economy', description: 'Resource efficiency and circular economy practices, including waste reduction and material circularity', category: 'Environmental', created_at: new Date().toISOString() },
+          { id: 6, code: 'S1', name: 'Own Workforce', description: 'Rights and working conditions of the company\'s own workforce, including health and safety, diversity and inclusion', category: 'Social', created_at: new Date().toISOString() },
+          { id: 7, code: 'S2', name: 'Workers in Value Chain', description: 'Rights of workers in the value chain, including supply chain labor standards and human rights', category: 'Social', created_at: new Date().toISOString() },
+          { id: 8, code: 'S3', name: 'Affected Communities', description: 'Rights of affected communities, including community impact and indigenous rights', category: 'Social', created_at: new Date().toISOString() },
+          { id: 9, code: 'S4', name: 'Consumers and End-Users', description: 'Consumer and end-user rights, including product safety and data privacy', category: 'Social', created_at: new Date().toISOString() },
+          { id: 10, code: 'G1', name: 'Business Conduct', description: 'Business ethics and conduct, including anti-corruption and anti-bribery measures', category: 'Governance', created_at: new Date().toISOString() },
+          { id: 11, code: 'G2', name: 'Corporate Culture', description: 'Corporate culture and values, including leadership and organizational behavior', category: 'Governance', created_at: new Date().toISOString() },
+          { id: 12, code: 'G3', name: 'Management of Material Sustainability Risks', description: 'Risk management and oversight of sustainability-related risks', category: 'Governance', created_at: new Date().toISOString() }
+        ]
+        setTopics(sampleTopics)
       } else {
-        console.log('Using existing topics data')
         setTopics(topicsData)
       }
 
@@ -268,8 +237,9 @@ export function DoubleMaterialityAssessmentSimple() {
     }
   })
 
-  // Calculate progress
-  const progress = selectedTopics.length > 0 ? (scores.length / selectedTopics.length) * 100 : 0
+  // Calculate progress - use actual scores, not all assessments
+  const actualScores = scores.filter(score => selectedTopics.includes(score.esrs_topic_id))
+  const progress = selectedTopics.length > 0 ? (actualScores.length / selectedTopics.length) * 100 : 0
 
   // Prepare data for visualizations
   const matrixData = scores.map(score => {
@@ -370,12 +340,12 @@ export function DoubleMaterialityAssessmentSimple() {
                 <div className="text-sm text-gray-500">Topics Selected</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-green-600">{scores.length}</div>
+                <div className="text-3xl font-bold text-green-600">{actualScores.length}</div>
                 <div className="text-sm text-gray-500">Topics Scored</div>
               </div>
               <div className="text-center">
                 <div className="text-3xl font-bold text-orange-600">
-                  {scores.filter(s => (s.impact_materiality + s.financial_materiality) / 2 >= 3).length}
+                  {actualScores.filter(s => (s.impact_materiality + s.financial_materiality) / 2 >= 3).length}
                 </div>
                 <div className="text-sm text-gray-500">Material Topics</div>
               </div>
@@ -471,7 +441,27 @@ export function DoubleMaterialityAssessmentSimple() {
                   </CardHeader>
                   <CardContent className="p-0">
                     <div className="max-h-96 overflow-y-auto">
-                      {filteredTopics.map(topic => (
+                      {filteredTopics.length === 0 ? (
+                        <div className="p-8 text-center">
+                          <Target className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                          <h3 className="text-lg font-medium text-gray-900 mb-2">No Topics Found</h3>
+                          <p className="text-gray-500 mb-4">
+                            {searchTerm || selectedCategory !== 'All' 
+                              ? 'Try adjusting your search or filter criteria'
+                              : 'Loading ESRS topics...'
+                            }
+                          </p>
+                          {searchTerm && (
+                            <Button 
+                              variant="outline" 
+                              onClick={() => setSearchTerm('')}
+                            >
+                              Clear Search
+                            </Button>
+                          )}
+                        </div>
+                      ) : (
+                        filteredTopics.map(topic => (
                         <div
                           key={topic.id}
                           className={`p-4 border-b cursor-pointer hover:bg-gray-50 ${
@@ -515,7 +505,8 @@ export function DoubleMaterialityAssessmentSimple() {
                             </div>
                           </div>
                         </div>
-                      ))}
+                        ))
+                      )}
                     </div>
                   </CardContent>
                 </Card>
