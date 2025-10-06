@@ -75,6 +75,9 @@ export function DoubleMaterialityAssessmentSimple() {
   const [selectedCategory, setSelectedCategory] = useState<string>('All')
   const [selectedTopic, setSelectedTopic] = useState<SimpleTopic | null>(null)
   const [activeTab, setActiveTab] = useState('topics')
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [showOnlySelected, setShowOnlySelected] = useState(false)
+  const [sortBy, setSortBy] = useState<'name' | 'score' | 'category'>('name')
   
   const supabase = createClient()
   const debouncedUpdate = useRef<NodeJS.Timeout>()
@@ -241,14 +244,28 @@ export function DoubleMaterialityAssessmentSimple() {
     return scores.find(s => s.esrs_topic_id === topicId)
   }
 
-  // Filter topics based on search and category
+  // Filter and sort topics
   const filteredTopics = topics.filter(topic => {
     if (!topic || !topic.name || !topic.description) return false
     const matchesSearch = topic.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          topic.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          topic.code.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesCategory = selectedCategory === 'All' || topic.category === selectedCategory
-    return matchesSearch && matchesCategory
+    const matchesSelected = !showOnlySelected || selectedTopics.includes(topic.id)
+    return matchesSearch && matchesCategory && matchesSelected
+  }).sort((a, b) => {
+    switch (sortBy) {
+      case 'name':
+        return a.name.localeCompare(b.name)
+      case 'category':
+        return a.category.localeCompare(b.category)
+      case 'score':
+        const scoreA = getScore(a.id)?.total || 0
+        const scoreB = getScore(b.id)?.total || 0
+        return scoreB - scoreA
+      default:
+        return 0
+    }
   })
 
   // Calculate progress
@@ -343,7 +360,7 @@ export function DoubleMaterialityAssessmentSimple() {
               )}
             </CardTitle>
             <CardDescription>
-              Track your progress through the materiality assessment process
+              Track your progress through the materiality assessment process. Each ESRS topic requires individual assessment for both Impact and Financial materiality as required by CSRD.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -398,7 +415,7 @@ export function DoubleMaterialityAssessmentSimple() {
                           className="pl-10"
                         />
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2">
                         {['All', 'Environmental', 'Social', 'Governance'].map(category => (
                           <Button
                             key={category}
@@ -409,6 +426,46 @@ export function DoubleMaterialityAssessmentSimple() {
                             {category}
                           </Button>
                         ))}
+                      </div>
+                      
+                      {/* Additional Controls */}
+                      <div className="flex flex-wrap gap-2 items-center">
+                        <Button
+                          variant={showOnlySelected ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setShowOnlySelected(!showOnlySelected)}
+                        >
+                          {showOnlySelected ? 'Show All' : 'Show Selected Only'}
+                        </Button>
+                        
+                        <select
+                          value={sortBy}
+                          onChange={(e) => setSortBy(e.target.value as any)}
+                          className="px-3 py-1.5 text-sm border border-gray-300 rounded-md bg-white"
+                        >
+                          <option value="name">Sort by Name</option>
+                          <option value="category">Sort by Category</option>
+                          <option value="score">Sort by Score</option>
+                        </select>
+                        
+                        <div className="flex border border-gray-300 rounded-md">
+                          <Button
+                            variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                            size="sm"
+                            onClick={() => setViewMode('grid')}
+                            className="rounded-r-none"
+                          >
+                            Grid
+                          </Button>
+                          <Button
+                            variant={viewMode === 'list' ? 'default' : 'ghost'}
+                            size="sm"
+                            onClick={() => setViewMode('list')}
+                            className="rounded-l-none"
+                          >
+                            List
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </CardHeader>
