@@ -552,7 +552,7 @@ export function DoubleMaterialityAssessmentSimple() {
               <CardHeader>
                 <div className="flex justify-between items-center">
                   <CardTitle>Stakeholder Engagement</CardTitle>
-                  <Button onClick={() => toast.info('Stakeholder management coming soon!')}>
+                  <Button onClick={() => toast('Stakeholder management coming soon!')}>
                     <Plus className="w-4 h-4 mr-2" />
                     Add Stakeholder
                   </Button>
