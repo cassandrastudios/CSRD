@@ -229,8 +229,8 @@ export function DoubleMaterialityAssessmentSimple() {
       case 'category':
         return a.category.localeCompare(b.category)
       case 'score':
-        const scoreA = getScore(a.id)?.total || 0
-        const scoreB = getScore(b.id)?.total || 0
+        const scoreA = getScore(a.id) ? (getScore(a.id)!.impact_materiality + getScore(a.id)!.financial_materiality) / 2 : 0
+        const scoreB = getScore(b.id) ? (getScore(b.id)!.impact_materiality + getScore(b.id)!.financial_materiality) / 2 : 0
         return scoreB - scoreA
       default:
         return 0
