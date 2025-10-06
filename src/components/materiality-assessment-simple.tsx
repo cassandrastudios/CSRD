@@ -102,8 +102,45 @@ export function MaterialityAssessmentSimple() {
       if (topicsResult.error) throw topicsResult.error
       if (assessmentsResult.error) throw assessmentsResult.error
 
-      setTopics(topicsResult.data || [])
-      setAssessments(assessmentsResult.data || [])
+      const topicsData = topicsResult.data || []
+      const assessmentsData = assessmentsResult.data || []
+
+      // If no topics exist, populate them
+      if (topicsData.length === 0) {
+        console.log('No ESRS topics found, populating sample data...')
+        try {
+          const response = await fetch('/api/populate-esrs-topics', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          })
+          
+          if (response.ok) {
+            const result = await response.json()
+            console.log('Successfully populated ESRS topics:', result.message)
+            
+            // Fetch topics again after populating
+            const { data: newTopicsData, error: newTopicsError } = await supabase
+              .from('esrs_topics')
+              .select('*')
+              .order('code')
+            
+            if (newTopicsError) throw newTopicsError
+            setTopics(newTopicsData || [])
+          } else {
+            console.error('Failed to populate ESRS topics')
+            setTopics([])
+          }
+        } catch (populateError) {
+          console.error('Error populating ESRS topics:', populateError)
+          setTopics([])
+        }
+      } else {
+        setTopics(topicsData)
+      }
+
+      setAssessments(assessmentsData)
     } catch (error: any) {
       console.error('Error fetching data:', error)
       toast.error('Failed to load data: ' + error.message)
