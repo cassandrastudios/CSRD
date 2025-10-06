@@ -22,9 +22,6 @@ export function AuthForm() {
     setLoading(true)
 
     try {
-      console.log('Attempting authentication:', { isLogin, email, password: '***' })
-      console.log('Supabase client:', supabase)
-      console.log('Current origin:', window.location.origin)
       
       if (isLogin) {
         const { data, error } = await supabase.auth.signInWithPassword({
@@ -32,19 +29,13 @@ export function AuthForm() {
           password,
         })
         
-        console.log('Sign in result:', { data, error })
-        
         if (error) {
-          console.error('Sign in error details:', error)
           throw error
         }
-        
-        console.log('Sign in successful, redirecting to dashboard...')
         toast.success('Signed in successfully!')
         
-        // Small delay to ensure session is properly set
+        // Redirect to dashboard
         setTimeout(() => {
-          console.log('Forcing redirect to /dashboard')
           window.location.href = '/dashboard'
         }, 500)
       } else {
@@ -53,24 +44,13 @@ export function AuthForm() {
           password,
         })
         
-        console.log('Sign up result:', { data, error })
-        
         if (error) {
-          console.error('Sign up error details:', error)
           throw error
         }
         
         toast.success('Check your email for verification link!')
       }
     } catch (error: any) {
-      console.error('Auth error:', error)
-      console.error('Error details:', {
-        message: error.message,
-        status: error.status,
-        statusText: error.statusText,
-        name: error.name,
-        stack: error.stack
-      })
       toast.error(error.message || 'Authentication failed')
     } finally {
       setLoading(false)
@@ -79,9 +59,6 @@ export function AuthForm() {
 
   const handleGoogleAuth = async () => {
     try {
-      console.log('Attempting Google OAuth...')
-      console.log('Redirect URL:', `${window.location.origin}/dashboard`)
-      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -93,22 +70,15 @@ export function AuthForm() {
         }
       })
       
-      console.log('Google OAuth result:', { error })
-      
       if (error) {
-        console.error('Google auth error:', error)
         throw error
       } else {
-        console.log('Google OAuth successful, redirecting to dashboard...')
         toast.success('Google authentication successful!')
-        // Small delay to ensure session is properly set
         setTimeout(() => {
-          console.log('Forcing redirect to /dashboard')
           window.location.href = '/dashboard'
         }, 500)
       }
     } catch (error: any) {
-      console.error('Google auth error:', error)
       toast.error(`Google authentication failed: ${error.message}`)
     }
   }

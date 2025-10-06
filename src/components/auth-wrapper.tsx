@@ -21,31 +21,23 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        console.log('Checking authentication state...')
-        
-        // Get current session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-        console.log('Session check result:', { session, sessionError })
         
         if (sessionError) {
-          console.error('Session error:', sessionError)
           setAuthError(sessionError.message)
           setLoading(false)
           return
         }
 
         if (session?.user) {
-          console.log('User authenticated:', session.user.email)
           setUser(session.user)
           setAuthError(null)
         } else {
-          console.log('No user session found')
           setUser(null)
         }
         
         setLoading(false)
       } catch (error: any) {
-        console.error('Auth check error:', error)
         setAuthError(error.message)
         setLoading(false)
       }
@@ -55,19 +47,14 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth state change:', event, session?.user?.email)
-      
       if (event === 'SIGNED_IN' && session?.user) {
-        console.log('User signed in, updating state')
         setUser(session.user)
         setAuthError(null)
         setLoading(false)
       } else if (event === 'SIGNED_OUT') {
-        console.log('User signed out, clearing state')
         setUser(null)
         setLoading(false)
       } else if (event === 'TOKEN_REFRESHED' && session?.user) {
-        console.log('Token refreshed, updating user')
         setUser(session.user)
         setAuthError(null)
       }
@@ -79,9 +66,7 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
   const handleRetry = () => {
     setLoading(true)
     setAuthError(null)
-    // Re-check auth
     supabase.auth.getSession().then(({ data: { session }, error }) => {
-      console.log('Retry session check:', { session, error })
       if (session?.user) {
         setUser(session.user)
       } else {
@@ -97,7 +82,7 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
       setUser(null)
       router.push('/auth')
     } catch (error) {
-      console.error('Sign out error:', error)
+      // Handle sign out error silently
     }
   }
 
@@ -160,19 +145,5 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
     )
   }
 
-  return (
-    <div>
-      {/* Debug info for Cursor browser */}
-      <div className="bg-blue-50 border-b border-blue-200 p-2 text-xs text-blue-800">
-        <strong>Debug:</strong> User: {user.email} | ID: {user.id.slice(0, 8)}... | 
-        <button 
-          onClick={handleSignOut}
-          className="ml-2 text-blue-600 hover:text-blue-800 underline"
-        >
-          Sign Out
-        </button>
-      </div>
-      {children}
-    </div>
-  )
+  return <>{children}</>
 }
