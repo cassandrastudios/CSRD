@@ -237,7 +237,7 @@ export function DoubleMaterialityAssessmentSimple() {
     }
   })
 
-  // Calculate progress - use actual scores, not all assessments
+  // Calculate progress - only count scores for selected topics
   const actualScores = scores.filter(score => selectedTopics.includes(score.esrs_topic_id))
   const progress = selectedTopics.length > 0 ? (actualScores.length / selectedTopics.length) * 100 : 0
 
@@ -322,12 +322,37 @@ export function DoubleMaterialityAssessmentSimple() {
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               Assessment Progress
-              {saving && (
-                <div className="flex items-center text-sm text-blue-600">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
-                  Saving...
-                </div>
-              )}
+              <div className="flex items-center gap-2">
+                {saving && (
+                  <div className="flex items-center text-sm text-blue-600">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                    Saving...
+                  </div>
+                )}
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={async () => {
+                    if (confirm('This will clear all your assessment data. Are you sure?')) {
+                      try {
+                        const response = await fetch('/api/reset-data', { method: 'POST' })
+                        const result = await response.json()
+                        if (result.success) {
+                          toast.success('Data reset successfully!')
+                          // Refresh the page to reload data
+                          window.location.reload()
+                        } else {
+                          toast.error('Failed to reset data')
+                        }
+                      } catch (error) {
+                        toast.error('Failed to reset data')
+                      }
+                    }
+                  }}
+                >
+                  Reset Data
+                </Button>
+              </div>
             </CardTitle>
             <CardDescription>
               Track your progress through the materiality assessment process. Each ESRS topic requires individual assessment for both Impact and Financial materiality as required by CSRD.
