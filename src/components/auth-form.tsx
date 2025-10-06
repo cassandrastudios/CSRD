@@ -13,6 +13,7 @@ export function AuthForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showRedirectButton, setShowRedirectButton] = useState(false)
   const supabase = createClient()
   const router = useRouter()
 
@@ -39,8 +40,25 @@ export function AuthForm() {
         }
         
         console.log('Sign in successful, redirecting to dashboard...')
-        router.push('/dashboard')
         toast.success('Signed in successfully!')
+        
+        // Try multiple redirect methods for embedded browsers
+        try {
+          router.push('/dashboard')
+          // Fallback: manual redirect
+          setTimeout(() => {
+            if (window.location.pathname === '/auth') {
+              console.log('Router redirect failed, using manual redirect')
+              window.location.href = '/dashboard'
+            }
+          }, 1000)
+        } catch (redirectError) {
+          console.error('Router redirect failed, using manual redirect:', redirectError)
+          window.location.href = '/dashboard'
+        }
+        
+        // Show redirect button as backup
+        setShowRedirectButton(true)
       } else {
         const { data, error } = await supabase.auth.signUp({
           email,
@@ -92,6 +110,10 @@ export function AuthForm() {
       if (error) {
         console.error('Google auth error:', error)
         throw error
+      } else {
+        // Show redirect button for Google OAuth as well
+        setShowRedirectButton(true)
+        toast.success('Google authentication successful!')
       }
     } catch (error: any) {
       console.error('Google auth error:', error)
@@ -165,6 +187,20 @@ export function AuthForm() {
             }
           </button>
         </div>
+        
+        {showRedirectButton && (
+          <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
+            <p className="text-sm text-green-800 mb-2">
+              Sign in successful! If you're not redirected automatically:
+            </p>
+            <Button 
+              onClick={() => window.location.href = '/dashboard'}
+              className="w-full bg-green-600 hover:bg-green-700"
+            >
+              Go to Dashboard
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   )
