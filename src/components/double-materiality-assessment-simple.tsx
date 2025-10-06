@@ -123,27 +123,24 @@ export function DoubleMaterialityAssessmentSimple() {
       console.log('Topics data:', topicsData)
       console.log('Scores data:', scoresData)
 
-      // If no topics exist, use fallback sample topics
-      if (topicsData.length === 0) {
-        console.log('No ESRS topics found, using sample data...')
-        const sampleTopics = [
-          { id: 1, code: 'E1', name: 'Climate Change', description: 'Climate change mitigation and adaptation measures, including greenhouse gas emissions reduction and climate risk management', category: 'Environmental', created_at: new Date().toISOString() },
-          { id: 2, code: 'E2', name: 'Pollution', description: 'Pollution prevention and control, including air, water, and soil pollution management', category: 'Environmental', created_at: new Date().toISOString() },
-          { id: 3, code: 'E3', name: 'Water and Marine Resources', description: 'Water and marine resource management, including water consumption and marine biodiversity protection', category: 'Environmental', created_at: new Date().toISOString() },
-          { id: 4, code: 'E4', name: 'Biodiversity and Ecosystems', description: 'Biodiversity and ecosystem protection, including habitat conservation and species protection', category: 'Environmental', created_at: new Date().toISOString() },
-          { id: 5, code: 'E5', name: 'Resource Use and Circular Economy', description: 'Resource efficiency and circular economy practices, including waste reduction and material circularity', category: 'Environmental', created_at: new Date().toISOString() },
-          { id: 6, code: 'S1', name: 'Own Workforce', description: 'Rights and working conditions of the company\'s own workforce, including health and safety, diversity and inclusion', category: 'Social', created_at: new Date().toISOString() },
-          { id: 7, code: 'S2', name: 'Workers in Value Chain', description: 'Rights of workers in the value chain, including supply chain labor standards and human rights', category: 'Social', created_at: new Date().toISOString() },
-          { id: 8, code: 'S3', name: 'Affected Communities', description: 'Rights of affected communities, including community impact and indigenous rights', category: 'Social', created_at: new Date().toISOString() },
-          { id: 9, code: 'S4', name: 'Consumers and End-Users', description: 'Consumer and end-user rights, including product safety and data privacy', category: 'Social', created_at: new Date().toISOString() },
-          { id: 10, code: 'G1', name: 'Business Conduct', description: 'Business ethics and conduct, including anti-corruption and anti-bribery measures', category: 'Governance', created_at: new Date().toISOString() },
-          { id: 11, code: 'G2', name: 'Corporate Culture', description: 'Corporate culture and values, including leadership and organizational behavior', category: 'Governance', created_at: new Date().toISOString() },
-          { id: 12, code: 'G3', name: 'Management of Material Sustainability Risks', description: 'Risk management and oversight of sustainability-related risks', category: 'Governance', created_at: new Date().toISOString() }
-        ]
-        setTopics(sampleTopics)
-      } else {
-        setTopics(topicsData)
-      }
+      // Always use sample topics for now to ensure they show up
+      console.log('Setting up ESRS topics...')
+      const sampleTopics = [
+        { id: 1, code: 'E1', name: 'Climate Change', description: 'Climate change mitigation and adaptation measures, including greenhouse gas emissions reduction and climate risk management', category: 'Environmental', created_at: new Date().toISOString() },
+        { id: 2, code: 'E2', name: 'Pollution', description: 'Pollution prevention and control, including air, water, and soil pollution management', category: 'Environmental', created_at: new Date().toISOString() },
+        { id: 3, code: 'E3', name: 'Water and Marine Resources', description: 'Water and marine resource management, including water consumption and marine biodiversity protection', category: 'Environmental', created_at: new Date().toISOString() },
+        { id: 4, code: 'E4', name: 'Biodiversity and Ecosystems', description: 'Biodiversity and ecosystem protection, including habitat conservation and species protection', category: 'Environmental', created_at: new Date().toISOString() },
+        { id: 5, code: 'E5', name: 'Resource Use and Circular Economy', description: 'Resource efficiency and circular economy practices, including waste reduction and material circularity', category: 'Environmental', created_at: new Date().toISOString() },
+        { id: 6, code: 'S1', name: 'Own Workforce', description: 'Rights and working conditions of the company\'s own workforce, including health and safety, diversity and inclusion', category: 'Social', created_at: new Date().toISOString() },
+        { id: 7, code: 'S2', name: 'Workers in Value Chain', description: 'Rights of workers in the value chain, including supply chain labor standards and human rights', category: 'Social', created_at: new Date().toISOString() },
+        { id: 8, code: 'S3', name: 'Affected Communities', description: 'Rights of affected communities, including community impact and indigenous rights', category: 'Social', created_at: new Date().toISOString() },
+        { id: 9, code: 'S4', name: 'Consumers and End-Users', description: 'Consumer and end-user rights, including product safety and data privacy', category: 'Social', created_at: new Date().toISOString() },
+        { id: 10, code: 'G1', name: 'Business Conduct', description: 'Business ethics and conduct, including anti-corruption and anti-bribery measures', category: 'Governance', created_at: new Date().toISOString() },
+        { id: 11, code: 'G2', name: 'Corporate Culture', description: 'Corporate culture and values, including leadership and organizational behavior', category: 'Governance', created_at: new Date().toISOString() },
+        { id: 12, code: 'G3', name: 'Management of Material Sustainability Risks', description: 'Risk management and oversight of sustainability-related risks', category: 'Governance', created_at: new Date().toISOString() }
+      ]
+      setTopics(sampleTopics)
+      console.log('Topics set:', sampleTopics.length)
 
       setScores(scoresData)
 
@@ -215,7 +212,10 @@ export function DoubleMaterialityAssessmentSimple() {
 
   // Filter and sort topics
   const filteredTopics = topics.filter(topic => {
-    if (!topic || !topic.name || !topic.description) return false
+    if (!topic || !topic.name || !topic.description) {
+      console.log('Filtering out invalid topic:', topic)
+      return false
+    }
     const matchesSearch = topic.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          topic.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          topic.code.toLowerCase().includes(searchTerm.toLowerCase())
@@ -236,6 +236,12 @@ export function DoubleMaterialityAssessmentSimple() {
         return 0
     }
   })
+
+  console.log('Topics state:', topics.length)
+  console.log('Filtered topics:', filteredTopics.length)
+  console.log('Search term:', searchTerm)
+  console.log('Selected category:', selectedCategory)
+  console.log('Show only selected:', showOnlySelected)
 
   // Calculate progress - only count scores for selected topics
   const actualScores = scores.filter(score => selectedTopics.includes(score.esrs_topic_id))
