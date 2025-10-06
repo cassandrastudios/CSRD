@@ -95,18 +95,84 @@ export function DoubleMaterialityAssessmentSimple() {
 
   const fetchData = async () => {
     try {
+      console.log('Fetching ESRS topics and materiality assessments...')
+      
       const [topicsResult, scoresResult] = await Promise.all([
         supabase.from('esrs_topics').select('*').order('code'),
         supabase.from('materiality_assessments').select('*')
       ])
 
-      if (topicsResult.error) throw topicsResult.error
-      if (scoresResult.error) throw scoresResult.error
+      console.log('Topics result:', topicsResult)
+      console.log('Scores result:', scoresResult)
+
+      if (topicsResult.error) {
+        console.error('Topics error:', topicsResult.error)
+        throw topicsResult.error
+      }
+      if (scoresResult.error) {
+        console.error('Scores error:', scoresResult.error)
+        throw scoresResult.error
+      }
 
       const topicsData = topicsResult.data || []
       const scoresData = scoresResult.data || []
 
-      setTopics(topicsData)
+      console.log('Topics data:', topicsData)
+      console.log('Scores data:', scoresData)
+
+      // If no topics exist, populate them
+      if (topicsData.length === 0) {
+        console.log('No ESRS topics found, populating sample data...')
+        try {
+          const response = await fetch('/api/populate-esrs-topics', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          })
+          
+          if (response.ok) {
+            const result = await response.json()
+            console.log('Successfully populated ESRS topics:', result.message)
+            
+            // Fetch topics again after populating
+            const { data: newTopicsData, error: newTopicsError } = await supabase
+              .from('esrs_topics')
+              .select('*')
+              .order('code')
+            
+            if (newTopicsError) throw newTopicsError
+            console.log('New topics data after population:', newTopicsData)
+            setTopics(newTopicsData || [])
+          } else {
+            console.error('Failed to populate ESRS topics')
+            // Fallback: create sample topics locally
+            const fallbackTopics = [
+              { id: 1, code: 'E1', name: 'Climate Change', description: 'Climate change mitigation and adaptation measures', category: 'Environmental' },
+              { id: 2, code: 'E2', name: 'Pollution', description: 'Pollution prevention and control', category: 'Environmental' },
+              { id: 3, code: 'S1', name: 'Own Workforce', description: 'Rights and working conditions of workforce', category: 'Social' },
+              { id: 4, code: 'G1', name: 'Business Conduct', description: 'Business ethics and conduct', category: 'Governance' }
+            ]
+            console.log('Using fallback topics:', fallbackTopics)
+            setTopics(fallbackTopics)
+          }
+        } catch (populateError) {
+          console.error('Error populating ESRS topics:', populateError)
+          // Fallback: create sample topics locally
+          const fallbackTopics = [
+            { id: 1, code: 'E1', name: 'Climate Change', description: 'Climate change mitigation and adaptation measures', category: 'Environmental' },
+            { id: 2, code: 'E2', name: 'Pollution', description: 'Pollution prevention and control', category: 'Environmental' },
+            { id: 3, code: 'S1', name: 'Own Workforce', description: 'Rights and working conditions of workforce', category: 'Social' },
+            { id: 4, code: 'G1', name: 'Business Conduct', description: 'Business ethics and conduct', category: 'Governance' }
+          ]
+          console.log('Using fallback topics after error:', fallbackTopics)
+          setTopics(fallbackTopics)
+        }
+      } else {
+        console.log('Using existing topics data')
+        setTopics(topicsData)
+      }
+
       setScores(scoresData)
 
       // Auto-select topics that have scores
