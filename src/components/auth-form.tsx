@@ -6,39 +6,126 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Auth } from '@supabase/auth-ui-react'
-import { ThemeSupa } from '@supabase/auth-ui-shared'
 import toast from 'react-hot-toast'
 
 export function AuthForm() {
+  const [isLogin, setIsLogin] = useState(true)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
   const supabase = createClient()
   const router = useRouter()
+
+  const handleAuth = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+
+    try {
+      if (isLogin) {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        })
+        if (error) throw error
+        router.push('/dashboard')
+        toast.success('Signed in successfully!')
+      } else {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+        })
+        if (error) throw error
+        toast.success('Check your email for verification link!')
+      }
+    } catch (error: any) {
+      console.error('Auth error:', error)
+      toast.error(error.message || 'Authentication failed')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleGoogleAuth = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`
+        }
+      })
+      if (error) throw error
+    } catch (error: any) {
+      console.error('Google auth error:', error)
+      toast.error('Google authentication failed')
+    }
+  }
 
   return (
     <Card className="w-full">
       <CardHeader>
         <CardTitle>Welcome to CSRD Co-Pilot</CardTitle>
         <CardDescription>
-          Sign in to access your CSRD compliance dashboard
+          {isLogin ? 'Sign in to your account' : 'Create a new account to get started'}
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Auth
-          supabaseClient={supabase}
-          appearance={{ 
-            theme: ThemeSupa,
-            variables: {
-              default: {
-                colors: {
-                  brand: '#3b82f6',
-                  brandAccent: '#2563eb',
-                }
-              }
+        <form onSubmit={handleAuth} className="space-y-4">
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              Email
+            </label>
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="Enter your email"
+            />
+          </div>
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+              Password
+            </label>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="Enter your password"
+              minLength={6}
+            />
+          </div>
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? 'Loading...' : (isLogin ? 'Sign In' : 'Sign Up')}
+          </Button>
+        </form>
+        
+        <div className="mt-4">
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            onClick={handleGoogleAuth}
+            disabled={loading}
+          >
+            Continue with Google
+          </Button>
+        </div>
+        
+        <div className="mt-4 text-center">
+          <button
+            type="button"
+            onClick={() => setIsLogin(!isLogin)}
+            className="text-sm text-blue-600 hover:text-blue-500"
+          >
+            {isLogin 
+              ? "Don't have an account? Sign up" 
+              : "Already have an account? Sign in"
             }
-          }}
-          providers={['google']}
-          redirectTo={`${typeof window !== 'undefined' ? window.location.origin : ''}/dashboard`}
-        />
+          </button>
+        </div>
       </CardContent>
     </Card>
   )
