@@ -98,33 +98,9 @@ export function DoubleMaterialityAssessmentSimple() {
 
   const fetchData = async () => {
     try {
-      console.log('Fetching ESRS topics and materiality assessments...')
-      
-      const [topicsResult, scoresResult] = await Promise.all([
-        supabase.from('esrs_topics').select('*').order('code'),
-        supabase.from('materiality_assessments').select('*')
-      ])
-
-      console.log('Topics result:', topicsResult)
-      console.log('Scores result:', scoresResult)
-
-      if (topicsResult.error) {
-        console.error('Topics error:', topicsResult.error)
-        throw topicsResult.error
-      }
-      if (scoresResult.error) {
-        console.error('Scores error:', scoresResult.error)
-        throw scoresResult.error
-      }
-
-      const topicsData = topicsResult.data || []
-      const scoresData = scoresResult.data || []
-
-      console.log('Topics data:', topicsData)
-      console.log('Scores data:', scoresData)
-
-      // Always use sample topics for now to ensure they show up
       console.log('Setting up ESRS topics...')
+      
+      // Always use sample topics - no database dependency
       const sampleTopics = [
         { id: 1, code: 'E1', name: 'Climate Change', description: 'Climate change mitigation and adaptation measures, including greenhouse gas emissions reduction and climate risk management', category: 'Environmental', created_at: new Date().toISOString() },
         { id: 2, code: 'E2', name: 'Pollution', description: 'Pollution prevention and control, including air, water, and soil pollution management', category: 'Environmental', created_at: new Date().toISOString() },
@@ -139,17 +115,17 @@ export function DoubleMaterialityAssessmentSimple() {
         { id: 11, code: 'G2', name: 'Corporate Culture', description: 'Corporate culture and values, including leadership and organizational behavior', category: 'Governance', created_at: new Date().toISOString() },
         { id: 12, code: 'G3', name: 'Management of Material Sustainability Risks', description: 'Risk management and oversight of sustainability-related risks', category: 'Governance', created_at: new Date().toISOString() }
       ]
+      
       setTopics(sampleTopics)
+      setScores([]) // Start with no scores
+      setSelectedTopics([]) // Start with no selected topics
+      
       console.log('Topics set:', sampleTopics.length)
-
-      setScores(scoresData)
-
-      // Auto-select topics that have scores
-      const scoredTopicIds = scoresData.map(s => s.esrs_topic_id)
-      setSelectedTopics(scoredTopicIds)
+      console.log('Scores cleared')
+      console.log('Selected topics cleared')
 
     } catch (error: any) {
-      console.error('Error fetching data:', error)
+      console.error('Error setting up data:', error)
       toast.error('Failed to load data: ' + error.message)
     } finally {
       setLoading(false)
@@ -472,14 +448,20 @@ export function DoubleMaterialityAssessmentSimple() {
                   </CardHeader>
                   <CardContent className="p-0">
                     <div className="max-h-96 overflow-y-auto">
-                      {filteredTopics.length === 0 ? (
+                      {loading ? (
+                        <div className="p-8 text-center">
+                          <Target className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                          <h3 className="text-lg font-medium text-gray-900 mb-2">Loading Topics...</h3>
+                          <p className="text-gray-500">Setting up ESRS topics...</p>
+                        </div>
+                      ) : filteredTopics.length === 0 ? (
                         <div className="p-8 text-center">
                           <Target className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                           <h3 className="text-lg font-medium text-gray-900 mb-2">No Topics Found</h3>
                           <p className="text-gray-500 mb-4">
                             {searchTerm || selectedCategory !== 'All' 
                               ? 'Try adjusting your search or filter criteria'
-                              : 'Loading ESRS topics...'
+                              : 'No topics available'
                             }
                           </p>
                           {searchTerm && (
@@ -490,6 +472,9 @@ export function DoubleMaterialityAssessmentSimple() {
                               Clear Search
                             </Button>
                           )}
+                          <div className="mt-4 text-xs text-gray-400">
+                            Debug: Topics: {topics.length}, Filtered: {filteredTopics.length}
+                          </div>
                         </div>
                       ) : (
                         filteredTopics.map(topic => (
