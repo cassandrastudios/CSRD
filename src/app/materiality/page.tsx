@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { MaterialityAssessment } from '@/components/materiality-assessment'
+import { EnhancedMaterialityAssessment } from '@/components/enhanced-materiality-assessment'
 
 export default async function MaterialityPage() {
   const supabase = createClient()
@@ -10,5 +10,5 @@ export default async function MaterialityPage() {
     redirect('/auth')
   }
 
-  return <MaterialityAssessment />
+  return <EnhancedMaterialityAssessment />
 }

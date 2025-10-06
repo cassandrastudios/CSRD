@@ -9,11 +9,15 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.58.0",
-    "@supabase/ssr": "^0.5.1",
+    "@radix-ui/react-tabs": "^1.1.13",
     "@supabase/auth-ui-react": "^0.4.7",
     "@supabase/auth-ui-shared": "^0.1.8",
+    "@supabase/ssr": "^0.5.1",
+    "@supabase/supabase-js": "^2.58.0",
     "@tanstack/react-query": "^5.83.0",
+    "@tiptap/extension-placeholder": "^2.1.13",
+    "@tiptap/react": "^2.1.13",
+    "@tiptap/starter-kit": "^2.1.13",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.462.0",
@@ -22,9 +26,6 @@
     "react-dom": "^18.3.1",
     "react-hot-toast": "^2.4.1",
     "recharts": "^2.15.4",
-    "@tiptap/react": "^2.1.13",
-    "@tiptap/starter-kit": "^2.1.13",
-    "@tiptap/extension-placeholder": "^2.1.13",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^3.25.76"
