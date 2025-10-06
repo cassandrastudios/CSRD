@@ -49,6 +49,7 @@ interface SimpleTopic {
   name: string
   description: string
   category: string
+  parent_id: number | null
   created_at: string
 }
 
@@ -100,20 +101,61 @@ export function DoubleMaterialityAssessmentSimple() {
     try {
       console.log('Setting up ESRS topics...')
       
-      // Always use sample topics - no database dependency
+      // Always use sample topics with subtopics - no database dependency
       const sampleTopics = [
-        { id: 1, code: 'E1', name: 'Climate Change', description: 'Climate change mitigation and adaptation measures, including greenhouse gas emissions reduction and climate risk management', category: 'Environmental', created_at: new Date().toISOString() },
-        { id: 2, code: 'E2', name: 'Pollution', description: 'Pollution prevention and control, including air, water, and soil pollution management', category: 'Environmental', created_at: new Date().toISOString() },
-        { id: 3, code: 'E3', name: 'Water and Marine Resources', description: 'Water and marine resource management, including water consumption and marine biodiversity protection', category: 'Environmental', created_at: new Date().toISOString() },
-        { id: 4, code: 'E4', name: 'Biodiversity and Ecosystems', description: 'Biodiversity and ecosystem protection, including habitat conservation and species protection', category: 'Environmental', created_at: new Date().toISOString() },
-        { id: 5, code: 'E5', name: 'Resource Use and Circular Economy', description: 'Resource efficiency and circular economy practices, including waste reduction and material circularity', category: 'Environmental', created_at: new Date().toISOString() },
-        { id: 6, code: 'S1', name: 'Own Workforce', description: 'Rights and working conditions of the company\'s own workforce, including health and safety, diversity and inclusion', category: 'Social', created_at: new Date().toISOString() },
-        { id: 7, code: 'S2', name: 'Workers in Value Chain', description: 'Rights of workers in the value chain, including supply chain labor standards and human rights', category: 'Social', created_at: new Date().toISOString() },
-        { id: 8, code: 'S3', name: 'Affected Communities', description: 'Rights of affected communities, including community impact and indigenous rights', category: 'Social', created_at: new Date().toISOString() },
-        { id: 9, code: 'S4', name: 'Consumers and End-Users', description: 'Consumer and end-user rights, including product safety and data privacy', category: 'Social', created_at: new Date().toISOString() },
-        { id: 10, code: 'G1', name: 'Business Conduct', description: 'Business ethics and conduct, including anti-corruption and anti-bribery measures', category: 'Governance', created_at: new Date().toISOString() },
-        { id: 11, code: 'G2', name: 'Corporate Culture', description: 'Corporate culture and values, including leadership and organizational behavior', category: 'Governance', created_at: new Date().toISOString() },
-        { id: 12, code: 'G3', name: 'Management of Material Sustainability Risks', description: 'Risk management and oversight of sustainability-related risks', category: 'Governance', created_at: new Date().toISOString() }
+        // Environmental Topics with Subtopics
+        { id: 1, code: 'E1', name: 'Climate Change', description: 'Climate change mitigation and adaptation measures', category: 'Environmental', parent_id: null, created_at: new Date().toISOString() },
+        { id: 101, code: 'E1-1', name: 'Climate Change Mitigation', description: 'Greenhouse gas emissions reduction and energy transition', category: 'Environmental', parent_id: 1, created_at: new Date().toISOString() },
+        { id: 102, code: 'E1-2', name: 'Climate Change Adaptation', description: 'Adaptation measures and climate risk management', category: 'Environmental', parent_id: 1, created_at: new Date().toISOString() },
+        { id: 103, code: 'E1-3', name: 'Energy Consumption and Mix', description: 'Energy consumption patterns and renewable energy transition', category: 'Environmental', parent_id: 1, created_at: new Date().toISOString() },
+        
+        { id: 2, code: 'E2', name: 'Pollution', description: 'Pollution prevention and control measures', category: 'Environmental', parent_id: null, created_at: new Date().toISOString() },
+        { id: 201, code: 'E2-1', name: 'Air Pollution', description: 'Air emissions and air quality management', category: 'Environmental', parent_id: 2, created_at: new Date().toISOString() },
+        { id: 202, code: 'E2-2', name: 'Water Pollution', description: 'Water discharge and water quality management', category: 'Environmental', parent_id: 2, created_at: new Date().toISOString() },
+        { id: 203, code: 'E2-3', name: 'Soil Pollution', description: 'Soil contamination and remediation', category: 'Environmental', parent_id: 2, created_at: new Date().toISOString() },
+        
+        { id: 3, code: 'E3', name: 'Water and Marine Resources', description: 'Water and marine resource management', category: 'Environmental', parent_id: null, created_at: new Date().toISOString() },
+        { id: 301, code: 'E3-1', name: 'Water Consumption', description: 'Water use efficiency and water stress management', category: 'Environmental', parent_id: 3, created_at: new Date().toISOString() },
+        { id: 302, code: 'E3-2', name: 'Marine Biodiversity', description: 'Marine ecosystem protection and sustainable fishing', category: 'Environmental', parent_id: 3, created_at: new Date().toISOString() },
+        
+        { id: 4, code: 'E4', name: 'Biodiversity and Ecosystems', description: 'Biodiversity and ecosystem protection', category: 'Environmental', parent_id: null, created_at: new Date().toISOString() },
+        { id: 401, code: 'E4-1', name: 'Terrestrial Biodiversity', description: 'Land-based ecosystem protection and habitat conservation', category: 'Environmental', parent_id: 4, created_at: new Date().toISOString() },
+        { id: 402, code: 'E4-2', name: 'Species Protection', description: 'Endangered species protection and wildlife management', category: 'Environmental', parent_id: 4, created_at: new Date().toISOString() },
+        
+        { id: 5, code: 'E5', name: 'Resource Use and Circular Economy', description: 'Resource efficiency and circular economy practices', category: 'Environmental', parent_id: null, created_at: new Date().toISOString() },
+        { id: 501, code: 'E5-1', name: 'Resource Efficiency', description: 'Material efficiency and resource optimization', category: 'Environmental', parent_id: 5, created_at: new Date().toISOString() },
+        { id: 502, code: 'E5-2', name: 'Waste Management', description: 'Waste reduction, recycling, and circular economy', category: 'Environmental', parent_id: 5, created_at: new Date().toISOString() },
+        
+        // Social Topics with Subtopics
+        { id: 6, code: 'S1', name: 'Own Workforce', description: 'Rights and working conditions of workforce', category: 'Social', parent_id: null, created_at: new Date().toISOString() },
+        { id: 601, code: 'S1-1', name: 'Working Conditions', description: 'Health and safety, working hours, and workplace conditions', category: 'Social', parent_id: 6, created_at: new Date().toISOString() },
+        { id: 602, code: 'S1-2', name: 'Equal Treatment and Opportunities', description: 'Diversity, inclusion, and equal opportunities', category: 'Social', parent_id: 6, created_at: new Date().toISOString() },
+        { id: 603, code: 'S1-3', name: 'Social Dialogue', description: 'Employee representation and collective bargaining', category: 'Social', parent_id: 6, created_at: new Date().toISOString() },
+        
+        { id: 7, code: 'S2', name: 'Workers in Value Chain', description: 'Rights of workers in the value chain', category: 'Social', parent_id: null, created_at: new Date().toISOString() },
+        { id: 701, code: 'S2-1', name: 'Supply Chain Labor Standards', description: 'Labor rights and working conditions in supply chains', category: 'Social', parent_id: 7, created_at: new Date().toISOString() },
+        { id: 702, code: 'S2-2', name: 'Child Labor and Forced Labor', description: 'Prevention of child labor and forced labor', category: 'Social', parent_id: 7, created_at: new Date().toISOString() },
+        
+        { id: 8, code: 'S3', name: 'Affected Communities', description: 'Rights of affected communities', category: 'Social', parent_id: null, created_at: new Date().toISOString() },
+        { id: 801, code: 'S3-1', name: 'Community Impact', description: 'Local community development and impact management', category: 'Social', parent_id: 8, created_at: new Date().toISOString() },
+        { id: 802, code: 'S3-2', name: 'Indigenous Rights', description: 'Indigenous peoples rights and cultural heritage', category: 'Social', parent_id: 8, created_at: new Date().toISOString() },
+        
+        { id: 9, code: 'S4', name: 'Consumers and End-Users', description: 'Consumer and end-user rights', category: 'Social', parent_id: null, created_at: new Date().toISOString() },
+        { id: 901, code: 'S4-1', name: 'Product Safety', description: 'Product safety and quality standards', category: 'Social', parent_id: 9, created_at: new Date().toISOString() },
+        { id: 902, code: 'S4-2', name: 'Data Privacy', description: 'Consumer data protection and privacy rights', category: 'Social', parent_id: 9, created_at: new Date().toISOString() },
+        
+        // Governance Topics with Subtopics
+        { id: 10, code: 'G1', name: 'Business Conduct', description: 'Business ethics and conduct', category: 'Governance', parent_id: null, created_at: new Date().toISOString() },
+        { id: 1001, code: 'G1-1', name: 'Anti-Corruption', description: 'Anti-corruption and anti-bribery measures', category: 'Governance', parent_id: 10, created_at: new Date().toISOString() },
+        { id: 1002, code: 'G1-2', name: 'Tax Strategy', description: 'Tax transparency and responsible tax practices', category: 'Governance', parent_id: 10, created_at: new Date().toISOString() },
+        
+        { id: 11, code: 'G2', name: 'Corporate Culture', description: 'Corporate culture and values', category: 'Governance', parent_id: null, created_at: new Date().toISOString() },
+        { id: 1101, code: 'G2-1', name: 'Leadership and Governance', description: 'Board composition and leadership effectiveness', category: 'Governance', parent_id: 11, created_at: new Date().toISOString() },
+        { id: 1102, code: 'G2-2', name: 'Organizational Culture', description: 'Values, ethics, and organizational behavior', category: 'Governance', parent_id: 11, created_at: new Date().toISOString() },
+        
+        { id: 12, code: 'G3', name: 'Management of Material Sustainability Risks', description: 'Risk management and oversight', category: 'Governance', parent_id: null, created_at: new Date().toISOString() },
+        { id: 1201, code: 'G3-1', name: 'Risk Management', description: 'Sustainability risk identification and management', category: 'Governance', parent_id: 12, created_at: new Date().toISOString() },
+        { id: 1202, code: 'G3-2', name: 'Due Diligence', description: 'Due diligence processes and procedures', category: 'Governance', parent_id: 12, created_at: new Date().toISOString() }
       ]
       
       setTopics(sampleTopics)
@@ -199,6 +241,13 @@ export function DoubleMaterialityAssessmentSimple() {
     const matchesSelected = !showOnlySelected || selectedTopics.includes(topic.id)
     return matchesSearch && matchesCategory && matchesSelected
   }).sort((a, b) => {
+    // First sort by parent_id (main topics first), then by the selected sort criteria
+    if (a.parent_id === null && b.parent_id !== null) return -1
+    if (a.parent_id !== null && b.parent_id === null) return 1
+    if (a.parent_id !== null && b.parent_id !== null && a.parent_id !== b.parent_id) {
+      return a.parent_id - b.parent_id
+    }
+    
     switch (sortBy) {
       case 'name':
         return a.name.localeCompare(b.name)
@@ -477,51 +526,69 @@ export function DoubleMaterialityAssessmentSimple() {
                           </div>
                         </div>
                       ) : (
-                        filteredTopics.map(topic => (
-                        <div
-                          key={topic.id}
-                          className={`p-4 border-b cursor-pointer hover:bg-gray-50 ${
-                            selectedTopics.includes(topic.id) ? 'bg-blue-50 border-blue-200' : ''
-                          }`}
-                          onClick={() => {
-                            if (selectedTopics.includes(topic.id)) {
-                              setSelectedTopics(prev => prev.filter(id => id !== topic.id))
-                            } else {
-                              setSelectedTopics(prev => [...prev, topic.id])
-                            }
-                          }}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2">
-                                <input
-                                  type="checkbox"
-                                  checked={selectedTopics.includes(topic.id)}
-                                  onChange={() => {}}
-                                  className="rounded"
-                                />
-                                <div>
-                                  <div className="font-medium">{topic.name}</div>
-                                  <div className="text-sm text-gray-500">{topic.code}</div>
+                        filteredTopics.map(topic => {
+                          const isMainTopic = topic.parent_id === null
+                          const isSubTopic = topic.parent_id !== null
+                          
+                          return (
+                            <div
+                              key={topic.id}
+                              className={`p-4 border-b cursor-pointer hover:bg-gray-50 ${
+                                selectedTopics.includes(topic.id) ? 'bg-blue-50 border-blue-200' : ''
+                              } ${isSubTopic ? 'bg-gray-50/50' : ''}`}
+                              onClick={() => {
+                                if (selectedTopics.includes(topic.id)) {
+                                  setSelectedTopics(prev => prev.filter(id => id !== topic.id))
+                                } else {
+                                  setSelectedTopics(prev => [...prev, topic.id])
+                                }
+                              }}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2">
+                                    <input
+                                      type="checkbox"
+                                      checked={selectedTopics.includes(topic.id)}
+                                      onChange={(e) => {
+                                        e.stopPropagation()
+                                        if (e.target.checked) {
+                                          setSelectedTopics(prev => [...prev, topic.id])
+                                        } else {
+                                          setSelectedTopics(prev => prev.filter(id => id !== topic.id))
+                                        }
+                                      }}
+                                      className="rounded"
+                                    />
+                                    <div className={`${isSubTopic ? 'ml-6' : ''}`}>
+                                      <div className={`font-medium ${isSubTopic ? 'text-sm' : ''}`}>
+                                        {topic.name}
+                                      </div>
+                                      <div className="text-sm text-gray-500">{topic.code}</div>
+                                    </div>
+                                  </div>
+                                  <div className={`text-sm text-gray-600 mt-1 ${isSubTopic ? 'ml-6' : ''}`}>
+                                    {topic.description}
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  {isMainTopic && (
+                                    <Badge variant="outline">{topic.category}</Badge>
+                                  )}
+                                  {getScore(topic.id) && (
+                                    <Badge variant={
+                                      (getScore(topic.id)!.impact_materiality + getScore(topic.id)!.financial_materiality) / 2 >= 3 
+                                        ? 'default' : 'secondary'
+                                    }>
+                                      {(getScore(topic.id)!.impact_materiality + getScore(topic.id)!.financial_materiality) / 2 >= 3 
+                                        ? 'Material' : 'Non-Material'}
+                                    </Badge>
+                                  )}
                                 </div>
                               </div>
-                              <div className="text-sm text-gray-600 mt-1">{topic.description}</div>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <Badge variant="outline">{topic.category}</Badge>
-                              {getScore(topic.id) && (
-                                <Badge variant={
-                                  (getScore(topic.id)!.impact_materiality + getScore(topic.id)!.financial_materiality) / 2 >= 3 
-                                    ? 'default' : 'secondary'
-                                }>
-                                  {(getScore(topic.id)!.impact_materiality + getScore(topic.id)!.financial_materiality) / 2 >= 3 
-                                    ? 'Material' : 'Non-Material'}
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                        ))
+                          )
+                        })
                       )}
                     </div>
                   </CardContent>
