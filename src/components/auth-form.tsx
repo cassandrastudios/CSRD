@@ -21,24 +21,50 @@ export function AuthForm() {
     setLoading(true)
 
     try {
+      console.log('Attempting authentication:', { isLogin, email, password: '***' })
+      console.log('Supabase client:', supabase)
+      console.log('Current origin:', window.location.origin)
+      
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         })
-        if (error) throw error
+        
+        console.log('Sign in result:', { data, error })
+        
+        if (error) {
+          console.error('Sign in error details:', error)
+          throw error
+        }
+        
+        console.log('Sign in successful, redirecting to dashboard...')
         router.push('/dashboard')
         toast.success('Signed in successfully!')
       } else {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
         })
-        if (error) throw error
+        
+        console.log('Sign up result:', { data, error })
+        
+        if (error) {
+          console.error('Sign up error details:', error)
+          throw error
+        }
+        
         toast.success('Check your email for verification link!')
       }
     } catch (error: any) {
       console.error('Auth error:', error)
+      console.error('Error details:', {
+        message: error.message,
+        status: error.status,
+        statusText: error.statusText,
+        name: error.name,
+        stack: error.stack
+      })
       toast.error(error.message || 'Authentication failed')
     } finally {
       setLoading(false)
@@ -47,16 +73,29 @@ export function AuthForm() {
 
   const handleGoogleAuth = async () => {
     try {
+      console.log('Attempting Google OAuth...')
+      console.log('Redirect URL:', `${window.location.origin}/dashboard`)
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/dashboard`
+          redirectTo: `${window.location.origin}/dashboard`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
         }
       })
-      if (error) throw error
+      
+      console.log('Google OAuth result:', { error })
+      
+      if (error) {
+        console.error('Google auth error:', error)
+        throw error
+      }
     } catch (error: any) {
       console.error('Google auth error:', error)
-      toast.error('Google authentication failed')
+      toast.error(`Google authentication failed: ${error.message}`)
     }
   }
 
