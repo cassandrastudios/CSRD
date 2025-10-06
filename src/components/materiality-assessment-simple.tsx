@@ -168,6 +168,7 @@ export function MaterialityAssessmentSimple() {
 
   // Filter topics based on search and category
   const filteredTopics = topics.filter(topic => {
+    if (!topic || !topic.name || !topic.description || !topic.code) return false
     const matchesSearch = topic.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          topic.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          topic.code.toLowerCase().includes(searchTerm.toLowerCase())
@@ -221,6 +222,27 @@ export function MaterialityAssessmentSimple() {
               ))}
             </div>
           </div>
+        </div>
+      </Layout>
+    )
+  }
+
+  if (topics.length === 0) {
+    return (
+      <Layout>
+        <div className="p-8">
+          <Card>
+            <CardContent className="flex items-center justify-center h-64">
+              <div className="text-center">
+                <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No ESRS Topics Found</h3>
+                <p className="text-gray-500 mb-4">The ESRS topics database appears to be empty.</p>
+                <Button onClick={fetchData}>
+                  Retry Loading
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </Layout>
     )
