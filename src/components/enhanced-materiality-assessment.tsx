@@ -249,7 +249,7 @@ export function EnhancedMaterialityAssessment() {
       acc[category].assessed++
     }
     return acc
-  }, {} as Record<string, { total: number; assessed: number }])
+  }, {} as Record<string, { total: number; assessed: number }>)
 
   const categoryChartData = Object.entries(categoryData).map(([category, data]) => ({
     category,
