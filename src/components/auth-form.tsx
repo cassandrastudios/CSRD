@@ -42,23 +42,11 @@ export function AuthForm() {
         console.log('Sign in successful, redirecting to dashboard...')
         toast.success('Signed in successfully!')
         
-        // Try multiple redirect methods for embedded browsers
-        try {
-          router.push('/dashboard')
-          // Fallback: manual redirect
-          setTimeout(() => {
-            if (window.location.pathname === '/auth') {
-              console.log('Router redirect failed, using manual redirect')
-              window.location.href = '/dashboard'
-            }
-          }, 1000)
-        } catch (redirectError) {
-          console.error('Router redirect failed, using manual redirect:', redirectError)
+        // Small delay to ensure session is properly set
+        setTimeout(() => {
+          console.log('Forcing redirect to /dashboard')
           window.location.href = '/dashboard'
-        }
-        
-        // Show redirect button as backup
-        setShowRedirectButton(true)
+        }, 500)
       } else {
         const { data, error } = await supabase.auth.signUp({
           email,
@@ -111,9 +99,13 @@ export function AuthForm() {
         console.error('Google auth error:', error)
         throw error
       } else {
-        // Show redirect button for Google OAuth as well
-        setShowRedirectButton(true)
+        console.log('Google OAuth successful, redirecting to dashboard...')
         toast.success('Google authentication successful!')
+        // Small delay to ensure session is properly set
+        setTimeout(() => {
+          console.log('Forcing redirect to /dashboard')
+          window.location.href = '/dashboard'
+        }, 500)
       }
     } catch (error: any) {
       console.error('Google auth error:', error)

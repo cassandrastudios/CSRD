@@ -37,6 +37,7 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
         if (session?.user) {
           console.log('User authenticated:', session.user.email)
           setUser(session.user)
+          setAuthError(null)
         } else {
           console.log('No user session found')
           setUser(null)
@@ -60,9 +61,15 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
         console.log('User signed in, updating state')
         setUser(session.user)
         setAuthError(null)
+        setLoading(false)
       } else if (event === 'SIGNED_OUT') {
         console.log('User signed out, clearing state')
         setUser(null)
+        setLoading(false)
+      } else if (event === 'TOKEN_REFRESHED' && session?.user) {
+        console.log('Token refreshed, updating user')
+        setUser(session.user)
+        setAuthError(null)
       }
     })
 
