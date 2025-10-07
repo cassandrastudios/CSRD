@@ -43,6 +43,7 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { ValueChainCreator } from './value-chain/ValueChainCreator'
+import { StakeholderManagement } from './stakeholder-management'
 
 // Simple types for existing schema
 interface SimpleTopic {
@@ -641,25 +642,7 @@ export function DoubleMaterialityAssessmentSimple() {
 
           {/* Stakeholders Tab */}
           <TabsContent value="stakeholders" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                  <CardTitle>Stakeholder Engagement</CardTitle>
-                  <Button onClick={() => toast('Stakeholder management coming soon!')}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Stakeholder
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-12">
-                  <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Stakeholder Management</h3>
-                  <p className="text-gray-500 mb-4">Advanced stakeholder engagement features coming soon</p>
-                  <Button variant="outline">Learn More</Button>
-                </div>
-              </CardContent>
-            </Card>
+            <StakeholderManagement organizationId="default-org" />
           </TabsContent>
 
           {/* Scoring Tab */}
