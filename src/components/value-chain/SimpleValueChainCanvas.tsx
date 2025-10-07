@@ -139,7 +139,7 @@ export function SimpleValueChainCanvas() {
       </div>
 
       {/* All Players Grouped by Category */}
-      <div className="flex-1 overflow-x-auto" key={reorderKey}>
+      <div className="flex-1 overflow-x-auto">
         <div className="flex gap-8 p-4 min-w-max">
           {valueChain.players.length === 0 ? (
             <div className="flex items-center justify-center w-full h-full">
