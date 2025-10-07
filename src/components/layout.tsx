@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Navigation } from './navigation'
 
 interface LayoutProps {
@@ -10,8 +10,19 @@ interface LayoutProps {
 export function Layout({ children }: LayoutProps) {
   const [isNavCollapsed, setIsNavCollapsed] = useState(false)
 
+  // Load navigation state from localStorage on mount
+  useEffect(() => {
+    const savedState = localStorage.getItem('nav-collapsed')
+    if (savedState !== null) {
+      setIsNavCollapsed(JSON.parse(savedState))
+    }
+  }, [])
+
   const toggleNav = () => {
-    setIsNavCollapsed(!isNavCollapsed)
+    const newState = !isNavCollapsed
+    setIsNavCollapsed(newState)
+    // Save navigation state to localStorage
+    localStorage.setItem('nav-collapsed', JSON.stringify(newState))
   }
 
   return (
