@@ -288,7 +288,6 @@ export function ValueChainCreator() {
               </div>
             </TabsContent>
           </Tabs>
-        </div>
       </div>
 
       {/* Player Editor Modal */}
