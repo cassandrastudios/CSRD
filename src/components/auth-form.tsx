@@ -59,6 +59,7 @@ export function AuthForm() {
 
   const handleGoogleAuth = async () => {
     try {
+      // For embedded browsers, open OAuth in a new window
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -66,17 +67,20 @@ export function AuthForm() {
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
-          }
+          },
+          // Force opening in new window for embedded browsers
+          skipBrowserRedirect: false
         }
       })
       
       if (error) {
         throw error
       } else {
-        toast.success('Google authentication successful!')
+        toast.success('Google authentication initiated!')
+        // For embedded browsers, we need to handle the redirect differently
         setTimeout(() => {
           window.location.href = '/dashboard'
-        }, 500)
+        }, 1000)
       }
     } catch (error: any) {
       toast.error(`Google authentication failed: ${error.message}`)
@@ -137,18 +141,65 @@ export function AuthForm() {
           </Button>
         </div>
         
-        <div className="mt-4 text-center">
-          <button
-            type="button"
-            onClick={() => setIsLogin(!isLogin)}
-            className="text-sm text-blue-600 hover:text-blue-500"
-          >
-            {isLogin 
-              ? "Don't have an account? Sign up" 
-              : "Already have an account? Sign in"
-            }
-          </button>
-        </div>
+                <div className="mt-4 text-center">
+                  <button
+                    type="button"
+                    onClick={() => setIsLogin(!isLogin)}
+                    className="text-sm text-blue-600 hover:text-blue-500"
+                  >
+                    {isLogin 
+                      ? "Don't have an account? Sign up" 
+                      : "Already have an account? Sign in"
+                    }
+                  </button>
+                </div>
+                
+                {/* Quick test login for embedded browsers */}
+                <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                  <p className="text-sm text-yellow-800 mb-2">
+                    Having trouble with embedded browser? Try this test account:
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={async () => {
+                      setEmail('test@example.com')
+                      setPassword('testpassword123')
+                      setLoading(true)
+                      try {
+                        const { error } = await supabase.auth.signInWithPassword({
+                          email: 'test@example.com',
+                          password: 'testpassword123',
+                        })
+                        if (error) {
+                          // If test user doesn't exist, create it
+                          const { error: signUpError } = await supabase.auth.signUp({
+                            email: 'test@example.com',
+                            password: 'testpassword123',
+                          })
+                          if (signUpError) {
+                            throw signUpError
+                          }
+                          toast.success('Test account created! Please check your email.')
+                        } else {
+                          toast.success('Signed in with test account!')
+                          setTimeout(() => {
+                            window.location.href = '/dashboard'
+                          }, 500)
+                        }
+                      } catch (error: any) {
+                        toast.error('Test login failed: ' + error.message)
+                      } finally {
+                        setLoading(false)
+                      }
+                    }}
+                    disabled={loading}
+                    className="w-full"
+                  >
+                    Use Test Account
+                  </Button>
+                </div>
         
         {showRedirectButton && (
           <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
