@@ -59,12 +59,14 @@ export function SimpleValueChainCanvas() {
     console.log('Drag started:', player.name);
     setDraggedPlayer(player);
     e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', player.id);
   };
 
   const handleDragOver = (e: React.DragEvent, index: number) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
     setDraggedOverIndex(index);
+    console.log('Drag over index:', index);
   };
 
   const handleDragLeave = () => {
@@ -75,12 +77,28 @@ export function SimpleValueChainCanvas() {
     e.preventDefault();
     setDraggedOverIndex(null);
     
-    if (!draggedPlayer) return;
+    console.log('Drop event triggered at index:', targetIndex);
+    
+    if (!draggedPlayer) {
+      console.log('No dragged player found');
+      return;
+    }
     
     const players = [...valueChain.players];
     const draggedIndex = players.findIndex(p => p.id === draggedPlayer.id);
     
-    if (draggedIndex === -1) return;
+    console.log('Dragged player index:', draggedIndex, 'Target index:', targetIndex);
+    
+    if (draggedIndex === -1) {
+      console.log('Dragged player not found in players array');
+      return;
+    }
+    
+    if (draggedIndex === targetIndex) {
+      console.log('Same position, no reordering needed');
+      setDraggedPlayer(null);
+      return;
+    }
     
     // Remove dragged player
     const [draggedItem] = players.splice(draggedIndex, 1);
@@ -156,8 +174,11 @@ export function SimpleValueChainCanvas() {
                   } ${
                     draggedPlayer?.id === player.id ? 'opacity-50' : ''
                   }`}
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, player)}
+                  draggable={true}
+                  onDragStart={(e) => {
+                    console.log('Card drag start triggered for:', player.name);
+                    handleDragStart(e, player);
+                  }}
                   onClick={() => selectPlayer(player)}
                 >
                   <CardContent className="p-4">
