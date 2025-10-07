@@ -152,11 +152,11 @@ export function SimpleValueChainCanvas() {
                     <p className="text-xs text-gray-400">Add players to this category</p>
                   </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="flex gap-3 overflow-x-auto pb-2">
                     {players.map((player) => (
                       <Card
                         key={player.id}
-                        className={`cursor-pointer hover:shadow-md transition-shadow w-full ${
+                        className={`cursor-pointer hover:shadow-md transition-shadow flex-shrink-0 w-72 ${
                           selectedPlayer?.id === player.id ? 'ring-2 ring-blue-500' : ''
                         }`}
                         draggable
