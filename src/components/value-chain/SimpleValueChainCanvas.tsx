@@ -9,7 +9,7 @@ import { Truck, Building2, Users, Link, Trash2, Edit, GripVertical } from 'lucid
 import { Button } from '@/components/ui/button';
 
 export function SimpleValueChainCanvas() {
-  const { valueChain, selectedPlayer, selectedRelationship, selectPlayer, selectRelationship, deleteRelationship, movePlayerToCategory, updatePlayer } = useValueChainStore();
+  const { valueChain, selectedPlayer, selectedRelationship, selectPlayer, selectRelationship, deleteRelationship, movePlayerToCategory, updatePlayer, reorderPlayers } = useValueChainStore();
   const [draggedPlayer, setDraggedPlayer] = useState<Player | null>(null);
   const [dragOverCategory, setDragOverCategory] = useState<string | null>(null);
   const [dragOverPlayer, setDragOverPlayer] = useState<string | null>(null);
@@ -131,10 +131,8 @@ export function SimpleValueChainCanvas() {
           const [draggedItem] = newPlayers.splice(draggedIndex, 1);
           newPlayers.splice(targetIndex, 0, draggedItem);
           
-          // Update the order by updating x positions
-          newPlayers.forEach((player, index) => {
-            updatePlayer(player.id, { x: index * 10 }); // Simple ordering by x position
-          });
+          // Use the new reorderPlayers function
+          reorderPlayers(draggedPlayer.category, newPlayers);
           
           // Force re-render by updating the key
           setReorderKey(prev => prev + 1);

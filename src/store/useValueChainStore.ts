@@ -76,6 +76,30 @@ export const useValueChainStore = create<ValueChainStore>()(
         });
       },
 
+      reorderPlayers: (category: 'upstream' | 'own_operations' | 'downstream', newOrder: Player[]) => {
+        const { valueChain } = get();
+        if (!valueChain) return;
+
+        // Update players in the specified category with new order
+        const updatedPlayers = valueChain.players.map(player => {
+          if (player.category === category) {
+            const newIndex = newOrder.findIndex(p => p.id === player.id);
+            if (newIndex !== -1) {
+              return { ...player, x: newIndex * 10 };
+            }
+          }
+          return player;
+        });
+
+        set({
+          valueChain: {
+            ...valueChain,
+            players: updatedPlayers,
+            updatedAt: new Date().toISOString(),
+          },
+        });
+      },
+
       deletePlayer: (id: string) => {
         const { valueChain } = get();
         if (!valueChain) return;

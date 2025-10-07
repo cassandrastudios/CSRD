@@ -42,6 +42,8 @@ export interface ValueChainStore {
   createValueChain: (name: string, description?: string) => void;
   addPlayer: (player: Omit<Player, 'id' | 'x' | 'y'>) => void;
   updatePlayer: (id: string, updates: Partial<Player>) => void;
+  movePlayerToCategory: (playerId: string, newCategory: 'upstream' | 'own_operations' | 'downstream') => void;
+  reorderPlayers: (category: 'upstream' | 'own_operations' | 'downstream', newOrder: Player[]) => void;
   deletePlayer: (id: string) => void;
   addRelationship: (relationship: Omit<Relationship, 'id'>) => void;
   updateRelationship: (id: string, updates: Partial<Relationship>) => void;
