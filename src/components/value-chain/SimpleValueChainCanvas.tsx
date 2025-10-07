@@ -159,14 +159,16 @@ export function SimpleValueChainCanvas() {
               <div key={player.id} className="flex items-center">
                 {/* Drop zone before each card */}
                 <div
-                  className={`w-2 h-32 rounded transition-colors ${
+                  className={`w-8 h-32 rounded transition-colors flex items-center justify-center ${
                     draggedOverIndex === index && draggedPlayer?.id !== player.id
-                      ? 'bg-blue-400' : 'bg-transparent'
+                      ? 'bg-blue-400 border-2 border-blue-600' : 'bg-gray-200 hover:bg-gray-300'
                   }`}
                   onDragOver={(e) => handleDragOver(e, index)}
                   onDragLeave={handleDragLeave}
                   onDrop={(e) => handleDrop(e, index)}
-                />
+                >
+                  <div className="text-xs text-gray-500 font-bold">DROP</div>
+                </div>
                 
                 <Card
                   className={`cursor-grab hover:shadow-md transition-shadow flex-shrink-0 w-80 group ${
@@ -245,14 +247,16 @@ export function SimpleValueChainCanvas() {
             
             {/* Drop zone after the last card */}
             <div
-              className={`w-2 h-32 rounded transition-colors ${
+              className={`w-8 h-32 rounded transition-colors flex items-center justify-center ${
                 draggedOverIndex === sortedPlayers.length && draggedPlayer
-                  ? 'bg-blue-400' : 'bg-transparent'
+                  ? 'bg-blue-400 border-2 border-blue-600' : 'bg-gray-200 hover:bg-gray-300'
               }`}
               onDragOver={(e) => handleDragOver(e, sortedPlayers.length)}
               onDragLeave={handleDragLeave}
               onDrop={(e) => handleDrop(e, sortedPlayers.length)}
-            />
+            >
+              <div className="text-xs text-gray-500 font-bold">DROP</div>
+            </div>
           </div>
         )}
       </div>
