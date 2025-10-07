@@ -24,6 +24,7 @@ const sectors = [
 
 export function OnboardingForm() {
   const [formData, setFormData] = useState({
+    organization_name: '',
     name: '',
     sector: '',
     employee_count: '',
@@ -38,18 +39,29 @@ export function OnboardingForm() {
     setLoading(true)
 
     try {
-      const { error } = await supabase
+      // Update user metadata with name and organization
+      const { error: userError } = await supabase.auth.updateUser({
+        data: {
+          name: formData.name,
+          organization_name: formData.organization_name
+        }
+      })
+
+      if (userError) throw userError
+
+      // Create organization
+      const { error: orgError } = await supabase
         .from('organizations')
         .insert({
-          name: formData.name,
+          name: formData.organization_name,
           sector: formData.sector,
           employee_count: parseInt(formData.employee_count),
           first_reporting_year: formData.first_reporting_year
         })
 
-      if (error) throw error
+      if (orgError) throw orgError
 
-      toast.success('Organization setup complete!')
+      toast.success('Organization setup complete! You are now an admin.')
       router.push('/dashboard')
     } catch (error: any) {
       toast.error(error.message)
@@ -75,10 +87,23 @@ export function OnboardingForm() {
                   Organization Name
                 </label>
                 <Input
+                  id="organization_name"
+                  value={formData.organization_name}
+                  onChange={(e) => setFormData({ ...formData, organization_name: e.target.value })}
+                  placeholder="Enter your organization name"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                  Your Name
+                </label>
+                <Input
                   id="name"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Enter your organization name"
+                  placeholder="Enter your full name"
                   required
                 />
               </div>
