@@ -115,106 +115,79 @@ export function SimpleValueChainCanvas() {
         )}
       </div>
 
-      {/* Value Chain Lanes with Horizontal Scroll */}
+      {/* All Players in Horizontal Layout */}
       <div className="flex-1 overflow-x-auto">
-        <div className="flex h-full">
-        {categories.map((category) => {
-          const players = valueChain.players.filter(p => p.category === category.key);
-          const isDragOver = dragOverCategory === category.key;
-          
-          return (
-            <div
-              key={category.key}
-              className={`w-80 border-r border-gray-200 last:border-r-0 ${getCategoryBgColor(category.key)} ${
-                isDragOver ? 'ring-2 ring-blue-400 ring-opacity-50' : ''
-              }`}
-              onDragOver={(e) => handleDragOver(e, category.key)}
-              onDragLeave={handleDragLeave}
-              onDrop={(e) => handleDrop(e, category.key)}
-            >
-              {/* Category Header */}
-              <div className={`p-3 border-b ${getCategoryColor(category.key)}`}>
-                <div className="flex items-center justify-center gap-2">
-                  {category.icon}
-                  <span className="font-semibold">{category.name}</span>
-                  <Badge variant="secondary" className="ml-2">
-                    {players.length}
-                  </Badge>
-                </div>
-              </div>
-
-              {/* Players */}
-              <div className="p-4 min-h-[400px] relative">
-                {players.length === 0 ? (
-                  <div className="text-center text-gray-500 py-8">
-                    <div className="text-4xl mb-2">👥</div>
-                    <p className="text-sm">No players yet</p>
-                    <p className="text-xs text-gray-400">Add players to this category</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {players.map((player) => (
-                      <Card
-                        key={player.id}
-                        className={`cursor-pointer hover:shadow-md transition-shadow w-full ${
-                          selectedPlayer?.id === player.id ? 'ring-2 ring-blue-500' : ''
-                        }`}
-                        draggable
-                        onDragStart={(e) => handleDragStart(e, player)}
-                        onClick={() => selectPlayer(player)}
-                      >
-                        <CardContent className="p-4">
-                          <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center gap-3">
-                              {getCategoryIcon(player.category)}
-                              <div>
-                                <h3 className="font-semibold text-base">{player.name}</h3>
-                                {player.type && (
-                                  <p className="text-xs text-gray-500">{player.type}</p>
-                                )}
-                              </div>
-                            </div>
-                            <Badge className={getCategoryColor(player.category)}>
-                              {player.category.replace('_', ' ')}
-                            </Badge>
-                          </div>
-                          
-                          {player.description && (
-                            <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                              {player.description}
-                            </p>
-                          )}
-                          
-                          <div className="grid grid-cols-3 gap-2 mb-3">
-                            <div className="text-center p-2 bg-gray-50 rounded">
-                              <div className="text-lg font-bold text-blue-600">{player.impactOnCompany}</div>
-                              <div className="text-xs text-gray-500">Impact On</div>
-                            </div>
-                            <div className="text-center p-2 bg-gray-50 rounded">
-                              <div className="text-lg font-bold text-green-600">{player.impactFromCompany}</div>
-                              <div className="text-xs text-gray-500">Impact From</div>
-                            </div>
-                            <div className="text-center p-2 bg-gray-100 rounded">
-                              <div className="text-lg font-bold text-gray-700">{player.impactOnCompany + player.impactFromCompany}</div>
-                              <div className="text-xs text-gray-500">Total</div>
-                            </div>
-                          </div>
-                          
-                          {player.industry && (
-                            <div className="flex items-center gap-2 text-xs text-gray-500">
-                              <span className="font-medium">Industry:</span>
-                              <span>{player.industry}</span>
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
+        <div className="flex gap-4 p-4 min-w-max">
+          {valueChain.players.length === 0 ? (
+            <div className="flex items-center justify-center w-full h-full">
+              <div className="text-center">
+                <div className="text-6xl mb-4">👥</div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  No Players Added Yet
+                </h3>
+                <p className="text-gray-600">
+                  Add players to start building your value chain
+                </p>
               </div>
             </div>
-          );
-        })}
+          ) : (
+            valueChain.players.map((player) => (
+              <Card
+                key={player.id}
+                className={`cursor-pointer hover:shadow-md transition-shadow flex-shrink-0 w-80 ${
+                  selectedPlayer?.id === player.id ? 'ring-2 ring-blue-500' : ''
+                }`}
+                draggable
+                onDragStart={(e) => handleDragStart(e, player)}
+                onClick={() => selectPlayer(player)}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      {getCategoryIcon(player.category)}
+                      <div>
+                        <h3 className="font-semibold text-base">{player.name}</h3>
+                        {player.type && (
+                          <p className="text-xs text-gray-500">{player.type}</p>
+                        )}
+                      </div>
+                    </div>
+                    <Badge className={getCategoryColor(player.category)}>
+                      {player.category.replace('_', ' ')}
+                    </Badge>
+                  </div>
+                  
+                  {player.description && (
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                      {player.description}
+                    </p>
+                  )}
+                  
+                  <div className="grid grid-cols-3 gap-2 mb-3">
+                    <div className="text-center p-2 bg-gray-50 rounded">
+                      <div className="text-lg font-bold text-blue-600">{player.impactOnCompany}</div>
+                      <div className="text-xs text-gray-500">Impact On</div>
+                    </div>
+                    <div className="text-center p-2 bg-gray-50 rounded">
+                      <div className="text-lg font-bold text-green-600">{player.impactFromCompany}</div>
+                      <div className="text-xs text-gray-500">Impact From</div>
+                    </div>
+                    <div className="text-center p-2 bg-gray-100 rounded">
+                      <div className="text-lg font-bold text-gray-700">{player.impactOnCompany + player.impactFromCompany}</div>
+                      <div className="text-xs text-gray-500">Total</div>
+                    </div>
+                  </div>
+                  
+                  {player.industry && (
+                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <span className="font-medium">Industry:</span>
+                      <span>{player.industry}</span>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))
+          )}
         </div>
       </div>
 
