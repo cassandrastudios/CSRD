@@ -52,23 +52,28 @@ export function Navigation({ isCollapsed, onToggle }: NavigationProps) {
       isCollapsed ? "w-16" : "w-64"
     )}>
       {/* Header */}
-      <div className="flex items-center h-16 px-6 border-b border-gray-200">
-        <BarChart3 className="h-8 w-8 text-blue-600 flex-shrink-0" />
-        {!isCollapsed && (
-          <span className="ml-2 text-xl font-bold text-gray-900">CSRD Co-Pilot</span>
-        )}
+      <div className="flex items-center h-16 border-b border-gray-200">
+        <div className="flex items-center flex-1 px-3">
+          <BarChart3 className="h-8 w-8 text-blue-600 flex-shrink-0" />
+          {!isCollapsed && (
+            <span className="ml-2 text-xl font-bold text-gray-900">CSRD Co-Pilot</span>
+          )}
+        </div>
         <Button
           variant="ghost"
           size="sm"
           onClick={onToggle}
-          className="ml-auto flex-shrink-0"
+          className={cn(
+            "flex-shrink-0 h-8 w-8 p-0 hover:bg-gray-100",
+            isCollapsed ? "mx-2" : "mr-3"
+          )}
         >
           {isCollapsed ? <Menu className="h-5 w-5" /> : <X className="h-5 w-5" />}
         </Button>
       </div>
       
       {/* Navigation */}
-      <nav className="flex-1 px-4 py-6 space-y-2">
+      <nav className="flex-1 py-6 space-y-2">
         {navigation.map((item) => {
           const isActive = pathname === item.href
           return (
@@ -76,15 +81,16 @@ export function Navigation({ isCollapsed, onToggle }: NavigationProps) {
               key={item.name}
               href={item.href}
               className={cn(
-                'flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors',
+                'flex items-center text-sm font-medium rounded-md transition-colors',
+                isCollapsed ? 'justify-center px-3 py-2 mx-2' : 'px-3 py-2 mx-2',
                 isActive
                   ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700'
                   : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
               )}
               title={isCollapsed ? item.name : undefined}
             >
-              <item.icon className={cn("h-5 w-5", isCollapsed ? "" : "mr-3")} />
-              {!isCollapsed && item.name}
+              <item.icon className="h-5 w-5 flex-shrink-0" />
+              {!isCollapsed && <span className="ml-3">{item.name}</span>}
             </Link>
           )
         })}
@@ -100,12 +106,12 @@ export function Navigation({ isCollapsed, onToggle }: NavigationProps) {
             className={cn(
               "flex items-center w-full text-sm font-medium rounded-md transition-colors",
               "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
-              isCollapsed ? "justify-center px-2" : "px-3 py-2"
+              isCollapsed ? "justify-center px-2 py-2" : "px-3 py-2"
             )}
             title={isCollapsed ? "Account" : undefined}
           >
-            <User className={cn("h-5 w-5", isCollapsed ? "" : "mr-3")} />
-            {!isCollapsed && "Account"}
+            <User className="h-5 w-5 flex-shrink-0" />
+            {!isCollapsed && <span className="ml-3">Account</span>}
           </Button>
           
           {isAccountOpen && (
