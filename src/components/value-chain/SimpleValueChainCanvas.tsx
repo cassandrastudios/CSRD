@@ -188,12 +188,15 @@ export function SimpleValueChainCanvas() {
                           <div key={player.id} className="flex items-center">
                             {/* Drop zone before each card */}
                             <div
-                              className={`w-2 h-32 bg-gray-200 rounded transition-colors ${
+                              className={`w-4 h-32 rounded transition-colors ${
                                 draggedPlayer && draggedPlayer.category === player.category && draggedPlayer.id !== player.id
-                                  ? 'bg-blue-300' : 'bg-transparent'
+                                  ? 'bg-blue-400 border-2 border-blue-600' : 'bg-gray-200 hover:bg-gray-300'
                               }`}
                               onDragOver={handleDragOver}
-                              onDrop={(e) => handlePlayerDrop(e, player.id)}
+                              onDrop={(e) => {
+                                console.log('Drop zone hit for player:', player.name);
+                                handlePlayerDrop(e, player.id);
+                              }}
                             />
                             
                             <Card
@@ -272,13 +275,14 @@ export function SimpleValueChainCanvas() {
                         {/* Drop zone after the last card */}
                         {players.length > 0 && (
                           <div
-                            className={`w-2 h-32 bg-gray-200 rounded transition-colors ${
+                            className={`w-4 h-32 rounded transition-colors ${
                               draggedPlayer && draggedPlayer.category === players[0].category
-                                ? 'bg-blue-300' : 'bg-transparent'
+                                ? 'bg-blue-400 border-2 border-blue-600' : 'bg-gray-200 hover:bg-gray-300'
                             }`}
                             onDragOver={handleDragOver}
                             onDrop={(e) => {
                               const lastPlayer = players[players.length - 1];
+                              console.log('Drop zone hit for last position after player:', lastPlayer.name);
                               handlePlayerDrop(e, lastPlayer.id);
                             }}
                           />
