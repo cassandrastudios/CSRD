@@ -165,9 +165,9 @@ export function SimpleValueChainCanvas() {
               <div key={player.id} className="flex items-center">
                 {/* Drop zone before each card */}
                 <div
-                  className={`w-1 h-32 rounded transition-colors ${
+                  className={`w-2 h-32 rounded transition-colors ${
                     draggedOverIndex === index && draggedPlayer?.id !== player.id
-                      ? 'bg-blue-500' : 'bg-transparent hover:bg-gray-300'
+                      ? 'bg-blue-500' : 'bg-transparent'
                   }`}
                   onDragOver={(e) => {
                     console.log('Drop zone drag over triggered for index:', index);
@@ -260,9 +260,9 @@ export function SimpleValueChainCanvas() {
             
             {/* Drop zone after the last card */}
             <div
-              className={`w-1 h-32 rounded transition-colors ${
+              className={`w-2 h-32 rounded transition-colors ${
                 draggedOverIndex === sortedPlayers.length && draggedPlayer
-                  ? 'bg-blue-500' : 'bg-transparent hover:bg-gray-300'
+                  ? 'bg-blue-500' : 'bg-transparent'
               }`}
               onDragOver={(e) => handleDragOver(e, sortedPlayers.length)}
               onDragLeave={handleDragLeave}
