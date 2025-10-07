@@ -53,8 +53,10 @@ export function PlayerEditor({ player, onClose }: PlayerEditorProps) {
     e.preventDefault();
     
     if (player) {
+      console.log('Updating existing player:', player.id, formData);
       updatePlayer(player.id, formData);
     } else {
+      console.log('Adding new player:', formData);
       addPlayer(formData);
     }
     

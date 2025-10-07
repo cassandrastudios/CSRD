@@ -128,7 +128,11 @@ export function ValueChainSidebar() {
         
         <div className="flex gap-2 mt-4">
           <Button
-            onClick={() => setShowPlayerEditor(true)}
+            onClick={() => {
+              selectPlayer(null);
+              setEditingPlayer(false);
+              setShowPlayerEditor(true);
+            }}
             size="sm"
             className="flex-1"
           >
@@ -169,7 +173,11 @@ export function ValueChainSidebar() {
             <div className="text-4xl mb-2">👥</div>
             <p className="text-sm text-gray-500">No players added yet</p>
             <Button
-              onClick={() => setShowPlayerEditor(true)}
+              onClick={() => {
+                selectPlayer(null);
+                setEditingPlayer(false);
+                setShowPlayerEditor(true);
+              }}
               variant="outline"
               size="sm"
               className="mt-2"
