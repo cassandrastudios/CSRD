@@ -162,40 +162,32 @@ export function SimpleValueChainCanvas() {
         ) : (
           <div className="flex gap-4 overflow-x-auto pb-4">
             {sortedPlayers.map((player, index) => (
-              <div key={player.id} className="flex items-center">
-                {/* Drop zone before each card */}
-                <div
-                  className={`w-2 h-32 rounded transition-colors ${
-                    draggedOverIndex === index && draggedPlayer?.id !== player.id
-                      ? 'bg-blue-500' : 'bg-transparent'
-                  }`}
-                  onDragOver={(e) => {
-                    console.log('Drop zone drag over triggered for index:', index);
-                    handleDragOver(e, index);
-                  }}
-                  onDragLeave={() => {
-                    console.log('Drop zone drag leave triggered for index:', index);
-                    handleDragLeave();
-                  }}
-                  onDrop={(e) => {
-                    console.log('Drop zone drop triggered for index:', index);
-                    handleDrop(e, index);
-                  }}
-                />
-                
-                <Card
-                  className={`cursor-grab hover:shadow-md transition-shadow flex-shrink-0 w-80 group ${
-                    selectedPlayer?.id === player.id ? 'ring-2 ring-blue-500' : ''
-                  } ${
-                    draggedPlayer?.id === player.id ? 'opacity-50' : ''
-                  }`}
-                  draggable={true}
-                  onDragStart={(e) => {
-                    console.log('Card drag start triggered for:', player.name);
-                    handleDragStart(e, player);
-                  }}
-                  onClick={() => selectPlayer(player)}
-                >
+              <Card
+                key={player.id}
+                className={`cursor-grab hover:shadow-md transition-shadow flex-shrink-0 w-80 group ${
+                  selectedPlayer?.id === player.id ? 'ring-2 ring-blue-500' : ''
+                } ${
+                  draggedPlayer?.id === player.id ? 'opacity-50' : ''
+                }`}
+                draggable={true}
+                onDragStart={(e) => {
+                  console.log('Card drag start triggered for:', player.name);
+                  handleDragStart(e, player);
+                }}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.dataTransfer.dropEffect = 'move';
+                  setDraggedOverIndex(index);
+                }}
+                onDragLeave={() => {
+                  setDraggedOverIndex(null);
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  handleDrop(e, index);
+                }}
+                onClick={() => selectPlayer(player)}
+              >
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-3">
@@ -255,19 +247,7 @@ export function SimpleValueChainCanvas() {
                     )}
                   </CardContent>
                 </Card>
-              </div>
             ))}
-            
-            {/* Drop zone after the last card */}
-            <div
-              className={`w-2 h-32 rounded transition-colors ${
-                draggedOverIndex === sortedPlayers.length && draggedPlayer
-                  ? 'bg-blue-500' : 'bg-transparent'
-              }`}
-              onDragOver={(e) => handleDragOver(e, sortedPlayers.length)}
-              onDragLeave={handleDragLeave}
-              onDrop={(e) => handleDrop(e, sortedPlayers.length)}
-            />
           </div>
         )}
       </div>
