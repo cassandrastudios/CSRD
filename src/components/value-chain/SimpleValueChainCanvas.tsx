@@ -115,8 +115,9 @@ export function SimpleValueChainCanvas() {
         )}
       </div>
 
-      {/* Value Chain Lanes */}
-      <div className="flex-1 flex">
+      {/* Value Chain Lanes with Horizontal Scroll */}
+      <div className="flex-1 overflow-x-auto">
+        <div className="flex min-w-max h-full">
         {categories.map((category) => {
           const players = valueChain.players.filter(p => p.category === category.key);
           const isDragOver = dragOverCategory === category.key;
@@ -124,7 +125,7 @@ export function SimpleValueChainCanvas() {
           return (
             <div
               key={category.key}
-              className={`flex-1 border-r border-gray-200 last:border-r-0 ${getCategoryBgColor(category.key)} ${
+              className={`w-80 border-r border-gray-200 last:border-r-0 ${getCategoryBgColor(category.key)} ${
                 isDragOver ? 'ring-2 ring-blue-400 ring-opacity-50' : ''
               }`}
               onDragOver={(e) => handleDragOver(e, category.key)}
@@ -151,38 +152,59 @@ export function SimpleValueChainCanvas() {
                     <p className="text-xs text-gray-400">Add players to this category</p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 auto-rows-max">
+                  <div className="space-y-3">
                     {players.map((player) => (
                       <Card
                         key={player.id}
-                        className={`cursor-pointer hover:shadow-md transition-shadow ${
+                        className={`cursor-pointer hover:shadow-md transition-shadow w-full ${
                           selectedPlayer?.id === player.id ? 'ring-2 ring-blue-500' : ''
                         }`}
                         draggable
                         onDragStart={(e) => handleDragStart(e, player)}
                         onClick={() => selectPlayer(player)}
                       >
-                        <CardContent className="p-3">
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2">
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-3">
                               {getCategoryIcon(player.category)}
-                              <span className="font-medium text-sm">{player.name}</span>
+                              <div>
+                                <h3 className="font-semibold text-base">{player.name}</h3>
+                                {player.type && (
+                                  <p className="text-xs text-gray-500">{player.type}</p>
+                                )}
+                              </div>
                             </div>
                             <Badge className={getCategoryColor(player.category)}>
                               {player.category.replace('_', ' ')}
                             </Badge>
                           </div>
                           
-                          <div className="flex items-center justify-between text-xs text-gray-500">
-                            <span>In: {player.impactOnCompany}</span>
-                            <span>Out: {player.impactFromCompany}</span>
-                            <span>Total: {player.impactOnCompany + player.impactFromCompany}</span>
-                          </div>
-                          
                           {player.description && (
-                            <p className="text-xs text-gray-600 mt-1 truncate">
+                            <p className="text-sm text-gray-600 mb-3 line-clamp-2">
                               {player.description}
                             </p>
+                          )}
+                          
+                          <div className="grid grid-cols-3 gap-2 mb-3">
+                            <div className="text-center p-2 bg-gray-50 rounded">
+                              <div className="text-lg font-bold text-blue-600">{player.impactOnCompany}</div>
+                              <div className="text-xs text-gray-500">Impact On</div>
+                            </div>
+                            <div className="text-center p-2 bg-gray-50 rounded">
+                              <div className="text-lg font-bold text-green-600">{player.impactFromCompany}</div>
+                              <div className="text-xs text-gray-500">Impact From</div>
+                            </div>
+                            <div className="text-center p-2 bg-gray-100 rounded">
+                              <div className="text-lg font-bold text-gray-700">{player.impactOnCompany + player.impactFromCompany}</div>
+                              <div className="text-xs text-gray-500">Total</div>
+                            </div>
+                          </div>
+                          
+                          {player.industry && (
+                            <div className="flex items-center gap-2 text-xs text-gray-500">
+                              <span className="font-medium">Industry:</span>
+                              <span>{player.industry}</span>
+                            </div>
                           )}
                         </CardContent>
                       </Card>
@@ -193,6 +215,7 @@ export function SimpleValueChainCanvas() {
             </div>
           );
         })}
+        </div>
       </div>
 
       {/* Relationships */}
