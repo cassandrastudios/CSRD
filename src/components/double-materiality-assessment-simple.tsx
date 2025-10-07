@@ -38,9 +38,11 @@ import {
   UserCheck,
   BarChart3,
   FileDown,
-  History
+  History,
+  Workflow
 } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { ValueChainCreator } from './value-chain/ValueChainCreator'
 
 // Simple types for existing schema
 interface SimpleTopic {
@@ -415,13 +417,21 @@ export function DoubleMaterialityAssessmentSimple() {
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
+            <TabsTrigger value="value-chain">Value Chain</TabsTrigger>
             <TabsTrigger value="topics">Topics</TabsTrigger>
             <TabsTrigger value="stakeholders">Stakeholders</TabsTrigger>
             <TabsTrigger value="scoring">Scoring</TabsTrigger>
             <TabsTrigger value="matrix">Matrix</TabsTrigger>
             <TabsTrigger value="reports">Reports</TabsTrigger>
           </TabsList>
+
+          {/* Value Chain Tab */}
+          <TabsContent value="value-chain" className="space-y-6">
+            <div className="h-[600px]">
+              <ValueChainCreator />
+            </div>
+          </TabsContent>
 
           {/* Topics Tab */}
           <TabsContent value="topics" className="space-y-6">
