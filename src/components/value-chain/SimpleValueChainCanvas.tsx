@@ -5,13 +5,28 @@ import { useValueChainStore } from '@/store/useValueChainStore';
 import { Player } from '@/types/valueChain';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Truck, Building2, Users, Edit, GripVertical } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
+import { Truck, Building2, Users, Edit, GripVertical, Save, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export function SimpleValueChainCanvas() {
-  const { valueChain } = useValueChainStore();
+  const { valueChain, updatePlayer } = useValueChainStore();
   const [draggedPlayer, setDraggedPlayer] = useState<Player | null>(null);
   const [draggedOverIndex, setDraggedOverIndex] = useState<number | null>(null);
+  const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
+  const [editFormData, setEditFormData] = useState({
+    name: '',
+    category: 'own_operations' as 'upstream' | 'own_operations' | 'downstream',
+    description: '',
+    impactOnCompany: 5,
+    impactFromCompany: 5,
+    type: '',
+    industry: '',
+  });
 
   if (!valueChain) {
     return (
@@ -132,6 +147,61 @@ export function SimpleValueChainCanvas() {
     setDraggedPlayer(null);
   };
 
+  const handleEditClick = (player: Player) => {
+    setEditingPlayer(player);
+    setEditFormData({
+      name: player.name,
+      category: player.category,
+      description: player.description || '',
+      impactOnCompany: player.impactOnCompany,
+      impactFromCompany: player.impactFromCompany,
+      type: player.type || '',
+      industry: player.industry || '',
+    });
+  };
+
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setEditFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleEditSliderChange = (name: string, value: number[]) => {
+    setEditFormData(prev => ({ ...prev, [name]: value[0] }));
+  };
+
+  const handleEditSelectChange = (name: string, value: string) => {
+    setEditFormData(prev => ({ ...prev, [name]: value as 'upstream' | 'own_operations' | 'downstream' }));
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingPlayer) return;
+    
+    updatePlayer(editingPlayer.id, editFormData);
+    setEditingPlayer(null);
+    setEditFormData({
+      name: '',
+      category: 'own_operations',
+      description: '',
+      impactOnCompany: 5,
+      impactFromCompany: 5,
+      type: '',
+      industry: '',
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingPlayer(null);
+    setEditFormData({
+      name: '',
+      category: 'own_operations',
+      description: '',
+      impactOnCompany: 5,
+      impactFromCompany: 5,
+      type: '',
+      industry: '',
+    });
+  };
+
   // Group players by category and sort within each category by x position
   const groupedPlayers = {
     upstream: valueChain.players
@@ -150,6 +220,195 @@ export function SimpleValueChainCanvas() {
     ...groupedPlayers.own_operations,
     ...groupedPlayers.downstream
   ];
+
+  const renderCardContent = (player: Player) => {
+    if (editingPlayer?.id === player.id) {
+      return (
+        <CardContent className="p-4">
+          <div className="space-y-4">
+            {/* Name Field */}
+            <div>
+              <Label htmlFor="edit-name">Player Name</Label>
+              <Input
+                id="edit-name"
+                name="name"
+                value={editFormData.name}
+                onChange={handleEditChange}
+                className="mt-1"
+              />
+            </div>
+
+            {/* Category Field */}
+            <div>
+              <Label htmlFor="edit-category">Category</Label>
+              <Select
+                name="category"
+                value={editFormData.category}
+                onValueChange={(value: string) => handleEditSelectChange('category', value)}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="upstream">Upstream</SelectItem>
+                  <SelectItem value="own_operations">Own Operations</SelectItem>
+                  <SelectItem value="downstream">Downstream</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Type Field */}
+            <div>
+              <Label htmlFor="edit-type">Player Type</Label>
+              <Input
+                id="edit-type"
+                name="type"
+                value={editFormData.type}
+                onChange={handleEditChange}
+                placeholder="e.g., Supplier, Customer, Internal Unit"
+                className="mt-1"
+              />
+            </div>
+
+            {/* Industry Field */}
+            <div>
+              <Label htmlFor="edit-industry">Industry</Label>
+              <Input
+                id="edit-industry"
+                name="industry"
+                value={editFormData.industry}
+                onChange={handleEditChange}
+                placeholder="e.g., Manufacturing, Logistics"
+                className="mt-1"
+              />
+            </div>
+
+            {/* Description Field */}
+            <div>
+              <Label htmlFor="edit-description">Description</Label>
+              <Textarea
+                id="edit-description"
+                name="description"
+                value={editFormData.description}
+                onChange={handleEditChange}
+                rows={3}
+                className="mt-1"
+              />
+            </div>
+
+            {/* Impact Sliders */}
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="edit-impact-on" className="flex items-center justify-between">
+                  Impact ON Company: {editFormData.impactOnCompany}
+                </Label>
+                <Slider
+                  id="edit-impact-on"
+                  name="impactOnCompany"
+                  min={1}
+                  max={10}
+                  step={1}
+                  value={[editFormData.impactOnCompany]}
+                  onValueChange={(value: number[]) => handleEditSliderChange('impactOnCompany', value)}
+                  className="mt-2"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="edit-impact-from" className="flex items-center justify-between">
+                  Impact FROM Company: {editFormData.impactFromCompany}
+                </Label>
+                <Slider
+                  id="edit-impact-from"
+                  name="impactFromCompany"
+                  min={1}
+                  max={10}
+                  step={1}
+                  value={[editFormData.impactFromCompany]}
+                  onValueChange={(value: number[]) => handleEditSliderChange('impactFromCompany', value)}
+                  className="mt-2"
+                />
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <Button variant="outline" size="sm" onClick={handleCancelEdit}>
+                <X className="w-4 h-4 mr-2" />
+                Cancel
+              </Button>
+              <Button size="sm" onClick={handleSaveEdit}>
+                <Save className="w-4 h-4 mr-2" />
+                Save
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      );
+    }
+
+    // Display mode
+    return (
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <GripVertical className="w-4 h-4 text-gray-400 cursor-grab" />
+            {getCategoryIcon(player.category)}
+            <div>
+              <h3 className="font-semibold text-base">{player.name}</h3>
+              {player.type && (
+                <p className="text-xs text-gray-500">{player.type}</p>
+              )}
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge className={getCategoryColor(player.category)}>
+              {player.category.replace('_', ' ')}
+            </Badge>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleEditClick(player);
+              }}
+            >
+              <Edit className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+        
+        {player.description && (
+          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+            {player.description}
+          </p>
+        )}
+        
+        <div className="grid grid-cols-3 gap-2 mb-3">
+          <div className="text-center p-2 bg-gray-50 rounded">
+            <div className="text-lg font-bold text-blue-600">{player.impactOnCompany}</div>
+            <div className="text-xs text-gray-500">Impact On</div>
+          </div>
+          <div className="text-center p-2 bg-gray-50 rounded">
+            <div className="text-lg font-bold text-green-600">{player.impactFromCompany}</div>
+            <div className="text-xs text-gray-500">Impact From</div>
+          </div>
+          <div className="text-center p-2 bg-gray-100 rounded">
+            <div className="text-lg font-bold text-gray-700">{player.impactOnCompany + player.impactFromCompany}</div>
+            <div className="text-xs text-gray-500">Total</div>
+          </div>
+        </div>
+        
+        {player.industry && (
+          <div className="flex items-center gap-2 text-xs text-gray-500">
+            <span className="font-medium">Industry:</span>
+            <span>{player.industry}</span>
+          </div>
+        )}
+      </CardContent>
+    );
+  };
 
 
   return (
@@ -234,82 +493,32 @@ export function SimpleValueChainCanvas() {
                     className={`cursor-grab hover:shadow-md transition-shadow flex-shrink-0 w-80 group ${
                       draggedPlayer?.id === player.id ? 'opacity-50' : ''
                     }`}
-                    draggable={true}
+                    draggable={editingPlayer?.id !== player.id}
                     onDragStart={(e) => {
+                      if (editingPlayer?.id === player.id) {
+                        e.preventDefault();
+                        return;
+                      }
                       console.log('Card drag start triggered for:', player.name);
                       handleDragStart(e, player);
                     }}
                     onDragOver={(e) => {
+                      if (editingPlayer?.id === player.id) return;
                       e.preventDefault();
                       e.dataTransfer.dropEffect = 'move';
                       setDraggedOverIndex(index);
                     }}
                     onDragLeave={() => {
+                      if (editingPlayer?.id === player.id) return;
                       setDraggedOverIndex(null);
                     }}
                     onDrop={(e) => {
+                      if (editingPlayer?.id === player.id) return;
                       e.preventDefault();
                       handleDrop(e, index);
                     }}
                   >
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          <GripVertical className="w-4 h-4 text-gray-400 cursor-grab" />
-                          {getCategoryIcon(player.category)}
-                          <div>
-                            <h3 className="font-semibold text-base">{player.name}</h3>
-                            {player.type && (
-                              <p className="text-xs text-gray-500">{player.type}</p>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Badge className={getCategoryColor(player.category)}>
-                            {player.category.replace('_', ' ')}
-                          </Badge>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              console.log('Edit player:', player.id);
-                            }}
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                      
-                      {player.description && (
-                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                          {player.description}
-                        </p>
-                      )}
-                      
-                      <div className="grid grid-cols-3 gap-2 mb-3">
-                        <div className="text-center p-2 bg-gray-50 rounded">
-                          <div className="text-lg font-bold text-blue-600">{player.impactOnCompany}</div>
-                          <div className="text-xs text-gray-500">Impact On</div>
-                        </div>
-                        <div className="text-center p-2 bg-gray-50 rounded">
-                          <div className="text-lg font-bold text-green-600">{player.impactFromCompany}</div>
-                          <div className="text-xs text-gray-500">Impact From</div>
-                        </div>
-                        <div className="text-center p-2 bg-gray-100 rounded">
-                          <div className="text-lg font-bold text-gray-700">{player.impactOnCompany + player.impactFromCompany}</div>
-                          <div className="text-xs text-gray-500">Total</div>
-                        </div>
-                      </div>
-                      
-                      {player.industry && (
-                        <div className="flex items-center gap-2 text-xs text-gray-500">
-                          <span className="font-medium">Industry:</span>
-                          <span>{player.industry}</span>
-                        </div>
-                      )}
-                    </CardContent>
+                    {renderCardContent(player)}
                   </Card>
                 </div>
               ))}
@@ -347,82 +556,32 @@ export function SimpleValueChainCanvas() {
                       className={`cursor-grab hover:shadow-md transition-shadow flex-shrink-0 w-80 group ${
                         draggedPlayer?.id === player.id ? 'opacity-50' : ''
                       }`}
-                      draggable={true}
+                      draggable={editingPlayer?.id !== player.id}
                       onDragStart={(e) => {
+                        if (editingPlayer?.id === player.id) {
+                          e.preventDefault();
+                          return;
+                        }
                         console.log('Card drag start triggered for:', player.name);
                         handleDragStart(e, player);
                       }}
                       onDragOver={(e) => {
+                        if (editingPlayer?.id === player.id) return;
                         e.preventDefault();
                         e.dataTransfer.dropEffect = 'move';
                         setDraggedOverIndex(globalIndex);
                       }}
                       onDragLeave={() => {
+                        if (editingPlayer?.id === player.id) return;
                         setDraggedOverIndex(null);
                       }}
                       onDrop={(e) => {
+                        if (editingPlayer?.id === player.id) return;
                         e.preventDefault();
                         handleDrop(e, globalIndex);
                       }}
                     >
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-3">
-                            <GripVertical className="w-4 h-4 text-gray-400 cursor-grab" />
-                            {getCategoryIcon(player.category)}
-                            <div>
-                              <h3 className="font-semibold text-base">{player.name}</h3>
-                              {player.type && (
-                                <p className="text-xs text-gray-500">{player.type}</p>
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Badge className={getCategoryColor(player.category)}>
-                              {player.category.replace('_', ' ')}
-                            </Badge>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                console.log('Edit player:', player.id);
-                              }}
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </div>
-                        
-                        {player.description && (
-                          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                            {player.description}
-                          </p>
-                        )}
-                        
-                        <div className="grid grid-cols-3 gap-2 mb-3">
-                          <div className="text-center p-2 bg-gray-50 rounded">
-                            <div className="text-lg font-bold text-blue-600">{player.impactOnCompany}</div>
-                            <div className="text-xs text-gray-500">Impact On</div>
-                          </div>
-                          <div className="text-center p-2 bg-gray-50 rounded">
-                            <div className="text-lg font-bold text-green-600">{player.impactFromCompany}</div>
-                            <div className="text-xs text-gray-500">Impact From</div>
-                          </div>
-                          <div className="text-center p-2 bg-gray-100 rounded">
-                            <div className="text-lg font-bold text-gray-700">{player.impactOnCompany + player.impactFromCompany}</div>
-                            <div className="text-xs text-gray-500">Total</div>
-                          </div>
-                        </div>
-                        
-                        {player.industry && (
-                          <div className="flex items-center gap-2 text-xs text-gray-500">
-                            <span className="font-medium">Industry:</span>
-                            <span>{player.industry}</span>
-                          </div>
-                        )}
-                      </CardContent>
+                      {renderCardContent(player)}
                     </Card>
                   </div>
                 );
@@ -461,82 +620,32 @@ export function SimpleValueChainCanvas() {
                       className={`cursor-grab hover:shadow-md transition-shadow flex-shrink-0 w-80 group ${
                         draggedPlayer?.id === player.id ? 'opacity-50' : ''
                       }`}
-                      draggable={true}
+                      draggable={editingPlayer?.id !== player.id}
                       onDragStart={(e) => {
+                        if (editingPlayer?.id === player.id) {
+                          e.preventDefault();
+                          return;
+                        }
                         console.log('Card drag start triggered for:', player.name);
                         handleDragStart(e, player);
                       }}
                       onDragOver={(e) => {
+                        if (editingPlayer?.id === player.id) return;
                         e.preventDefault();
                         e.dataTransfer.dropEffect = 'move';
                         setDraggedOverIndex(globalIndex);
                       }}
                       onDragLeave={() => {
+                        if (editingPlayer?.id === player.id) return;
                         setDraggedOverIndex(null);
                       }}
                       onDrop={(e) => {
+                        if (editingPlayer?.id === player.id) return;
                         e.preventDefault();
                         handleDrop(e, globalIndex);
                       }}
                     >
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-3">
-                            <GripVertical className="w-4 h-4 text-gray-400 cursor-grab" />
-                            {getCategoryIcon(player.category)}
-                            <div>
-                              <h3 className="font-semibold text-base">{player.name}</h3>
-                              {player.type && (
-                                <p className="text-xs text-gray-500">{player.type}</p>
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Badge className={getCategoryColor(player.category)}>
-                              {player.category.replace('_', ' ')}
-                            </Badge>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                console.log('Edit player:', player.id);
-                              }}
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </div>
-                        
-                        {player.description && (
-                          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                            {player.description}
-                          </p>
-                        )}
-                        
-                        <div className="grid grid-cols-3 gap-2 mb-3">
-                          <div className="text-center p-2 bg-gray-50 rounded">
-                            <div className="text-lg font-bold text-blue-600">{player.impactOnCompany}</div>
-                            <div className="text-xs text-gray-500">Impact On</div>
-                          </div>
-                          <div className="text-center p-2 bg-gray-50 rounded">
-                            <div className="text-lg font-bold text-green-600">{player.impactFromCompany}</div>
-                            <div className="text-xs text-gray-500">Impact From</div>
-                          </div>
-                          <div className="text-center p-2 bg-gray-100 rounded">
-                            <div className="text-lg font-bold text-gray-700">{player.impactOnCompany + player.impactFromCompany}</div>
-                            <div className="text-xs text-gray-500">Total</div>
-                          </div>
-                        </div>
-                        
-                        {player.industry && (
-                          <div className="flex items-center gap-2 text-xs text-gray-500">
-                            <span className="font-medium">Industry:</span>
-                            <span>{player.industry}</span>
-                          </div>
-                        )}
-                      </CardContent>
+                      {renderCardContent(player)}
                     </Card>
                   </div>
                 );
