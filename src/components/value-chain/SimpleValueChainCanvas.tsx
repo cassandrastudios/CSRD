@@ -5,7 +5,7 @@ import { useValueChainStore } from '@/store/useValueChainStore';
 import { Player } from '@/types/valueChain';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Truck, Building2, Users, Link, Trash2, Edit } from 'lucide-react';
+import { Truck, Building2, Users, Link, Trash2, Edit, GripVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export function SimpleValueChainCanvas() {
@@ -13,6 +13,7 @@ export function SimpleValueChainCanvas() {
   const [draggedPlayer, setDraggedPlayer] = useState<Player | null>(null);
   const [dragOverCategory, setDragOverCategory] = useState<string | null>(null);
   const [dragOverPlayer, setDragOverPlayer] = useState<string | null>(null);
+  const [reorderKey, setReorderKey] = useState(0);
   const dragRef = useRef<HTMLDivElement>(null);
 
   if (!valueChain) {
@@ -135,6 +136,9 @@ export function SimpleValueChainCanvas() {
             updatePlayer(player.id, { x: index * 10 }); // Simple ordering by x position
           });
           
+          // Force re-render by updating the key
+          setReorderKey(prev => prev + 1);
+          
           console.log('Reordered players:', newPlayers.map(p => p.name));
         }
       } else {
@@ -166,7 +170,7 @@ export function SimpleValueChainCanvas() {
       </div>
 
       {/* All Players Grouped by Category */}
-      <div className="flex-1 overflow-x-auto">
+      <div className="flex-1 overflow-x-auto" key={reorderKey}>
         <div className="flex gap-8 p-4 min-w-max">
           {valueChain.players.length === 0 ? (
             <div className="flex items-center justify-center w-full h-full">
@@ -222,6 +226,7 @@ export function SimpleValueChainCanvas() {
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-3">
+                              <GripVertical className="w-4 h-4 text-gray-400 cursor-grab" />
                               {getCategoryIcon(player.category)}
                               <div>
                                 <h3 className="font-semibold text-base">{player.name}</h3>
