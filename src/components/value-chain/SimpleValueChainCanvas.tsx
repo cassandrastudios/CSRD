@@ -71,6 +71,7 @@ export function SimpleValueChainCanvas() {
   };
 
   const handleDragStart = (e: React.DragEvent, player: Player) => {
+    console.log('Drag started:', player.name, player.category);
     setDraggedPlayer(player);
     e.dataTransfer.effectAllowed = 'move';
   };
@@ -85,6 +86,7 @@ export function SimpleValueChainCanvas() {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
     setDragOverPlayer(playerId);
+    console.log('Drag over player:', playerId);
   };
 
   const handleDragLeave = () => {
@@ -106,25 +108,37 @@ export function SimpleValueChainCanvas() {
 
   const handlePlayerDrop = (e: React.DragEvent, targetPlayerId: string) => {
     e.preventDefault();
+    console.log('Drop on player:', targetPlayerId, 'Dragged player:', draggedPlayer?.name);
     setDragOverCategory(null);
     setDragOverPlayer(null);
     
     if (draggedPlayer && targetPlayerId !== draggedPlayer.id) {
-      // Reorder within the same category
-      const players = valueChain?.players.filter(p => p.category === draggedPlayer.category) || [];
-      const draggedIndex = players.findIndex(p => p.id === draggedPlayer.id);
-      const targetIndex = players.findIndex(p => p.id === targetPlayerId);
+      const targetPlayer = valueChain?.players.find(p => p.id === targetPlayerId);
+      console.log('Target player category:', targetPlayer?.category, 'Dragged player category:', draggedPlayer.category);
       
-      if (draggedIndex !== -1 && targetIndex !== -1) {
-        // Simple reordering logic - move dragged player to target position
-        const newPlayers = [...players];
-        const [draggedItem] = newPlayers.splice(draggedIndex, 1);
-        newPlayers.splice(targetIndex, 0, draggedItem);
+      // Only allow reordering within the same category
+      if (draggedPlayer.category === targetPlayer?.category) {
+        const players = valueChain?.players.filter(p => p.category === draggedPlayer.category) || [];
+        const draggedIndex = players.findIndex(p => p.id === draggedPlayer.id);
+        const targetIndex = players.findIndex(p => p.id === targetPlayerId);
         
-        // Update the order by updating x positions
-        newPlayers.forEach((player, index) => {
-          updatePlayer(player.id, { x: index * 10 }); // Simple ordering by x position
-        });
+        console.log('Dragged index:', draggedIndex, 'Target index:', targetIndex);
+        
+        if (draggedIndex !== -1 && targetIndex !== -1) {
+          // Create new array with reordered players
+          const newPlayers = [...players];
+          const [draggedItem] = newPlayers.splice(draggedIndex, 1);
+          newPlayers.splice(targetIndex, 0, draggedItem);
+          
+          // Update the order by updating x positions
+          newPlayers.forEach((player, index) => {
+            updatePlayer(player.id, { x: index * 10 }); // Simple ordering by x position
+          });
+          
+          console.log('Reordered players:', newPlayers.map(p => p.name));
+        }
+      } else {
+        console.log('Cannot reorder across categories');
       }
     }
     
