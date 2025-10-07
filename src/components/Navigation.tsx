@@ -52,24 +52,23 @@ export function Navigation({ isCollapsed, onToggle }: NavigationProps) {
       isCollapsed ? "w-16" : "w-64"
     )}>
       {/* Header */}
-      <div className="flex items-center h-16 border-b border-gray-200">
-        <div className="flex items-center flex-1 px-3">
+      <div className="border-b border-gray-200">
+        <div className="flex items-center h-16 px-3">
           <BarChart3 className="h-8 w-8 text-blue-600 flex-shrink-0" />
           {!isCollapsed && (
             <span className="ml-2 text-xl font-bold text-gray-900">CSRD Co-Pilot</span>
           )}
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onToggle}
-          className={cn(
-            "flex-shrink-0 h-8 w-8 p-0 hover:bg-gray-100",
-            isCollapsed ? "mx-2" : "mr-3"
-          )}
-        >
-          {isCollapsed ? <Menu className="h-5 w-5" /> : <X className="h-5 w-5" />}
-        </Button>
+        <div className="px-3 pb-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggle}
+            className="w-full h-8 p-0 hover:bg-gray-100 flex items-center justify-center"
+          >
+            {isCollapsed ? <Menu className="h-5 w-5" /> : <X className="h-5 w-5" />}
+          </Button>
+        </div>
       </div>
       
       {/* Navigation */}
