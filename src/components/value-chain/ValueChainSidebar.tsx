@@ -224,6 +224,53 @@ export function ValueChainSidebar() {
         )}
       </div>
 
+      {/* Selected Relationship */}
+      {selectedRelationship && valueChain && (
+        <div className="p-6 border-t border-gray-200">
+          <h3 className="text-sm font-medium text-gray-900 mb-3">Selected Relationship</h3>
+          <div className="p-3 bg-purple-50 border border-purple-200 rounded-lg">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <Link className="w-4 h-4 text-purple-600" />
+                <span className="font-medium text-sm text-purple-800">
+                  {valueChain.players.find(p => p.id === selectedRelationship.from)?.name || 'Unknown'}
+                  {' → '}
+                  {valueChain.players.find(p => p.id === selectedRelationship.to)?.name || 'Unknown'}
+                </span>
+              </div>
+              <Badge className="bg-purple-100 text-purple-800">
+                {selectedRelationship.type || 'relationship'}
+              </Badge>
+            </div>
+            
+            {selectedRelationship.description && (
+              <p className="text-xs text-purple-700 mb-2">
+                {selectedRelationship.description}
+              </p>
+            )}
+            
+            {selectedRelationship.strength && (
+              <p className="text-xs text-purple-600 mb-2">
+                Strength: {selectedRelationship.strength}/10
+              </p>
+            )}
+            
+            <Button
+              onClick={() => {
+                deleteRelationship(selectedRelationship.id);
+                selectRelationship(null);
+              }}
+              variant="destructive"
+              size="sm"
+              className="w-full mt-2"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete Relationship
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Player Editor Modal */}
       {showPlayerEditor && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

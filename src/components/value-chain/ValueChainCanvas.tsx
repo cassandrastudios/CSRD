@@ -23,7 +23,7 @@ const nodeTypes = {
 };
 
 export function ValueChainCanvas() {
-  const { valueChain, updatePlayerPosition, addRelationship } = useValueChainStore();
+  const { valueChain, updatePlayerPosition, addRelationship, selectRelationship } = useValueChainStore();
   
   // Convert players to ReactFlow nodes
   const nodes: Node[] = useMemo(() => {
@@ -73,6 +73,7 @@ export function ValueChainCanvas() {
         fontSize: 12,
         fill: '#374151',
       },
+      className: 'cursor-pointer hover:stroke-purple-500',
     }));
   }, [valueChain]);
 
@@ -110,6 +111,23 @@ export function ValueChainCanvas() {
     [updatePlayerPosition]
   );
 
+  const onEdgeClick = useCallback(
+    (event: React.MouseEvent, edge: Edge) => {
+      event.stopPropagation();
+      if (!valueChain) return;
+      
+      const relationship = valueChain.relationships.find(rel => rel.id === edge.id);
+      if (relationship) {
+        selectRelationship(relationship);
+      }
+    },
+    [valueChain, selectRelationship]
+  );
+
+  const onPaneClick = useCallback(() => {
+    selectRelationship(null);
+  }, [selectRelationship]);
+
   if (!valueChain) {
     return (
       <div className="h-full flex items-center justify-center bg-gray-50">
@@ -135,6 +153,8 @@ export function ValueChainCanvas() {
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         onNodeDragStop={onNodeDragStop}
+        onEdgeClick={onEdgeClick}
+        onPaneClick={onPaneClick}
         nodeTypes={nodeTypes}
         fitView
         className="bg-gray-50"
