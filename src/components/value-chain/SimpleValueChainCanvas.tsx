@@ -165,9 +165,9 @@ export function SimpleValueChainCanvas() {
               <div key={player.id} className="flex items-center">
                 {/* Drop zone before each card */}
                 <div
-                  className={`w-8 h-32 rounded transition-colors flex items-center justify-center ${
+                  className={`w-1 h-32 rounded transition-colors ${
                     draggedOverIndex === index && draggedPlayer?.id !== player.id
-                      ? 'bg-blue-400 border-2 border-blue-600' : 'bg-gray-200 hover:bg-gray-300'
+                      ? 'bg-blue-500' : 'bg-transparent hover:bg-gray-300'
                   }`}
                   onDragOver={(e) => {
                     console.log('Drop zone drag over triggered for index:', index);
@@ -181,9 +181,7 @@ export function SimpleValueChainCanvas() {
                     console.log('Drop zone drop triggered for index:', index);
                     handleDrop(e, index);
                   }}
-                >
-                  <div className="text-xs text-gray-500 font-bold">DROP</div>
-                </div>
+                />
                 
                 <Card
                   className={`cursor-grab hover:shadow-md transition-shadow flex-shrink-0 w-80 group ${
@@ -262,16 +260,14 @@ export function SimpleValueChainCanvas() {
             
             {/* Drop zone after the last card */}
             <div
-              className={`w-8 h-32 rounded transition-colors flex items-center justify-center ${
+              className={`w-1 h-32 rounded transition-colors ${
                 draggedOverIndex === sortedPlayers.length && draggedPlayer
-                  ? 'bg-blue-400 border-2 border-blue-600' : 'bg-gray-200 hover:bg-gray-300'
+                  ? 'bg-blue-500' : 'bg-transparent hover:bg-gray-300'
               }`}
               onDragOver={(e) => handleDragOver(e, sortedPlayers.length)}
               onDragLeave={handleDragLeave}
               onDrop={(e) => handleDrop(e, sortedPlayers.length)}
-            >
-              <div className="text-xs text-gray-500 font-bold">DROP</div>
-            </div>
+            />
           </div>
         )}
       </div>
