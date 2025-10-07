@@ -80,6 +80,8 @@ export const useValueChainStore = create<ValueChainStore>()(
         const { valueChain } = get();
         if (!valueChain) return;
 
+        console.log('reorderPlayers called with category:', category, 'newOrder:', newOrder.map(p => p.name));
+
         // Update players in the specified category with new order
         const updatedPlayers = valueChain.players.map(player => {
           if (player.category === category) {
@@ -90,6 +92,8 @@ export const useValueChainStore = create<ValueChainStore>()(
           }
           return player;
         });
+
+        console.log('Updated players:', updatedPlayers.map(p => ({ name: p.name, x: p.x, category: p.category })));
 
         set({
           valueChain: {

@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 export function SimpleValueChainCanvas() {
   const { valueChain, selectedPlayer, selectedRelationship, selectPlayer, selectRelationship, deleteRelationship, movePlayerToCategory, updatePlayer, reorderPlayers } = useValueChainStore();
   const [draggedPlayer, setDraggedPlayer] = useState<Player | null>(null);
+  const [renderKey, setRenderKey] = useState(0);
 
   if (!valueChain) {
     return (
@@ -101,14 +102,22 @@ export function SimpleValueChainCanvas() {
         const draggedIndex = players.findIndex(p => p.id === draggedPlayer.id);
         const targetIndex = players.findIndex(p => p.id === targetPlayerId);
         
+        console.log('Before reorder:', players.map(p => p.name));
+        console.log('Dragged index:', draggedIndex, 'Target index:', targetIndex);
+        
         if (draggedIndex !== -1 && targetIndex !== -1) {
           // Create new array with reordered players
           const newPlayers = [...players];
           const [draggedItem] = newPlayers.splice(draggedIndex, 1);
           newPlayers.splice(targetIndex, 0, draggedItem);
           
+          console.log('After reorder:', newPlayers.map(p => p.name));
+          
           // Use the new reorderPlayers function
           reorderPlayers(draggedPlayer.category, newPlayers);
+          
+          // Force re-render
+          setRenderKey(prev => prev + 1);
           
           console.log('Reordered players:', newPlayers.map(p => p.name));
         }
@@ -139,7 +148,7 @@ export function SimpleValueChainCanvas() {
       </div>
 
       {/* All Players Grouped by Category */}
-      <div className="flex-1 overflow-x-auto">
+      <div className="flex-1 overflow-x-auto" key={renderKey}>
         <div className="flex gap-8 p-4 min-w-max">
           {valueChain.players.length === 0 ? (
             <div className="flex items-center justify-center w-full h-full">
