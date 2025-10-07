@@ -87,6 +87,10 @@ export function Navigation({ isCollapsed, onToggle }: NavigationProps) {
                   : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
               )}
               title={isCollapsed ? item.name : undefined}
+              onClick={(e) => {
+                // Don't expand nav when clicking navigation items
+                e.stopPropagation()
+              }}
             >
               <item.icon className="h-5 w-5 flex-shrink-0" />
               {!isCollapsed && <span className="ml-3">{item.name}</span>}
@@ -101,7 +105,10 @@ export function Navigation({ isCollapsed, onToggle }: NavigationProps) {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setIsAccountOpen(!isAccountOpen)}
+            onClick={(e) => {
+              e.stopPropagation()
+              setIsAccountOpen(!isAccountOpen)
+            }}
             className={cn(
               "flex items-center w-full text-sm font-medium rounded-md transition-colors",
               "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
