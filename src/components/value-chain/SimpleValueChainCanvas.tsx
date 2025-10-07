@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { useValueChainStore } from '@/store/useValueChainStore';
 import { Player } from '@/types/valueChain';
 import { Card, CardContent } from '@/components/ui/card';
@@ -11,10 +11,6 @@ import { Button } from '@/components/ui/button';
 export function SimpleValueChainCanvas() {
   const { valueChain, selectedPlayer, selectedRelationship, selectPlayer, selectRelationship, deleteRelationship, movePlayerToCategory, updatePlayer, reorderPlayers } = useValueChainStore();
   const [draggedPlayer, setDraggedPlayer] = useState<Player | null>(null);
-  const [dragOverCategory, setDragOverCategory] = useState<string | null>(null);
-  const [dragOverPlayer, setDragOverPlayer] = useState<string | null>(null);
-  const [reorderKey, setReorderKey] = useState(0);
-  const dragRef = useRef<HTMLDivElement>(null);
 
   if (!valueChain) {
     return (
@@ -77,28 +73,14 @@ export function SimpleValueChainCanvas() {
     e.dataTransfer.effectAllowed = 'move';
   };
 
-  const handleDragOver = (e: React.DragEvent, category: string) => {
+
+  const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
-    setDragOverCategory(category);
-  };
-
-  const handlePlayerDragOver = (e: React.DragEvent, playerId: string) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    setDragOverPlayer(playerId);
-    console.log('Drag over player:', playerId);
-  };
-
-  const handleDragLeave = () => {
-    setDragOverCategory(null);
-    setDragOverPlayer(null);
   };
 
   const handleDrop = (e: React.DragEvent, targetCategory: string) => {
     e.preventDefault();
-    setDragOverCategory(null);
-    setDragOverPlayer(null);
     
     if (draggedPlayer && draggedPlayer.category !== targetCategory) {
       movePlayerToCategory(draggedPlayer.id, targetCategory as 'upstream' | 'own_operations' | 'downstream');
@@ -109,21 +91,15 @@ export function SimpleValueChainCanvas() {
 
   const handlePlayerDrop = (e: React.DragEvent, targetPlayerId: string) => {
     e.preventDefault();
-    console.log('Drop on player:', targetPlayerId, 'Dragged player:', draggedPlayer?.name);
-    setDragOverCategory(null);
-    setDragOverPlayer(null);
     
     if (draggedPlayer && targetPlayerId !== draggedPlayer.id) {
       const targetPlayer = valueChain?.players.find(p => p.id === targetPlayerId);
-      console.log('Target player category:', targetPlayer?.category, 'Dragged player category:', draggedPlayer.category);
       
       // Only allow reordering within the same category
       if (draggedPlayer.category === targetPlayer?.category) {
         const players = valueChain?.players.filter(p => p.category === draggedPlayer.category) || [];
         const draggedIndex = players.findIndex(p => p.id === draggedPlayer.id);
         const targetIndex = players.findIndex(p => p.id === targetPlayerId);
-        
-        console.log('Dragged index:', draggedIndex, 'Target index:', targetIndex);
         
         if (draggedIndex !== -1 && targetIndex !== -1) {
           // Create new array with reordered players
@@ -134,13 +110,8 @@ export function SimpleValueChainCanvas() {
           // Use the new reorderPlayers function
           reorderPlayers(draggedPlayer.category, newPlayers);
           
-          // Force re-render by updating the key
-          setReorderKey(prev => prev + 1);
-          
           console.log('Reordered players:', newPlayers.map(p => p.name));
         }
-      } else {
-        console.log('Cannot reorder across categories');
       }
     }
     
@@ -202,25 +173,30 @@ export function SimpleValueChainCanvas() {
                     </div>
                   </div>
                   
-                  {/* Players in this category */}
-                  <div className="flex gap-4">
-                    {players.map((player) => (
-                      <Card
-                        key={player.id}
-                        className={`cursor-pointer hover:shadow-md transition-shadow flex-shrink-0 w-80 group ${
-                          selectedPlayer?.id === player.id ? 'ring-2 ring-blue-500' : ''
-                        } ${
-                          dragOverPlayer === player.id ? 'ring-2 ring-green-400 bg-green-50' : ''
-                        } ${
-                          draggedPlayer?.id === player.id ? 'opacity-50' : ''
-                        }`}
-                        draggable
-                        onDragStart={(e) => handleDragStart(e, player)}
-                        onDragOver={(e) => handlePlayerDragOver(e, player.id)}
-                        onDragLeave={handleDragLeave}
-                        onDrop={(e) => handlePlayerDrop(e, player.id)}
-                        onClick={() => selectPlayer(player)}
-                      >
+                      {/* Players in this category */}
+                      <div className="flex gap-4">
+                        {players.map((player, index) => (
+                          <div key={player.id} className="flex items-center">
+                            {/* Drop zone before each card */}
+                            <div
+                              className={`w-2 h-32 bg-gray-200 rounded transition-colors ${
+                                draggedPlayer && draggedPlayer.category === player.category && draggedPlayer.id !== player.id
+                                  ? 'bg-blue-300' : 'bg-transparent'
+                              }`}
+                              onDragOver={handleDragOver}
+                              onDrop={(e) => handlePlayerDrop(e, player.id)}
+                            />
+                            
+                            <Card
+                              className={`cursor-grab hover:shadow-md transition-shadow flex-shrink-0 w-80 group ${
+                                selectedPlayer?.id === player.id ? 'ring-2 ring-blue-500' : ''
+                              } ${
+                                draggedPlayer?.id === player.id ? 'opacity-50' : ''
+                              }`}
+                              draggable
+                              onDragStart={(e) => handleDragStart(e, player)}
+                              onClick={() => selectPlayer(player)}
+                            >
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-3">
@@ -279,10 +255,26 @@ export function SimpleValueChainCanvas() {
                               <span>{player.industry}</span>
                             </div>
                           )}
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
+                            </CardContent>
+                            </Card>
+                          </div>
+                        ))}
+                        
+                        {/* Drop zone after the last card */}
+                        {players.length > 0 && (
+                          <div
+                            className={`w-2 h-32 bg-gray-200 rounded transition-colors ${
+                              draggedPlayer && draggedPlayer.category === players[0].category
+                                ? 'bg-blue-300' : 'bg-transparent'
+                            }`}
+                            onDragOver={handleDragOver}
+                            onDrop={(e) => {
+                              const lastPlayer = players[players.length - 1];
+                              handlePlayerDrop(e, lastPlayer.id);
+                            }}
+                          />
+                        )}
+                      </div>
                 </div>
               );
             })
