@@ -44,6 +44,7 @@ import {
 import toast from 'react-hot-toast'
 import { ValueChainCreator } from './value-chain/ValueChainCreator'
 import { StakeholderManagement } from './stakeholder-management'
+import { useOrganization } from '../hooks/useOrganization'
 
 // Simple types for existing schema
 interface SimpleTopic {
@@ -77,6 +78,9 @@ export function DoubleMaterialityAssessmentSimple() {
   const [saving, setSaving] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string>('All')
+  
+  // Organization
+  const { organization } = useOrganization()
   const [selectedTopic, setSelectedTopic] = useState<SimpleTopic | null>(null)
   const [activeTab, setActiveTab] = useState('topics')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
@@ -642,7 +646,13 @@ export function DoubleMaterialityAssessmentSimple() {
 
           {/* Stakeholders Tab */}
           <TabsContent value="stakeholders" className="space-y-6">
-            <StakeholderManagement organizationId="default-org" />
+            {organization ? (
+              <StakeholderManagement organizationId={organization.id} />
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-500">Loading organization...</p>
+              </div>
+            )}
           </TabsContent>
 
           {/* Scoring Tab */}
