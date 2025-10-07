@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Layout } from './layout'
+import { Layout } from '@/components/layout'
 import toast from 'react-hot-toast'
 
 const sectors = [

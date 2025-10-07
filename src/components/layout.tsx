@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Navigation } from './navigation'
+import { Navigation } from '@/components/navigation'
 
 interface LayoutProps {
   children: React.ReactNode
