@@ -143,7 +143,7 @@ export function SimpleValueChainCanvas() {
               </div>
 
               {/* Players */}
-              <div className="p-4 min-h-[400px]">
+              <div className="p-4 min-h-[400px] relative">
                 {players.length === 0 ? (
                   <div className="text-center text-gray-500 py-8">
                     <div className="text-4xl mb-2">👥</div>
@@ -151,11 +151,12 @@ export function SimpleValueChainCanvas() {
                     <p className="text-xs text-gray-400">Add players to this category</p>
                   </div>
                 ) : (
-                  <div className="space-y-3">
-                    {players.map((player) => (
+                  <div className="relative">
+                    <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                      {players.map((player) => (
                       <Card
                         key={player.id}
-                        className={`cursor-pointer hover:shadow-md transition-shadow ${
+                        className={`cursor-pointer hover:shadow-md transition-shadow flex-shrink-0 w-48 ${
                           selectedPlayer?.id === player.id ? 'ring-2 ring-blue-500' : ''
                         }`}
                         draggable
@@ -186,7 +187,10 @@ export function SimpleValueChainCanvas() {
                           )}
                         </CardContent>
                       </Card>
-                    ))}
+                      ))}
+                    </div>
+                    {/* Fade effect for scroll indication */}
+                    <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none"></div>
                   </div>
                 )}
               </div>
