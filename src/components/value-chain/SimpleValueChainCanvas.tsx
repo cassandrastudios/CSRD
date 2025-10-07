@@ -177,32 +177,174 @@ export function SimpleValueChainCanvas() {
             </div>
           </div>
         ) : (
-          <div className="flex gap-6 h-full overflow-x-auto">
-            {/* Upstream Section */}
-            <div className="flex-shrink-0 w-80">
-              <div className="flex items-center gap-2 mb-3">
-                <Truck className="h-5 w-5 text-orange-600" />
-                <h3 className="text-lg font-semibold text-gray-900">Upstream</h3>
-                <Badge variant="secondary" className="bg-orange-100 text-orange-800">
-                  {groupedPlayers.upstream.length}
-                </Badge>
-              </div>
-              <div className="space-y-4 overflow-y-auto max-h-[calc(100vh-200px)]">
-                {groupedPlayers.upstream.map((player, index) => (
-                  <div key={player.id}>
+          <div className="flex flex-col gap-4 h-full overflow-x-auto">
+            {/* Category Headers */}
+            <div className="flex gap-6 flex-shrink-0">
+              {/* Upstream Header */}
+              {groupedPlayers.upstream.length > 0 && (
+                <div className="flex items-center gap-2 p-3 bg-orange-50 rounded-lg border border-orange-200">
+                  <Truck className="h-5 w-5 text-orange-600" />
+                  <h3 className="text-lg font-semibold text-gray-900">Upstream</h3>
+                  <Badge variant="secondary" className="bg-orange-100 text-orange-800">
+                    {groupedPlayers.upstream.length}
+                  </Badge>
+                </div>
+              )}
+              
+              {/* Own Operations Header */}
+              {groupedPlayers.own_operations.length > 0 && (
+                <div className="flex items-center gap-2 p-3 bg-green-50 rounded-lg border border-green-200">
+                  <Building2 className="h-5 w-5 text-green-600" />
+                  <h3 className="text-lg font-semibold text-gray-900">Own Operations</h3>
+                  <Badge variant="secondary" className="bg-green-100 text-green-800">
+                    {groupedPlayers.own_operations.length}
+                  </Badge>
+                </div>
+              )}
+              
+              {/* Downstream Header */}
+              {groupedPlayers.downstream.length > 0 && (
+                <div className="flex items-center gap-2 p-3 bg-purple-50 rounded-lg border border-purple-200">
+                  <Users className="h-5 w-5 text-purple-600" />
+                  <h3 className="text-lg font-semibold text-gray-900">Downstream</h3>
+                  <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                    {groupedPlayers.downstream.length}
+                  </Badge>
+                </div>
+              )}
+            </div>
+
+            {/* Cards in horizontal flow */}
+            <div className="flex gap-4 overflow-x-auto pb-4">
+              {/* Upstream Cards */}
+              {groupedPlayers.upstream.map((player, index) => (
+                <div key={player.id} className="flex items-center">
+                  {/* Drop zone before each card */}
+                  <div
+                    className={`w-2 h-32 rounded transition-colors ${
+                      draggedOverIndex === index && draggedPlayer?.id !== player.id
+                        ? 'bg-blue-500' : 'bg-transparent'
+                    }`}
+                    onDragOver={(e) => handleDragOver(e, index)}
+                    onDragLeave={handleDragLeave}
+                    onDrop={(e) => handleDrop(e, index)}
+                  />
+                  
+                  <Card
+                    className={`cursor-grab hover:shadow-md transition-shadow flex-shrink-0 w-80 group ${
+                      draggedPlayer?.id === player.id ? 'opacity-50' : ''
+                    }`}
+                    draggable={true}
+                    onDragStart={(e) => {
+                      console.log('Card drag start triggered for:', player.name);
+                      handleDragStart(e, player);
+                    }}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      e.dataTransfer.dropEffect = 'move';
+                      setDraggedOverIndex(index);
+                    }}
+                    onDragLeave={() => {
+                      setDraggedOverIndex(null);
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      handleDrop(e, index);
+                    }}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <GripVertical className="w-4 h-4 text-gray-400 cursor-grab" />
+                          {getCategoryIcon(player.category)}
+                          <div>
+                            <h3 className="font-semibold text-base">{player.name}</h3>
+                            {player.type && (
+                              <p className="text-xs text-gray-500">{player.type}</p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge className={getCategoryColor(player.category)}>
+                            {player.category.replace('_', ' ')}
+                          </Badge>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              console.log('Edit player:', player.id);
+                            }}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                      
+                      {player.description && (
+                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                          {player.description}
+                        </p>
+                      )}
+                      
+                      <div className="grid grid-cols-3 gap-2 mb-3">
+                        <div className="text-center p-2 bg-gray-50 rounded">
+                          <div className="text-lg font-bold text-blue-600">{player.impactOnCompany}</div>
+                          <div className="text-xs text-gray-500">Impact On</div>
+                        </div>
+                        <div className="text-center p-2 bg-gray-50 rounded">
+                          <div className="text-lg font-bold text-green-600">{player.impactFromCompany}</div>
+                          <div className="text-xs text-gray-500">Impact From</div>
+                        </div>
+                        <div className="text-center p-2 bg-gray-100 rounded">
+                          <div className="text-lg font-bold text-gray-700">{player.impactOnCompany + player.impactFromCompany}</div>
+                          <div className="text-xs text-gray-500">Total</div>
+                        </div>
+                      </div>
+                      
+                      {player.industry && (
+                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                          <span className="font-medium">Industry:</span>
+                          <span>{player.industry}</span>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+              ))}
+              
+              {/* Drop zone after upstream cards */}
+              {groupedPlayers.upstream.length > 0 && (
+                <div
+                  className={`w-2 h-32 rounded transition-colors ${
+                    draggedOverIndex === groupedPlayers.upstream.length && draggedPlayer
+                      ? 'bg-blue-500' : 'bg-transparent'
+                  }`}
+                  onDragOver={(e) => handleDragOver(e, groupedPlayers.upstream.length)}
+                  onDragLeave={handleDragLeave}
+                  onDrop={(e) => handleDrop(e, groupedPlayers.upstream.length)}
+                />
+              )}
+
+              {/* Own Operations Cards */}
+              {groupedPlayers.own_operations.map((player, index) => {
+                const globalIndex = groupedPlayers.upstream.length + index;
+                return (
+                  <div key={player.id} className="flex items-center">
                     {/* Drop zone before each card */}
                     <div
-                      className={`w-full h-2 rounded transition-colors ${
-                        draggedOverIndex === index && draggedPlayer?.id !== player.id
+                      className={`w-2 h-32 rounded transition-colors ${
+                        draggedOverIndex === globalIndex && draggedPlayer?.id !== player.id
                           ? 'bg-blue-500' : 'bg-transparent'
                       }`}
-                      onDragOver={(e) => handleDragOver(e, index)}
+                      onDragOver={(e) => handleDragOver(e, globalIndex)}
                       onDragLeave={handleDragLeave}
-                      onDrop={(e) => handleDrop(e, index)}
+                      onDrop={(e) => handleDrop(e, globalIndex)}
                     />
                     
                     <Card
-                      className={`cursor-grab hover:shadow-md transition-shadow group ${
+                      className={`cursor-grab hover:shadow-md transition-shadow flex-shrink-0 w-80 group ${
                         draggedPlayer?.id === player.id ? 'opacity-50' : ''
                       }`}
                       draggable={true}
@@ -213,14 +355,14 @@ export function SimpleValueChainCanvas() {
                       onDragOver={(e) => {
                         e.preventDefault();
                         e.dataTransfer.dropEffect = 'move';
-                        setDraggedOverIndex(index);
+                        setDraggedOverIndex(globalIndex);
                       }}
                       onDragLeave={() => {
                         setDraggedOverIndex(null);
                       }}
                       onDrop={(e) => {
                         e.preventDefault();
-                        handleDrop(e, index);
+                        handleDrop(e, globalIndex);
                       }}
                     >
                       <CardContent className="p-4">
@@ -283,134 +425,13 @@ export function SimpleValueChainCanvas() {
                       </CardContent>
                     </Card>
                   </div>
-                ))}
-                
-                {/* Drop zone after the last upstream card */}
+                );
+              })}
+              
+              {/* Drop zone after own operations cards */}
+              {groupedPlayers.own_operations.length > 0 && (
                 <div
-                  className={`w-full h-2 rounded transition-colors ${
-                    draggedOverIndex === groupedPlayers.upstream.length && draggedPlayer
-                      ? 'bg-blue-500' : 'bg-transparent'
-                  }`}
-                  onDragOver={(e) => handleDragOver(e, groupedPlayers.upstream.length)}
-                  onDragLeave={handleDragLeave}
-                  onDrop={(e) => handleDrop(e, groupedPlayers.upstream.length)}
-                />
-              </div>
-            </div>
-
-            {/* Own Operations Section */}
-            <div className="flex-shrink-0 w-80">
-              <div className="flex items-center gap-2 mb-3">
-                <Building2 className="h-5 w-5 text-green-600" />
-                <h3 className="text-lg font-semibold text-gray-900">Own Operations</h3>
-                <Badge variant="secondary" className="bg-green-100 text-green-800">
-                  {groupedPlayers.own_operations.length}
-                </Badge>
-              </div>
-              <div className="space-y-4 overflow-y-auto max-h-[calc(100vh-200px)]">
-                {groupedPlayers.own_operations.map((player, index) => {
-                  const globalIndex = groupedPlayers.upstream.length + index;
-                  return (
-                    <div key={player.id}>
-                      {/* Drop zone before each card */}
-                      <div
-                        className={`w-full h-2 rounded transition-colors ${
-                          draggedOverIndex === globalIndex && draggedPlayer?.id !== player.id
-                            ? 'bg-blue-500' : 'bg-transparent'
-                        }`}
-                        onDragOver={(e) => handleDragOver(e, globalIndex)}
-                        onDragLeave={handleDragLeave}
-                        onDrop={(e) => handleDrop(e, globalIndex)}
-                      />
-                      
-                      <Card
-                        className={`cursor-grab hover:shadow-md transition-shadow group ${
-                          draggedPlayer?.id === player.id ? 'opacity-50' : ''
-                        }`}
-                        draggable={true}
-                        onDragStart={(e) => {
-                          console.log('Card drag start triggered for:', player.name);
-                          handleDragStart(e, player);
-                        }}
-                        onDragOver={(e) => {
-                          e.preventDefault();
-                          e.dataTransfer.dropEffect = 'move';
-                          setDraggedOverIndex(globalIndex);
-                        }}
-                        onDragLeave={() => {
-                          setDraggedOverIndex(null);
-                        }}
-                        onDrop={(e) => {
-                          e.preventDefault();
-                          handleDrop(e, globalIndex);
-                        }}
-                      >
-                        <CardContent className="p-4">
-                          <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center gap-3">
-                              <GripVertical className="w-4 h-4 text-gray-400 cursor-grab" />
-                              {getCategoryIcon(player.category)}
-                              <div>
-                                <h3 className="font-semibold text-base">{player.name}</h3>
-                                {player.type && (
-                                  <p className="text-xs text-gray-500">{player.type}</p>
-                                )}
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Badge className={getCategoryColor(player.category)}>
-                                {player.category.replace('_', ' ')}
-                              </Badge>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  console.log('Edit player:', player.id);
-                                }}
-                              >
-                                <Edit className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </div>
-                          
-                          {player.description && (
-                            <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                              {player.description}
-                            </p>
-                          )}
-                          
-                          <div className="grid grid-cols-3 gap-2 mb-3">
-                            <div className="text-center p-2 bg-gray-50 rounded">
-                              <div className="text-lg font-bold text-blue-600">{player.impactOnCompany}</div>
-                              <div className="text-xs text-gray-500">Impact On</div>
-                            </div>
-                            <div className="text-center p-2 bg-gray-50 rounded">
-                              <div className="text-lg font-bold text-green-600">{player.impactFromCompany}</div>
-                              <div className="text-xs text-gray-500">Impact From</div>
-                            </div>
-                            <div className="text-center p-2 bg-gray-100 rounded">
-                              <div className="text-lg font-bold text-gray-700">{player.impactOnCompany + player.impactFromCompany}</div>
-                              <div className="text-xs text-gray-500">Total</div>
-                            </div>
-                          </div>
-                          
-                          {player.industry && (
-                            <div className="flex items-center gap-2 text-xs text-gray-500">
-                              <span className="font-medium">Industry:</span>
-                              <span>{player.industry}</span>
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    </div>
-                  );
-                })}
-                
-                {/* Drop zone after the last own operations card */}
-                <div
-                  className={`w-full h-2 rounded transition-colors ${
+                  className={`w-2 h-32 rounded transition-colors ${
                     draggedOverIndex === groupedPlayers.upstream.length + groupedPlayers.own_operations.length && draggedPlayer
                       ? 'bg-blue-500' : 'bg-transparent'
                   }`}
@@ -418,122 +439,113 @@ export function SimpleValueChainCanvas() {
                   onDragLeave={handleDragLeave}
                   onDrop={(e) => handleDrop(e, groupedPlayers.upstream.length + groupedPlayers.own_operations.length)}
                 />
-              </div>
-            </div>
+              )}
 
-            {/* Downstream Section */}
-            <div className="flex-shrink-0 w-80">
-              <div className="flex items-center gap-2 mb-3">
-                <Users className="h-5 w-5 text-purple-600" />
-                <h3 className="text-lg font-semibold text-gray-900">Downstream</h3>
-                <Badge variant="secondary" className="bg-purple-100 text-purple-800">
-                  {groupedPlayers.downstream.length}
-                </Badge>
-              </div>
-              <div className="space-y-4 overflow-y-auto max-h-[calc(100vh-200px)]">
-                {groupedPlayers.downstream.map((player, index) => {
-                  const globalIndex = groupedPlayers.upstream.length + groupedPlayers.own_operations.length + index;
-                  return (
-                    <div key={player.id}>
-                      {/* Drop zone before each card */}
-                      <div
-                        className={`w-full h-2 rounded transition-colors ${
-                          draggedOverIndex === globalIndex && draggedPlayer?.id !== player.id
-                            ? 'bg-blue-500' : 'bg-transparent'
-                        }`}
-                        onDragOver={(e) => handleDragOver(e, globalIndex)}
-                        onDragLeave={handleDragLeave}
-                        onDrop={(e) => handleDrop(e, globalIndex)}
-                      />
-                      
-                      <Card
-                        className={`cursor-grab hover:shadow-md transition-shadow group ${
-                          draggedPlayer?.id === player.id ? 'opacity-50' : ''
-                        }`}
-                        draggable={true}
-                        onDragStart={(e) => {
-                          console.log('Card drag start triggered for:', player.name);
-                          handleDragStart(e, player);
-                        }}
-                        onDragOver={(e) => {
-                          e.preventDefault();
-                          e.dataTransfer.dropEffect = 'move';
-                          setDraggedOverIndex(globalIndex);
-                        }}
-                        onDragLeave={() => {
-                          setDraggedOverIndex(null);
-                        }}
-                        onDrop={(e) => {
-                          e.preventDefault();
-                          handleDrop(e, globalIndex);
-                        }}
-                      >
-                        <CardContent className="p-4">
-                          <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center gap-3">
-                              <GripVertical className="w-4 h-4 text-gray-400 cursor-grab" />
-                              {getCategoryIcon(player.category)}
-                              <div>
-                                <h3 className="font-semibold text-base">{player.name}</h3>
-                                {player.type && (
-                                  <p className="text-xs text-gray-500">{player.type}</p>
-                                )}
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Badge className={getCategoryColor(player.category)}>
-                                {player.category.replace('_', ' ')}
-                              </Badge>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  console.log('Edit player:', player.id);
-                                }}
-                              >
-                                <Edit className="w-4 h-4" />
-                              </Button>
+              {/* Downstream Cards */}
+              {groupedPlayers.downstream.map((player, index) => {
+                const globalIndex = groupedPlayers.upstream.length + groupedPlayers.own_operations.length + index;
+                return (
+                  <div key={player.id} className="flex items-center">
+                    {/* Drop zone before each card */}
+                    <div
+                      className={`w-2 h-32 rounded transition-colors ${
+                        draggedOverIndex === globalIndex && draggedPlayer?.id !== player.id
+                          ? 'bg-blue-500' : 'bg-transparent'
+                      }`}
+                      onDragOver={(e) => handleDragOver(e, globalIndex)}
+                      onDragLeave={handleDragLeave}
+                      onDrop={(e) => handleDrop(e, globalIndex)}
+                    />
+                    
+                    <Card
+                      className={`cursor-grab hover:shadow-md transition-shadow flex-shrink-0 w-80 group ${
+                        draggedPlayer?.id === player.id ? 'opacity-50' : ''
+                      }`}
+                      draggable={true}
+                      onDragStart={(e) => {
+                        console.log('Card drag start triggered for:', player.name);
+                        handleDragStart(e, player);
+                      }}
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        e.dataTransfer.dropEffect = 'move';
+                        setDraggedOverIndex(globalIndex);
+                      }}
+                      onDragLeave={() => {
+                        setDraggedOverIndex(null);
+                      }}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        handleDrop(e, globalIndex);
+                      }}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <GripVertical className="w-4 h-4 text-gray-400 cursor-grab" />
+                            {getCategoryIcon(player.category)}
+                            <div>
+                              <h3 className="font-semibold text-base">{player.name}</h3>
+                              {player.type && (
+                                <p className="text-xs text-gray-500">{player.type}</p>
+                              )}
                             </div>
                           </div>
-                          
-                          {player.description && (
-                            <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                              {player.description}
-                            </p>
-                          )}
-                          
-                          <div className="grid grid-cols-3 gap-2 mb-3">
-                            <div className="text-center p-2 bg-gray-50 rounded">
-                              <div className="text-lg font-bold text-blue-600">{player.impactOnCompany}</div>
-                              <div className="text-xs text-gray-500">Impact On</div>
-                            </div>
-                            <div className="text-center p-2 bg-gray-50 rounded">
-                              <div className="text-lg font-bold text-green-600">{player.impactFromCompany}</div>
-                              <div className="text-xs text-gray-500">Impact From</div>
-                            </div>
-                            <div className="text-center p-2 bg-gray-100 rounded">
-                              <div className="text-lg font-bold text-gray-700">{player.impactOnCompany + player.impactFromCompany}</div>
-                              <div className="text-xs text-gray-500">Total</div>
-                            </div>
+                          <div className="flex items-center gap-2">
+                            <Badge className={getCategoryColor(player.category)}>
+                              {player.category.replace('_', ' ')}
+                            </Badge>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                console.log('Edit player:', player.id);
+                              }}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
                           </div>
-                          
-                          {player.industry && (
-                            <div className="flex items-center gap-2 text-xs text-gray-500">
-                              <span className="font-medium">Industry:</span>
-                              <span>{player.industry}</span>
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    </div>
-                  );
-                })}
-                
-                {/* Drop zone after the last downstream card */}
+                        </div>
+                        
+                        {player.description && (
+                          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                            {player.description}
+                          </p>
+                        )}
+                        
+                        <div className="grid grid-cols-3 gap-2 mb-3">
+                          <div className="text-center p-2 bg-gray-50 rounded">
+                            <div className="text-lg font-bold text-blue-600">{player.impactOnCompany}</div>
+                            <div className="text-xs text-gray-500">Impact On</div>
+                          </div>
+                          <div className="text-center p-2 bg-gray-50 rounded">
+                            <div className="text-lg font-bold text-green-600">{player.impactFromCompany}</div>
+                            <div className="text-xs text-gray-500">Impact From</div>
+                          </div>
+                          <div className="text-center p-2 bg-gray-100 rounded">
+                            <div className="text-lg font-bold text-gray-700">{player.impactOnCompany + player.impactFromCompany}</div>
+                            <div className="text-xs text-gray-500">Total</div>
+                          </div>
+                        </div>
+                        
+                        {player.industry && (
+                          <div className="flex items-center gap-2 text-xs text-gray-500">
+                            <span className="font-medium">Industry:</span>
+                            <span>{player.industry}</span>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+                );
+              })}
+              
+              {/* Drop zone after downstream cards */}
+              {groupedPlayers.downstream.length > 0 && (
                 <div
-                  className={`w-full h-2 rounded transition-colors ${
+                  className={`w-2 h-32 rounded transition-colors ${
                     draggedOverIndex === allPlayers.length && draggedPlayer
                       ? 'bg-blue-500' : 'bg-transparent'
                   }`}
@@ -541,7 +553,7 @@ export function SimpleValueChainCanvas() {
                   onDragLeave={handleDragLeave}
                   onDrop={(e) => handleDrop(e, allPlayers.length)}
                 />
-              </div>
+              )}
             </div>
           </div>
         )}
