@@ -9,6 +9,7 @@ export interface SliderProps {
   step?: number
   className?: string
   name?: string
+  id?: string
 }
 
 const Slider = React.forwardRef<HTMLInputElement, SliderProps>(

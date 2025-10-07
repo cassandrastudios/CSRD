@@ -6,6 +6,7 @@ export interface SelectProps {
   value?: string
   onValueChange?: (value: string) => void
   children: React.ReactNode
+  name?: string
 }
 
 export interface SelectTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
