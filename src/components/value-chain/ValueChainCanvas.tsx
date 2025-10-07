@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useMemo, useEffect } from 'react';
+import React, { useCallback, useMemo, useEffect } from 'react';
 import ReactFlow, {
   Node,
   Edge,
