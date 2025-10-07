@@ -9,7 +9,7 @@ import { Truck, Building2, Users, Edit, GripVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export function SimpleValueChainCanvas() {
-  const { valueChain, selectedPlayer, selectPlayer } = useValueChainStore();
+  const { valueChain } = useValueChainStore();
   const [draggedPlayer, setDraggedPlayer] = useState<Player | null>(null);
   const [draggedOverIndex, setDraggedOverIndex] = useState<number | null>(null);
 
@@ -165,8 +165,6 @@ export function SimpleValueChainCanvas() {
               <Card
                 key={player.id}
                 className={`cursor-grab hover:shadow-md transition-shadow flex-shrink-0 w-80 group ${
-                  selectedPlayer?.id === player.id ? 'ring-2 ring-blue-500' : ''
-                } ${
                   draggedPlayer?.id === player.id ? 'opacity-50' : ''
                 }`}
                 draggable={true}
@@ -186,7 +184,6 @@ export function SimpleValueChainCanvas() {
                   e.preventDefault();
                   handleDrop(e, index);
                 }}
-                onClick={() => selectPlayer(player)}
               >
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
