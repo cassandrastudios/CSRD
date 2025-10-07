@@ -64,9 +64,10 @@ export function SimpleValueChainCanvas() {
 
   const handleDragOver = (e: React.DragEvent, index: number) => {
     e.preventDefault();
+    e.stopPropagation();
     e.dataTransfer.dropEffect = 'move';
     setDraggedOverIndex(index);
-    console.log('Drag over index:', index);
+    console.log('Drag over index:', index, 'draggedPlayer:', draggedPlayer?.name);
   };
 
   const handleDragLeave = () => {
@@ -75,12 +76,14 @@ export function SimpleValueChainCanvas() {
 
   const handleDrop = (e: React.DragEvent, targetIndex: number) => {
     e.preventDefault();
+    e.stopPropagation();
     setDraggedOverIndex(null);
     
-    console.log('Drop event triggered at index:', targetIndex);
+    console.log('🎯 DROP EVENT TRIGGERED at index:', targetIndex);
+    console.log('Current draggedPlayer:', draggedPlayer?.name);
     
     if (!draggedPlayer) {
-      console.log('No dragged player found');
+      console.log('❌ No dragged player found');
       return;
     }
     
@@ -90,15 +93,17 @@ export function SimpleValueChainCanvas() {
     console.log('Dragged player index:', draggedIndex, 'Target index:', targetIndex);
     
     if (draggedIndex === -1) {
-      console.log('Dragged player not found in players array');
+      console.log('❌ Dragged player not found in players array');
       return;
     }
     
     if (draggedIndex === targetIndex) {
-      console.log('Same position, no reordering needed');
+      console.log('ℹ️ Same position, no reordering needed');
       setDraggedPlayer(null);
       return;
     }
+    
+    console.log('✅ Starting reorder process...');
     
     // Remove dragged player
     const [draggedItem] = players.splice(draggedIndex, 1);
@@ -112,7 +117,7 @@ export function SimpleValueChainCanvas() {
       x: index * 10
     }));
     
-    console.log('Reordering players:', updatedPlayers.map(p => p.name));
+    console.log('🔄 Reordering players:', updatedPlayers.map(p => p.name));
     
     // Update the store directly
     useValueChainStore.setState({
@@ -123,6 +128,7 @@ export function SimpleValueChainCanvas() {
       }
     });
     
+    console.log('✅ Reorder complete!');
     setDraggedPlayer(null);
   };
 
@@ -163,9 +169,18 @@ export function SimpleValueChainCanvas() {
                     draggedOverIndex === index && draggedPlayer?.id !== player.id
                       ? 'bg-blue-400 border-2 border-blue-600' : 'bg-gray-200 hover:bg-gray-300'
                   }`}
-                  onDragOver={(e) => handleDragOver(e, index)}
-                  onDragLeave={handleDragLeave}
-                  onDrop={(e) => handleDrop(e, index)}
+                  onDragOver={(e) => {
+                    console.log('Drop zone drag over triggered for index:', index);
+                    handleDragOver(e, index);
+                  }}
+                  onDragLeave={() => {
+                    console.log('Drop zone drag leave triggered for index:', index);
+                    handleDragLeave();
+                  }}
+                  onDrop={(e) => {
+                    console.log('Drop zone drop triggered for index:', index);
+                    handleDrop(e, index);
+                  }}
                 >
                   <div className="text-xs text-gray-500 font-bold">DROP</div>
                 </div>
