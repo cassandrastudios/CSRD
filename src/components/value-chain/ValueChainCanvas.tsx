@@ -25,34 +25,57 @@ const nodeTypes = {
 export function ValueChainCanvas() {
   const { valueChain, updatePlayerPosition, addRelationship, selectRelationship } = useValueChainStore();
   
-  // Convert players to ReactFlow nodes
+  // Calculate lane positions and widths
+  const laneConfig = useMemo(() => {
+    if (!valueChain) return { upstream: { x: 0, width: 200 }, ownOps: { x: 200, width: 200 }, downstream: { x: 400, width: 200 } };
+    
+    const upstreamCount = valueChain.players.filter(p => p.category === 'upstream').length;
+    const ownOpsCount = valueChain.players.filter(p => p.category === 'own_operations').length;
+    const downstreamCount = valueChain.players.filter(p => p.category === 'downstream').length;
+    
+    const minWidth = 200;
+    const maxWidth = 400;
+    const totalWidth = 800;
+    
+    // Calculate proportional widths
+    const totalPlayers = upstreamCount + ownOpsCount + downstreamCount;
+    if (totalPlayers === 0) {
+      return { upstream: { x: 0, width: totalWidth / 3 }, ownOps: { x: totalWidth / 3, width: totalWidth / 3 }, downstream: { x: (totalWidth * 2) / 3, width: totalWidth / 3 } };
+    }
+    
+    const upstreamWidth = Math.max(minWidth, Math.min(maxWidth, (upstreamCount / totalPlayers) * totalWidth));
+    const ownOpsWidth = Math.max(minWidth, Math.min(maxWidth, (ownOpsCount / totalPlayers) * totalWidth));
+    const downstreamWidth = totalWidth - upstreamWidth - ownOpsWidth;
+    
+    return {
+      upstream: { x: 0, width: upstreamWidth },
+      ownOps: { x: upstreamWidth, width: ownOpsWidth },
+      downstream: { x: upstreamWidth + ownOpsWidth, width: downstreamWidth }
+    };
+  }, [valueChain]);
+
+  // Convert players to ReactFlow nodes with horizontal lane positioning
   const nodes: Node[] = useMemo(() => {
     if (!valueChain) return [];
     
-    return valueChain.players.map((player, index) => {
-      // Auto-layout by category
-      let x = 100;
-      let y = 100 + (index * 150);
+    return valueChain.players.map((player) => {
+      const lane = laneConfig[player.category === 'upstream' ? 'upstream' : player.category === 'own_operations' ? 'ownOps' : 'downstream'];
+      const playersInLane = valueChain.players.filter(p => p.category === player.category).sort((a, b) => (a.x || 0) - (b.x || 0));
+      const playerIndex = playersInLane.findIndex(p => p.id === player.id);
       
-      if (player.category === 'upstream') {
-        x = 50;
-        y = 100 + (valueChain.players.filter(p => p.category === 'upstream').indexOf(player) * 150);
-      } else if (player.category === 'own_operations') {
-        x = 300;
-        y = 100 + (valueChain.players.filter(p => p.category === 'own_operations').indexOf(player) * 150);
-      } else if (player.category === 'downstream') {
-        x = 550;
-        y = 100 + (valueChain.players.filter(p => p.category === 'downstream').indexOf(player) * 150);
-      }
+      // Calculate horizontal position within the lane
+      const spacing = lane.width / (playersInLane.length + 1);
+      const x = lane.x + spacing * (playerIndex + 1) - 50; // -50 to center the node
+      const y = 200; // Fixed vertical position for all players
       
       return {
         id: player.id,
         type: 'player',
         position: { x: player.x || x, y: player.y || y },
-        data: player,
+        data: { ...player, lane: player.category },
       };
     });
-  }, [valueChain]);
+  }, [valueChain, laneConfig]);
 
   // Convert relationships to ReactFlow edges
   const edges: Edge[] = useMemo(() => {
@@ -104,11 +127,43 @@ export function ValueChainCanvas() {
     [addRelationship]
   );
 
+  const onNodeDrag = useCallback(
+    (event: any, node: Node) => {
+      const player = node.data;
+      const lane = laneConfig[player.category === 'upstream' ? 'upstream' : player.category === 'own_operations' ? 'ownOps' : 'downstream'];
+      
+      // Constrain X position to within the lane bounds during drag
+      const constrainedX = Math.max(lane.x + 25, Math.min(lane.x + lane.width - 25, node.position.x));
+      
+      // Keep Y position fixed
+      const fixedY = 200;
+      
+      // Update the node position in real-time
+      setNodes((nds) =>
+        nds.map((n) =>
+          n.id === node.id
+            ? { ...n, position: { x: constrainedX, y: fixedY } }
+            : n
+        )
+      );
+    },
+    [laneConfig, setNodes]
+  );
+
   const onNodeDragStop = useCallback(
     (event: any, node: Node) => {
-      updatePlayerPosition(node.id, node.position.x, node.position.y);
+      const player = node.data;
+      const lane = laneConfig[player.category === 'upstream' ? 'upstream' : player.category === 'own_operations' ? 'ownOps' : 'downstream'];
+      
+      // Constrain X position to within the lane bounds
+      const constrainedX = Math.max(lane.x + 25, Math.min(lane.x + lane.width - 25, node.position.x));
+      
+      // Keep Y position fixed
+      const fixedY = 200;
+      
+      updatePlayerPosition(node.id, constrainedX, fixedY);
     },
-    [updatePlayerPosition]
+    [updatePlayerPosition, laneConfig]
   );
 
   const onEdgeClick = useCallback(
@@ -152,6 +207,7 @@ export function ValueChainCanvas() {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        onNodeDrag={onNodeDrag}
         onNodeDragStop={onNodeDragStop}
         onEdgeClick={onEdgeClick}
         onPaneClick={onPaneClick}
@@ -177,22 +233,69 @@ export function ValueChainCanvas() {
           }}
         />
         
-        {/* Lane Headers */}
-        <div className="absolute top-4 left-4 z-10">
-          <div className="bg-orange-500 text-white px-4 py-2 rounded-lg font-semibold shadow-lg">
+        {/* Lane Headers with Dynamic Widths */}
+        <div 
+          className="absolute top-4 z-10"
+          style={{ left: `${laneConfig.upstream.x}px`, width: `${laneConfig.upstream.width}px` }}
+        >
+          <div className="bg-orange-500 text-white px-4 py-2 rounded-lg font-semibold shadow-lg text-center">
             Upstream
+            <div className="text-xs opacity-75">
+              {valueChain?.players.filter(p => p.category === 'upstream').length || 0} players
+            </div>
           </div>
         </div>
-        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10">
-          <div className="bg-green-500 text-white px-4 py-2 rounded-lg font-semibold shadow-lg">
+        <div 
+          className="absolute top-4 z-10"
+          style={{ left: `${laneConfig.ownOps.x}px`, width: `${laneConfig.ownOps.width}px` }}
+        >
+          <div className="bg-green-500 text-white px-4 py-2 rounded-lg font-semibold shadow-lg text-center">
             Own Operations
+            <div className="text-xs opacity-75">
+              {valueChain?.players.filter(p => p.category === 'own_operations').length || 0} players
+            </div>
           </div>
         </div>
-        <div className="absolute top-4 right-4 z-10">
-          <div className="bg-purple-500 text-white px-4 py-2 rounded-lg font-semibold shadow-lg">
+        <div 
+          className="absolute top-4 z-10"
+          style={{ left: `${laneConfig.downstream.x}px`, width: `${laneConfig.downstream.width}px` }}
+        >
+          <div className="bg-purple-500 text-white px-4 py-2 rounded-lg font-semibold shadow-lg text-center">
             Downstream
+            <div className="text-xs opacity-75">
+              {valueChain?.players.filter(p => p.category === 'downstream').length || 0} players
+            </div>
           </div>
         </div>
+        
+        {/* Lane Boundaries */}
+        <div 
+          className="absolute border-l-2 border-r-2 border-orange-300 bg-orange-50 bg-opacity-20"
+          style={{ 
+            left: `${laneConfig.upstream.x}px`, 
+            width: `${laneConfig.upstream.width}px`,
+            top: '80px',
+            height: '300px'
+          }}
+        />
+        <div 
+          className="absolute border-l-2 border-r-2 border-green-300 bg-green-50 bg-opacity-20"
+          style={{ 
+            left: `${laneConfig.ownOps.x}px`, 
+            width: `${laneConfig.ownOps.width}px`,
+            top: '80px',
+            height: '300px'
+          }}
+        />
+        <div 
+          className="absolute border-l-2 border-r-2 border-purple-300 bg-purple-50 bg-opacity-20"
+          style={{ 
+            left: `${laneConfig.downstream.x}px`, 
+            width: `${laneConfig.downstream.width}px`,
+            top: '80px',
+            height: '300px'
+          }}
+        />
       </ReactFlow>
     </div>
   );
