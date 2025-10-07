@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useValueChainStore } from '@/store/useValueChainStore';
-import { ValueChainSidebar } from './ValueChainSidebar';
 import { SimpleValueChainCanvas } from './SimpleValueChainCanvas';
+import { PlayerEditor } from './PlayerEditor';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -13,12 +13,21 @@ import {
   Download, 
   Upload,
   RotateCcw,
-  HelpCircle
+  HelpCircle,
+  Plus
 } from 'lucide-react';
 
 export function ValueChainCreator() {
-  const { valueChain, exportValueChain, clearValueChain } = useValueChainStore();
+  const { valueChain, exportValueChain, clearValueChain, createValueChain } = useValueChainStore();
   const [activeTab, setActiveTab] = useState('canvas');
+  const [showPlayerEditor, setShowPlayerEditor] = useState(false);
+
+  const handleCreateValueChain = () => {
+    const name = prompt('Enter value chain name:');
+    if (name) {
+      createValueChain(name);
+    }
+  };
 
   const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -51,8 +60,16 @@ export function ValueChainCreator() {
           </div>
           
           <div className="flex items-center gap-2">
-            {valueChain && (
+            {valueChain ? (
               <>
+                <Button
+                  onClick={() => setShowPlayerEditor(true)}
+                  size="sm"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Player
+                </Button>
+                
                 <Button
                   variant="outline"
                   size="sm"
@@ -101,18 +118,18 @@ export function ValueChainCreator() {
                   Clear
                 </Button>
               </>
+            ) : (
+              <Button onClick={handleCreateValueChain}>
+                <Plus className="w-4 h-4 mr-2" />
+                Create Value Chain
+              </Button>
             )}
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex">
-        {/* Sidebar */}
-        <ValueChainSidebar />
-        
-        {/* Canvas Area */}
-        <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="canvas">Canvas</TabsTrigger>
@@ -273,6 +290,18 @@ export function ValueChainCreator() {
           </Tabs>
         </div>
       </div>
+
+      {/* Player Editor Modal */}
+      {showPlayerEditor && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <PlayerEditor
+              player={null}
+              onClose={() => setShowPlayerEditor(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
