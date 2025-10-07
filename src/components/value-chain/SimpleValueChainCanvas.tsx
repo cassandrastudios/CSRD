@@ -117,7 +117,7 @@ export function SimpleValueChainCanvas() {
 
       {/* Value Chain Lanes with Horizontal Scroll */}
       <div className="flex-1 overflow-x-auto">
-        <div className="flex min-w-max h-full">
+        <div className="flex h-full">
         {categories.map((category) => {
           const players = valueChain.players.filter(p => p.category === category.key);
           const isDragOver = dragOverCategory === category.key;
@@ -152,11 +152,11 @@ export function SimpleValueChainCanvas() {
                     <p className="text-xs text-gray-400">Add players to this category</p>
                   </div>
                 ) : (
-                  <div className="flex gap-3 overflow-x-auto pb-2">
+                  <div className="space-y-3">
                     {players.map((player) => (
                       <Card
                         key={player.id}
-                        className={`cursor-pointer hover:shadow-md transition-shadow flex-shrink-0 w-72 ${
+                        className={`cursor-pointer hover:shadow-md transition-shadow w-full ${
                           selectedPlayer?.id === player.id ? 'ring-2 ring-blue-500' : ''
                         }`}
                         draggable
