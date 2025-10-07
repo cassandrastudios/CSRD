@@ -61,6 +61,21 @@ export const useValueChainStore = create<ValueChainStore>()(
         });
       },
 
+      movePlayerToCategory: (playerId: string, newCategory: 'upstream' | 'own_operations' | 'downstream') => {
+        const { valueChain } = get();
+        if (!valueChain) return;
+
+        set({
+          valueChain: {
+            ...valueChain,
+            players: valueChain.players.map(player =>
+              player.id === playerId ? { ...player, category: newCategory } : player
+            ),
+            updatedAt: new Date().toISOString(),
+          },
+        });
+      },
+
       deletePlayer: (id: string) => {
         const { valueChain } = get();
         if (!valueChain) return;

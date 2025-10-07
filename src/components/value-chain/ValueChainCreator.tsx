@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useValueChainStore } from '@/store/useValueChainStore';
 import { ValueChainSidebar } from './ValueChainSidebar';
-import ValueChainCanvasWrapper from './ValueChainCanvas';
+import { SimpleValueChainCanvas } from './SimpleValueChainCanvas';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -121,7 +121,7 @@ export function ValueChainCreator() {
             </TabsList>
             
             <TabsContent value="canvas" className="flex-1">
-              <ValueChainCanvasWrapper />
+              <SimpleValueChainCanvas />
             </TabsContent>
             
             <TabsContent value="analysis" className="flex-1 p-6">
