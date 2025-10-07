@@ -436,47 +436,25 @@ export function SimpleValueChainCanvas() {
             </div>
           </div>
         ) : (
-          <div className="flex flex-col gap-4 h-full overflow-x-auto">
-            {/* Category Headers */}
-            <div className="flex gap-6 flex-shrink-0">
-              {/* Upstream Header */}
-              {groupedPlayers.upstream.length > 0 && (
-                <div className="flex items-center gap-2 p-3 bg-orange-50 rounded-lg border border-orange-200">
-                  <Truck className="h-5 w-5 text-orange-600" />
-                  <h3 className="text-lg font-semibold text-gray-900">Upstream</h3>
-                  <Badge variant="secondary" className="bg-orange-100 text-orange-800">
-                    {groupedPlayers.upstream.length}
-                  </Badge>
-                </div>
-              )}
-              
-              {/* Own Operations Header */}
-              {groupedPlayers.own_operations.length > 0 && (
-                <div className="flex items-center gap-2 p-3 bg-green-50 rounded-lg border border-green-200">
-                  <Building2 className="h-5 w-5 text-green-600" />
-                  <h3 className="text-lg font-semibold text-gray-900">Own Operations</h3>
-                  <Badge variant="secondary" className="bg-green-100 text-green-800">
-                    {groupedPlayers.own_operations.length}
-                  </Badge>
-                </div>
-              )}
-              
-              {/* Downstream Header */}
-              {groupedPlayers.downstream.length > 0 && (
-                <div className="flex items-center gap-2 p-3 bg-purple-50 rounded-lg border border-purple-200">
-                  <Users className="h-5 w-5 text-purple-600" />
-                  <h3 className="text-lg font-semibold text-gray-900">Downstream</h3>
-                  <Badge variant="secondary" className="bg-purple-100 text-purple-800">
-                    {groupedPlayers.downstream.length}
-                  </Badge>
-                </div>
-              )}
-            </div>
-
-            {/* Cards in horizontal flow */}
+          <div className="flex flex-col gap-4 h-full">
+            {/* Cards in horizontal flow with inline category headers */}
             <div className="flex gap-4 overflow-x-auto pb-4">
-              {/* Upstream Cards */}
-              {groupedPlayers.upstream.map((player, index) => (
+              {/* Upstream Section */}
+              {groupedPlayers.upstream.length > 0 && (
+                <>
+                  {/* Upstream Header */}
+                  <div className="flex-shrink-0 w-80">
+                    <div className="flex items-center gap-2 p-3 bg-orange-50 rounded-lg border border-orange-200 mb-2">
+                      <Truck className="h-5 w-5 text-orange-600" />
+                      <h3 className="text-lg font-semibold text-gray-900">Upstream</h3>
+                      <Badge variant="secondary" className="bg-orange-100 text-orange-800">
+                        {groupedPlayers.upstream.length}
+                      </Badge>
+                    </div>
+                  </div>
+                  
+                  {/* Upstream Cards */}
+                  {groupedPlayers.upstream.map((player, index) => (
                 <div key={player.id} className="flex items-center">
                   {/* Drop zone before each card */}
                   <div
@@ -523,20 +501,36 @@ export function SimpleValueChainCanvas() {
                 </div>
               ))}
               
-              {/* Drop zone after upstream cards */}
-              {groupedPlayers.upstream.length > 0 && (
-                <div
-                  className={`w-2 h-32 rounded transition-colors ${
-                    draggedOverIndex === groupedPlayers.upstream.length && draggedPlayer
-                      ? 'bg-blue-500' : 'bg-transparent'
-                  }`}
-                  onDragOver={(e) => handleDragOver(e, groupedPlayers.upstream.length)}
-                  onDragLeave={handleDragLeave}
-                  onDrop={(e) => handleDrop(e, groupedPlayers.upstream.length)}
-                />
+                  {/* Drop zone after upstream cards */}
+                  {groupedPlayers.upstream.length > 0 && (
+                    <div
+                      className={`w-2 h-32 rounded transition-colors ${
+                        draggedOverIndex === groupedPlayers.upstream.length && draggedPlayer
+                          ? 'bg-blue-500' : 'bg-transparent'
+                      }`}
+                      onDragOver={(e) => handleDragOver(e, groupedPlayers.upstream.length)}
+                      onDragLeave={handleDragLeave}
+                      onDrop={(e) => handleDrop(e, groupedPlayers.upstream.length)}
+                    />
+                  )}
+                </>
               )}
 
-              {/* Own Operations Cards */}
+              {/* Own Operations Section */}
+              {groupedPlayers.own_operations.length > 0 && (
+                <>
+                  {/* Own Operations Header */}
+                  <div className="flex-shrink-0 w-80">
+                    <div className="flex items-center gap-2 p-3 bg-green-50 rounded-lg border border-green-200 mb-2">
+                      <Building2 className="h-5 w-5 text-green-600" />
+                      <h3 className="text-lg font-semibold text-gray-900">Own Operations</h3>
+                      <Badge variant="secondary" className="bg-green-100 text-green-800">
+                        {groupedPlayers.own_operations.length}
+                      </Badge>
+                    </div>
+                  </div>
+                  
+                  {/* Own Operations Cards */}
               {groupedPlayers.own_operations.map((player, index) => {
                 const globalIndex = groupedPlayers.upstream.length + index;
                 return (
@@ -587,20 +581,36 @@ export function SimpleValueChainCanvas() {
                 );
               })}
               
-              {/* Drop zone after own operations cards */}
-              {groupedPlayers.own_operations.length > 0 && (
-                <div
-                  className={`w-2 h-32 rounded transition-colors ${
-                    draggedOverIndex === groupedPlayers.upstream.length + groupedPlayers.own_operations.length && draggedPlayer
-                      ? 'bg-blue-500' : 'bg-transparent'
-                  }`}
-                  onDragOver={(e) => handleDragOver(e, groupedPlayers.upstream.length + groupedPlayers.own_operations.length)}
-                  onDragLeave={handleDragLeave}
-                  onDrop={(e) => handleDrop(e, groupedPlayers.upstream.length + groupedPlayers.own_operations.length)}
-                />
+                  {/* Drop zone after own operations cards */}
+                  {groupedPlayers.own_operations.length > 0 && (
+                    <div
+                      className={`w-2 h-32 rounded transition-colors ${
+                        draggedOverIndex === groupedPlayers.upstream.length + groupedPlayers.own_operations.length && draggedPlayer
+                          ? 'bg-blue-500' : 'bg-transparent'
+                      }`}
+                      onDragOver={(e) => handleDragOver(e, groupedPlayers.upstream.length + groupedPlayers.own_operations.length)}
+                      onDragLeave={handleDragLeave}
+                      onDrop={(e) => handleDrop(e, groupedPlayers.upstream.length + groupedPlayers.own_operations.length)}
+                    />
+                  )}
+                </>
               )}
 
-              {/* Downstream Cards */}
+              {/* Downstream Section */}
+              {groupedPlayers.downstream.length > 0 && (
+                <>
+                  {/* Downstream Header */}
+                  <div className="flex-shrink-0 w-80">
+                    <div className="flex items-center gap-2 p-3 bg-purple-50 rounded-lg border border-purple-200 mb-2">
+                      <Users className="h-5 w-5 text-purple-600" />
+                      <h3 className="text-lg font-semibold text-gray-900">Downstream</h3>
+                      <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                        {groupedPlayers.downstream.length}
+                      </Badge>
+                    </div>
+                  </div>
+                  
+                  {/* Downstream Cards */}
               {groupedPlayers.downstream.map((player, index) => {
                 const globalIndex = groupedPlayers.upstream.length + groupedPlayers.own_operations.length + index;
                 return (
@@ -651,17 +661,19 @@ export function SimpleValueChainCanvas() {
                 );
               })}
               
-              {/* Drop zone after downstream cards */}
-              {groupedPlayers.downstream.length > 0 && (
-                <div
-                  className={`w-2 h-32 rounded transition-colors ${
-                    draggedOverIndex === allPlayers.length && draggedPlayer
-                      ? 'bg-blue-500' : 'bg-transparent'
-                  }`}
-                  onDragOver={(e) => handleDragOver(e, allPlayers.length)}
-                  onDragLeave={handleDragLeave}
-                  onDrop={(e) => handleDrop(e, allPlayers.length)}
-                />
+                  {/* Drop zone after downstream cards */}
+                  {groupedPlayers.downstream.length > 0 && (
+                    <div
+                      className={`w-2 h-32 rounded transition-colors ${
+                        draggedOverIndex === allPlayers.length && draggedPlayer
+                          ? 'bg-blue-500' : 'bg-transparent'
+                      }`}
+                      onDragOver={(e) => handleDragOver(e, allPlayers.length)}
+                      onDragLeave={handleDragLeave}
+                      onDrop={(e) => handleDrop(e, allPlayers.length)}
+                    />
+                  )}
+                </>
               )}
             </div>
           </div>
