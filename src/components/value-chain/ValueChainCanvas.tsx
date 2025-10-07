@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useEffect } from 'react';
 import ReactFlow, {
   Node,
   Edge,
@@ -26,7 +26,7 @@ export function ValueChainCanvas() {
   const { valueChain, updatePlayerPosition, addRelationship } = useValueChainStore();
   
   // Convert players to ReactFlow nodes
-  const initialNodes: Node[] = useMemo(() => {
+  const nodes: Node[] = useMemo(() => {
     if (!valueChain) return [];
     
     return valueChain.players.map((player, index) => {
@@ -55,7 +55,7 @@ export function ValueChainCanvas() {
   }, [valueChain]);
 
   // Convert relationships to ReactFlow edges
-  const initialEdges: Edge[] = useMemo(() => {
+  const edges: Edge[] = useMemo(() => {
     if (!valueChain) return [];
     
     return valueChain.relationships.map(rel => ({
@@ -76,8 +76,18 @@ export function ValueChainCanvas() {
     }));
   }, [valueChain]);
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [nodesState, setNodes, onNodesChange] = useNodesState(nodes);
+  const [edgesState, setEdges, onEdgesChange] = useEdgesState(edges);
+
+  // Update nodes when valueChain changes
+  useEffect(() => {
+    setNodes(nodes);
+  }, [nodes, setNodes]);
+
+  // Update edges when valueChain changes
+  useEffect(() => {
+    setEdges(edges);
+  }, [edges, setEdges]);
 
   const onConnect = useCallback(
     (params: Connection) => {
@@ -119,8 +129,8 @@ export function ValueChainCanvas() {
   return (
     <div className="h-full w-full">
       <ReactFlow
-        nodes={nodes}
-        edges={edges}
+        nodes={nodesState}
+        edges={edgesState}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
