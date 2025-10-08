@@ -233,11 +233,13 @@ export function Settings() {
         console.error('Save organization error:', error)
         // If there's any error, fall back to local state
         const updatedOrg = {
-          ...organization,
+          id: organization?.id || 'local-' + Date.now(),
           name: formData.name,
           sector: formData.sector,
           employee_count: parseInt(formData.employee_count),
-          first_reporting_year: formData.first_reporting_year
+          first_reporting_year: formData.first_reporting_year,
+          created_at: organization?.created_at || new Date().toISOString(),
+          updated_at: new Date().toISOString()
         }
         setOrganization(updatedOrg)
         toast.success('Organization updated locally (database unavailable)')
