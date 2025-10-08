@@ -116,7 +116,7 @@ export function Navigation({ isCollapsed, onToggle }: NavigationProps) {
             )}
             title={isCollapsed ? "Account" : undefined}
           >
-            <User className="h-5 w-5 flex-shrink-0" />
+            <LogOut className="h-5 w-5 flex-shrink-0" />
             {!isCollapsed && <span className="ml-3">Account</span>}
           </Button>
           

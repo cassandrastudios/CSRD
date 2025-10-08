@@ -71,7 +71,7 @@ export function Dashboard() {
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">CSRD Roadmap</h1>
+          <h1 className="text-3xl font-bold text-gray-900">CSRD Co-Pilot</h1>
           <p className="text-gray-600 mt-2">
             Track your progress through the CSRD compliance journey
           </p>
