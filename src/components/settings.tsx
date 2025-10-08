@@ -146,7 +146,9 @@ export function Settings() {
           name: orgName,
           sector: 'Other',
           employee_count: 1,
-          first_reporting_year: new Date().getFullYear() + 1
+          first_reporting_year: new Date().getFullYear() + 1,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         }
         setOrganization(localOrg)
         setFormData({
