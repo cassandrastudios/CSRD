@@ -1,11 +1,17 @@
-'use client'
+'use client';
 
 import { useState, useEffect } from 'react';
 import { Player } from '@/types/valueChain';
 import { useValueChainStore } from '@/store/useValueChainStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { X, Save, Lightbulb } from 'lucide-react';
 
 interface PlayerEditorProps {
@@ -51,7 +57,7 @@ export function PlayerEditor({ player, onClose }: PlayerEditorProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (player) {
       console.log('Updating existing player:', player.id, formData);
       updatePlayer(player.id, formData);
@@ -59,7 +65,7 @@ export function PlayerEditor({ player, onClose }: PlayerEditorProps) {
       console.log('Adding new player:', formData);
       addPlayer(formData);
     }
-    
+
     onClose();
   };
 
@@ -67,9 +73,21 @@ export function PlayerEditor({ player, onClose }: PlayerEditorProps) {
     // AI suggestion stub - could be expanded later
     const suggestions = {
       upstream: [
-        { name: 'Raw Material Suppliers', type: 'Supplier', industry: 'Manufacturing' },
-        { name: 'Component Manufacturers', type: 'Supplier', industry: 'Electronics' },
-        { name: 'Service Providers', type: 'Supplier', industry: 'Professional Services' },
+        {
+          name: 'Raw Material Suppliers',
+          type: 'Supplier',
+          industry: 'Manufacturing',
+        },
+        {
+          name: 'Component Manufacturers',
+          type: 'Supplier',
+          industry: 'Electronics',
+        },
+        {
+          name: 'Service Providers',
+          type: 'Supplier',
+          industry: 'Professional Services',
+        },
       ],
       own_operations: [
         { name: 'R&D Department', type: 'Internal', industry: 'Technology' },
@@ -84,8 +102,11 @@ export function PlayerEditor({ player, onClose }: PlayerEditorProps) {
     };
 
     const categorySuggestions = suggestions[formData.category];
-    const randomSuggestion = categorySuggestions[Math.floor(Math.random() * categorySuggestions.length)];
-    
+    const randomSuggestion =
+      categorySuggestions[
+        Math.floor(Math.random() * categorySuggestions.length)
+      ];
+
     setFormData(prev => ({
       ...prev,
       name: randomSuggestion.name,
@@ -101,7 +122,9 @@ export function PlayerEditor({ player, onClose }: PlayerEditorProps) {
           <div>
             <CardTitle>{player ? 'Edit Player' : 'Add New Player'}</CardTitle>
             <CardDescription>
-              {player ? 'Update player information' : 'Create a new value chain player'}
+              {player
+                ? 'Update player information'
+                : 'Create a new value chain player'}
             </CardDescription>
           </div>
           <Button variant="ghost" size="sm" onClick={onClose}>
@@ -117,7 +140,9 @@ export function PlayerEditor({ player, onClose }: PlayerEditorProps) {
             </label>
             <Input
               value={formData.name}
-              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+              onChange={e =>
+                setFormData(prev => ({ ...prev, name: e.target.value }))
+              }
               placeholder="e.g., Raw Material Suppliers"
               required
             />
@@ -129,10 +154,15 @@ export function PlayerEditor({ player, onClose }: PlayerEditorProps) {
             </label>
             <select
               value={formData.category}
-              onChange={(e) => setFormData(prev => ({ 
-                ...prev, 
-                category: e.target.value as 'upstream' | 'own_operations' | 'downstream' 
-              }))}
+              onChange={e =>
+                setFormData(prev => ({
+                  ...prev,
+                  category: e.target.value as
+                    | 'upstream'
+                    | 'own_operations'
+                    | 'downstream',
+                }))
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="upstream">Upstream</option>
@@ -147,7 +177,9 @@ export function PlayerEditor({ player, onClose }: PlayerEditorProps) {
             </label>
             <textarea
               value={formData.description}
-              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+              onChange={e =>
+                setFormData(prev => ({ ...prev, description: e.target.value }))
+              }
               placeholder="Describe this player's role..."
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               rows={3}
@@ -161,7 +193,9 @@ export function PlayerEditor({ player, onClose }: PlayerEditorProps) {
               </label>
               <Input
                 value={formData.type}
-                onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value }))}
+                onChange={e =>
+                  setFormData(prev => ({ ...prev, type: e.target.value }))
+                }
                 placeholder="e.g., Supplier, Customer"
               />
             </div>
@@ -171,7 +205,9 @@ export function PlayerEditor({ player, onClose }: PlayerEditorProps) {
               </label>
               <Input
                 value={formData.industry}
-                onChange={(e) => setFormData(prev => ({ ...prev, industry: e.target.value }))}
+                onChange={e =>
+                  setFormData(prev => ({ ...prev, industry: e.target.value }))
+                }
                 placeholder="e.g., Manufacturing"
               />
             </div>
@@ -186,10 +222,12 @@ export function PlayerEditor({ player, onClose }: PlayerEditorProps) {
               min="1"
               max="10"
               value={formData.impactOnCompany}
-              onChange={(e) => setFormData(prev => ({ 
-                ...prev, 
-                impactOnCompany: parseInt(e.target.value) 
-              }))}
+              onChange={e =>
+                setFormData(prev => ({
+                  ...prev,
+                  impactOnCompany: parseInt(e.target.value),
+                }))
+              }
               className="w-full"
             />
             <div className="flex justify-between text-xs text-gray-500 mt-1">
@@ -207,10 +245,12 @@ export function PlayerEditor({ player, onClose }: PlayerEditorProps) {
               min="1"
               max="10"
               value={formData.impactFromCompany}
-              onChange={(e) => setFormData(prev => ({ 
-                ...prev, 
-                impactFromCompany: parseInt(e.target.value) 
-              }))}
+              onChange={e =>
+                setFormData(prev => ({
+                  ...prev,
+                  impactFromCompany: parseInt(e.target.value),
+                }))
+              }
               className="w-full"
             />
             <div className="flex justify-between text-xs text-gray-500 mt-1">

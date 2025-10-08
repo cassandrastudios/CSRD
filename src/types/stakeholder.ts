@@ -42,7 +42,10 @@ export interface StakeholderPermission {
   canAssignAreas: boolean;
 }
 
-export const STAKEHOLDER_PERMISSIONS: Record<StakeholderRole, StakeholderPermission> = {
+export const STAKEHOLDER_PERMISSIONS: Record<
+  StakeholderRole,
+  StakeholderPermission
+> = {
   admin: {
     role: 'admin',
     canCreate: true,
@@ -78,7 +81,12 @@ export const STAKEHOLDER_PERMISSIONS: Record<StakeholderRole, StakeholderPermiss
 export interface StakeholderAssignment {
   id: string;
   stakeholder_id: string;
-  area_type: 'materiality' | 'value_chain' | 'reporting' | 'compliance' | 'data_hub';
+  area_type:
+    | 'materiality'
+    | 'value_chain'
+    | 'reporting'
+    | 'compliance'
+    | 'data_hub';
   area_id: string;
   assigned_by: string;
   assigned_at: string;

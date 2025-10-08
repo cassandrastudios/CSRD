@@ -1,29 +1,33 @@
-'use client'
+'use client';
 
-import { useEditor, EditorContent } from '@tiptap/react'
-import StarterKit from '@tiptap/starter-kit'
-import Placeholder from '@tiptap/extension-placeholder'
-import { Button } from '@/components/ui/button'
-import { 
-  Bold, 
-  Italic, 
-  List, 
-  ListOrdered, 
-  Quote, 
-  Undo, 
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import Placeholder from '@tiptap/extension-placeholder';
+import { Button } from '@/components/ui/button';
+import {
+  Bold,
+  Italic,
+  List,
+  ListOrdered,
+  Quote,
+  Undo,
   Redo,
   Heading1,
   Heading2,
-  Heading3
-} from 'lucide-react'
+  Heading3,
+} from 'lucide-react';
 
 interface TipTapEditorProps {
-  content: string
-  onChange: (content: string) => void
-  placeholder?: string
+  content: string;
+  onChange: (content: string) => void;
+  placeholder?: string;
 }
 
-export function TipTapEditor({ content, onChange, placeholder = "Start writing..." }: TipTapEditorProps) {
+export function TipTapEditor({
+  content,
+  onChange,
+  placeholder = 'Start writing...',
+}: TipTapEditorProps) {
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -33,12 +37,12 @@ export function TipTapEditor({ content, onChange, placeholder = "Start writing..
     ],
     content,
     onUpdate: ({ editor }) => {
-      onChange(editor.getHTML())
+      onChange(editor.getHTML());
     },
-  })
+  });
 
   if (!editor) {
-    return null
+    return null;
   }
 
   return (
@@ -65,24 +69,36 @@ export function TipTapEditor({ content, onChange, placeholder = "Start writing..
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-          className={editor.isActive('heading', { level: 1 }) ? 'bg-gray-100' : ''}
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 1 }).run()
+          }
+          className={
+            editor.isActive('heading', { level: 1 }) ? 'bg-gray-100' : ''
+          }
         >
           <Heading1 className="h-4 w-4" />
         </Button>
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-          className={editor.isActive('heading', { level: 2 }) ? 'bg-gray-100' : ''}
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 2 }).run()
+          }
+          className={
+            editor.isActive('heading', { level: 2 }) ? 'bg-gray-100' : ''
+          }
         >
           <Heading2 className="h-4 w-4" />
         </Button>
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-          className={editor.isActive('heading', { level: 3 }) ? 'bg-gray-100' : ''}
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 3 }).run()
+          }
+          className={
+            editor.isActive('heading', { level: 3 }) ? 'bg-gray-100' : ''
+          }
         >
           <Heading3 className="h-4 w-4" />
         </Button>
@@ -129,14 +145,14 @@ export function TipTapEditor({ content, onChange, placeholder = "Start writing..
           <Redo className="h-4 w-4" />
         </Button>
       </div>
-      
+
       {/* Editor */}
       <div className="p-4">
-        <EditorContent 
-          editor={editor} 
+        <EditorContent
+          editor={editor}
           className="prose prose-sm max-w-none focus:outline-none min-h-[300px]"
         />
       </div>
     </div>
-  )
+  );
 }

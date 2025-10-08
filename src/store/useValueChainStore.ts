@@ -1,6 +1,11 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { ValueChainStore, Player, Relationship, ValueChain } from '@/types/valueChain';
+import {
+  ValueChainStore,
+  Player,
+  Relationship,
+  ValueChain,
+} from '@/types/valueChain';
 
 export const useValueChainStore = create<ValueChainStore>()(
   persist(
@@ -61,7 +66,10 @@ export const useValueChainStore = create<ValueChainStore>()(
         });
       },
 
-      movePlayerToCategory: (playerId: string, newCategory: 'upstream' | 'own_operations' | 'downstream') => {
+      movePlayerToCategory: (
+        playerId: string,
+        newCategory: 'upstream' | 'own_operations' | 'downstream'
+      ) => {
         const { valueChain } = get();
         if (!valueChain) return;
 
@@ -69,18 +77,28 @@ export const useValueChainStore = create<ValueChainStore>()(
           valueChain: {
             ...valueChain,
             players: valueChain.players.map(player =>
-              player.id === playerId ? { ...player, category: newCategory } : player
+              player.id === playerId
+                ? { ...player, category: newCategory }
+                : player
             ),
             updatedAt: new Date().toISOString(),
           },
         });
       },
 
-      reorderPlayers: (category: 'upstream' | 'own_operations' | 'downstream', newOrder: Player[]) => {
+      reorderPlayers: (
+        category: 'upstream' | 'own_operations' | 'downstream',
+        newOrder: Player[]
+      ) => {
         const { valueChain } = get();
         if (!valueChain) return;
 
-        console.log('reorderPlayers called with category:', category, 'newOrder:', newOrder.map(p => p.name));
+        console.log(
+          'reorderPlayers called with category:',
+          category,
+          'newOrder:',
+          newOrder.map(p => p.name)
+        );
 
         // Update players in the specified category with new order
         const updatedPlayers = valueChain.players.map(player => {
@@ -93,7 +111,14 @@ export const useValueChainStore = create<ValueChainStore>()(
           return player;
         });
 
-        console.log('Updated players:', updatedPlayers.map(p => ({ name: p.name, x: p.x, category: p.category })));
+        console.log(
+          'Updated players:',
+          updatedPlayers.map(p => ({
+            name: p.name,
+            x: p.x,
+            category: p.category,
+          }))
+        );
 
         set({
           valueChain: {
@@ -160,7 +185,9 @@ export const useValueChainStore = create<ValueChainStore>()(
         set({
           valueChain: {
             ...valueChain,
-            relationships: valueChain.relationships.filter(rel => rel.id !== id),
+            relationships: valueChain.relationships.filter(
+              rel => rel.id !== id
+            ),
             updatedAt: new Date().toISOString(),
           },
         });

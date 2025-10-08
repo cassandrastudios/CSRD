@@ -1,29 +1,29 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
-import { Resend } from 'resend'
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
+import { Resend } from 'resend';
 
-const resend = new Resend('re_df7Whao2_JNqPYXtJoNJ2CkwniqEtXRhx')
+const resend = new Resend('re_df7Whao2_JNqPYXtJoNJ2CkwniqEtXRhx');
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, role } = await request.json()
+    const { email, role } = await request.json();
 
     if (!email || !role) {
       return NextResponse.json(
         { error: 'Email and role are required' },
         { status: 400 }
-      )
+      );
     }
 
-    const supabase = createClient()
-    
+    const supabase = createClient();
+
     // Get current user
-    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
     if (userError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Get user's organization
@@ -31,31 +31,37 @@ export async function POST(request: NextRequest) {
       .from('organizations')
       .select('name')
       .eq('id', user.user_metadata?.organization_id)
-      .single()
+      .single();
 
     // Generate invite token
-    const inviteToken = crypto.randomUUID()
-    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
+    const inviteToken = crypto.randomUUID();
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
 
     // Store invite in database (if table exists)
     try {
-      const { error: dbError } = await supabase
-        .from('team_invites')
-        .insert({
-          email,
-          role,
-          token: inviteToken,
-          expires_at: expiresAt.toISOString(),
-          organization_name: organization?.name || 'Your Organization',
-          inviter_name: user.user_metadata?.display_name || user.user_metadata?.full_name || user.email
-        })
+      const { error: dbError } = await supabase.from('team_invites').insert({
+        email,
+        role,
+        token: inviteToken,
+        expires_at: expiresAt.toISOString(),
+        organization_name: organization?.name || 'Your Organization',
+        inviter_name:
+          user.user_metadata?.display_name ||
+          user.user_metadata?.full_name ||
+          user.email,
+      });
 
       if (dbError) {
-        console.log('Database table not found, continuing without database storage:', dbError.message)
+        console.log(
+          'Database table not found, continuing without database storage:',
+          dbError.message
+        );
         // Continue without database storage for now
       }
     } catch (error) {
-      console.log('Database table not available, continuing without database storage')
+      console.log(
+        'Database table not available, continuing without database storage'
+      );
       // Continue without database storage for now
     }
 
@@ -87,7 +93,7 @@ export async function POST(request: NextRequest) {
           This invitation was sent by ${user.user_metadata?.display_name || user.user_metadata?.full_name || user.email} from ${organization?.name || 'your organization'}.
         </p>
       </div>
-    `
+    `;
 
     try {
       const { data, error } = await resend.emails.send({
@@ -95,30 +101,29 @@ export async function POST(request: NextRequest) {
         to: [email],
         subject: `You're invited to join ${organization?.name || 'our team'} on CSRD Co-Pilot`,
         html: emailContent,
-      })
+      });
 
       if (error) {
-        console.error('Email sending failed:', error)
+        console.error('Email sending failed:', error);
         // Don't fail the request if email fails, just log it
       } else {
-        console.log('Email sent successfully to:', email, 'ID:', data?.id)
+        console.log('Email sent successfully to:', email, 'ID:', data?.id);
       }
     } catch (emailError) {
-      console.error('Email sending error:', emailError)
+      console.error('Email sending error:', emailError);
       // Don't fail the request if email fails, just log it
     }
 
     return NextResponse.json({
       success: true,
       message: 'Invitation sent successfully',
-      inviteToken
-    })
-
+      inviteToken,
+    });
   } catch (error) {
-    console.error('Error sending invite:', error)
+    console.error('Error sending invite:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
-    )
+    );
   }
 }

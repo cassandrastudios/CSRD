@@ -1,14 +1,16 @@
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
-import { DataHub } from '@/components/data-hub'
+import { createClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
+import { DataHub } from '@/components/data-hub';
 
 export default async function DataPage() {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/auth')
+    redirect('/auth');
   }
 
-  return <DataHub />
+  return <DataHub />;
 }

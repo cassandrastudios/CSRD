@@ -45,6 +45,7 @@ To enable real email sending for team invitations, you have several options:
 ## Current Status
 
 Right now, the system:
+
 - ✅ Creates invite records in the database
 - ✅ Shows pending invites in the UI
 - ✅ Handles expiration (7 days)
@@ -63,6 +64,7 @@ Right now, the system:
 ## Email Template
 
 The email includes:
+
 - Professional HTML template
 - Invitation link with token
 - Role information
@@ -72,6 +74,7 @@ The email includes:
 ## Database
 
 The system stores invites in the `team_invites` table with:
+
 - Email address
 - Role assignment
 - Unique token

@@ -1,20 +1,20 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { User, LogOut } from 'lucide-react'
+import { useState } from 'react';
+import { createClient } from '@/lib/supabase/client';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { User, LogOut } from 'lucide-react';
 
 export function UserMenu() {
-  const [isOpen, setIsOpen] = useState(false)
-  const supabase = createClient()
-  const router = useRouter()
+  const [isOpen, setIsOpen] = useState(false);
+  const supabase = createClient();
+  const router = useRouter();
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    router.push('/auth')
-  }
+    await supabase.auth.signOut();
+    router.push('/auth');
+  };
 
   return (
     <div className="relative">
@@ -27,7 +27,7 @@ export function UserMenu() {
         <User className="h-4 w-4" />
         <span>Account</span>
       </Button>
-      
+
       {isOpen && (
         <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
           <button
@@ -40,5 +40,5 @@ export function UserMenu() {
         </div>
       )}
     </div>
-  )
+  );
 }

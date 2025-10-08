@@ -1,36 +1,42 @@
-'use client'
+'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { Layout } from './layout'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { 
-  ScatterChart, 
-  Scatter, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer, 
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { createClient } from '@/lib/supabase/client';
+import { Layout } from './layout';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  ScatterChart,
+  Scatter,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
   Cell,
   BarChart,
   Bar,
   PieChart,
   Pie,
-  Cell as PieCell
-} from 'recharts'
-import { 
-  Search, 
-  Filter, 
-  Upload, 
-  Users, 
-  FileText, 
-  CheckCircle, 
-  AlertCircle, 
+  Cell as PieCell,
+} from 'recharts';
+import {
+  Search,
+  Filter,
+  Upload,
+  Users,
+  FileText,
+  CheckCircle,
+  AlertCircle,
   Clock,
   Eye,
   Edit,
@@ -47,135 +53,145 @@ import {
   UserCheck,
   BarChart3,
   FileDown,
-  History
-} from 'lucide-react'
-import toast from 'react-hot-toast'
+  History,
+} from 'lucide-react';
+import toast from 'react-hot-toast';
 
 // Types
 interface Topic {
-  id: string
-  title: string
-  category: 'Environmental' | 'Social' | 'Governance'
-  status: 'core' | 'emerging' | 'under_review' | 'not_relevant'
-  custom_flag: boolean
-  description: string
-  esrs_code: string
-  organization_id: string
-  created_at: string
-  updated_at: string
+  id: string;
+  title: string;
+  category: 'Environmental' | 'Social' | 'Governance';
+  status: 'core' | 'emerging' | 'under_review' | 'not_relevant';
+  custom_flag: boolean;
+  description: string;
+  esrs_code: string;
+  organization_id: string;
+  created_at: string;
+  updated_at: string;
 }
 
 interface ValueChain {
-  id: string
-  topic_id: string
-  step: 'upstream' | 'own_operations' | 'downstream'
-  note: string
-  organization_id: string
-  created_at: string
+  id: string;
+  topic_id: string;
+  step: 'upstream' | 'own_operations' | 'downstream';
+  note: string;
+  organization_id: string;
+  created_at: string;
 }
 
 interface IRO {
-  id: string
-  topic_id: string
-  type: 'impact' | 'risk' | 'opportunity'
-  description: string
-  source: string
-  stakeholder_id: string | null
-  organization_id: string
-  created_at: string
-  updated_at: string
+  id: string;
+  topic_id: string;
+  type: 'impact' | 'risk' | 'opportunity';
+  description: string;
+  source: string;
+  stakeholder_id: string | null;
+  organization_id: string;
+  created_at: string;
+  updated_at: string;
 }
 
 interface Stakeholder {
-  id: string
-  name: string
-  type: 'employee' | 'client' | 'investor' | 'ngo' | 'regulator' | 'supplier' | 'community' | 'other'
-  influence: number
-  engagement_type: string
-  notes: string
-  organization_id: string
-  created_at: string
-  updated_at: string
+  id: string;
+  name: string;
+  type:
+    | 'employee'
+    | 'client'
+    | 'investor'
+    | 'ngo'
+    | 'regulator'
+    | 'supplier'
+    | 'community'
+    | 'other';
+  influence: number;
+  engagement_type: string;
+  notes: string;
+  organization_id: string;
+  created_at: string;
+  updated_at: string;
 }
 
 interface StakeholderFeedback {
-  id: string
-  topic_id: string
-  stakeholder_id: string
-  rating: number
-  note: string
-  organization_id: string
-  created_at: string
-  updated_at: string
+  id: string;
+  topic_id: string;
+  stakeholder_id: string;
+  rating: number;
+  note: string;
+  organization_id: string;
+  created_at: string;
+  updated_at: string;
 }
 
 interface Score {
-  id: string
-  topic_id: string
-  impact_score: number
-  financial_score: number
-  total_score: number
-  rationale: string
-  scale_score: number | null
-  scope_score: number | null
-  remediability_score: number | null
-  likelihood_score: number | null
-  organization_id: string
-  created_at: string
-  updated_at: string
+  id: string;
+  topic_id: string;
+  impact_score: number;
+  financial_score: number;
+  total_score: number;
+  rationale: string;
+  scale_score: number | null;
+  scope_score: number | null;
+  remediability_score: number | null;
+  likelihood_score: number | null;
+  organization_id: string;
+  created_at: string;
+  updated_at: string;
 }
 
 interface Evidence {
-  id: string
-  topic_id: string
-  file_url: string
-  file_name: string
-  file_type: string
-  file_size: number
-  description: string
-  uploaded_by: string
-  organization_id: string
-  created_at: string
+  id: string;
+  topic_id: string;
+  file_url: string;
+  file_name: string;
+  file_type: string;
+  file_size: number;
+  description: string;
+  uploaded_by: string;
+  organization_id: string;
+  created_at: string;
 }
 
 export function DoubleMaterialityAssessment() {
   // State management
-  const [topics, setTopics] = useState<Topic[]>([])
-  const [selectedTopics, setSelectedTopics] = useState<string[]>([])
-  const [valueChains, setValueChains] = useState<ValueChain[]>([])
-  const [iros, setIros] = useState<IRO[]>([])
-  const [stakeholders, setStakeholders] = useState<Stakeholder[]>([])
-  const [stakeholderFeedback, setStakeholderFeedback] = useState<StakeholderFeedback[]>([])
-  const [scores, setScores] = useState<Score[]>([])
-  const [evidence, setEvidence] = useState<Evidence[]>([])
-  
+  const [topics, setTopics] = useState<Topic[]>([]);
+  const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
+  const [valueChains, setValueChains] = useState<ValueChain[]>([]);
+  const [iros, setIros] = useState<IRO[]>([]);
+  const [stakeholders, setStakeholders] = useState<Stakeholder[]>([]);
+  const [stakeholderFeedback, setStakeholderFeedback] = useState<
+    StakeholderFeedback[]
+  >([]);
+  const [scores, setScores] = useState<Score[]>([]);
+  const [evidence, setEvidence] = useState<Evidence[]>([]);
+
   // UI state
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState<string>('All')
-  const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null)
-  const [activeTab, setActiveTab] = useState('topics')
-  const [showAddTopicModal, setShowAddTopicModal] = useState(false)
-  const [showAddStakeholderModal, setShowAddStakeholderModal] = useState(false)
-  const [showAddIROModal, setShowAddIROModal] = useState(false)
-  
-  const supabase = createClient()
-  const debouncedUpdate = useRef<NodeJS.Timeout>()
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
+  const [activeTab, setActiveTab] = useState('topics');
+  const [showAddTopicModal, setShowAddTopicModal] = useState(false);
+  const [showAddStakeholderModal, setShowAddStakeholderModal] = useState(false);
+  const [showAddIROModal, setShowAddIROModal] = useState(false);
+
+  const supabase = createClient();
+  const debouncedUpdate = useRef<NodeJS.Timeout>();
 
   // Fetch all data
   useEffect(() => {
-    fetchData()
-  }, [])
+    fetchData();
+  }, []);
 
   // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
       if (debouncedUpdate.current) {
-        clearTimeout(debouncedUpdate.current)
+        clearTimeout(debouncedUpdate.current);
       }
-    }
-  }, [])
+    };
+  }, []);
 
   const fetchData = async () => {
     try {
@@ -186,7 +202,7 @@ export function DoubleMaterialityAssessment() {
         stakeholdersResult,
         stakeholderFeedbackResult,
         scoresResult,
-        evidenceResult
+        evidenceResult,
       ] = await Promise.all([
         supabase.from('topics').select('*').order('title'),
         supabase.from('value_chain').select('*'),
@@ -194,133 +210,150 @@ export function DoubleMaterialityAssessment() {
         supabase.from('stakeholders').select('*'),
         supabase.from('stakeholder_feedback').select('*'),
         supabase.from('scores').select('*'),
-        supabase.from('evidence').select('*')
-      ])
+        supabase.from('evidence').select('*'),
+      ]);
 
-      if (topicsResult.error) throw topicsResult.error
-      if (valueChainsResult.error) throw valueChainsResult.error
-      if (irosResult.error) throw irosResult.error
-      if (stakeholdersResult.error) throw stakeholdersResult.error
-      if (stakeholderFeedbackResult.error) throw stakeholderFeedbackResult.error
-      if (scoresResult.error) throw scoresResult.error
-      if (evidenceResult.error) throw evidenceResult.error
+      if (topicsResult.error) throw topicsResult.error;
+      if (valueChainsResult.error) throw valueChainsResult.error;
+      if (irosResult.error) throw irosResult.error;
+      if (stakeholdersResult.error) throw stakeholdersResult.error;
+      if (stakeholderFeedbackResult.error)
+        throw stakeholderFeedbackResult.error;
+      if (scoresResult.error) throw scoresResult.error;
+      if (evidenceResult.error) throw evidenceResult.error;
 
-      setTopics(topicsResult.data || [])
-      setValueChains(valueChainsResult.data || [])
-      setIros(irosResult.data || [])
-      setStakeholders(stakeholdersResult.data || [])
-      setStakeholderFeedback(stakeholderFeedbackResult.data || [])
-      setScores(scoresResult.data || [])
-      setEvidence(evidenceResult.data || [])
+      setTopics(topicsResult.data || []);
+      setValueChains(valueChainsResult.data || []);
+      setIros(irosResult.data || []);
+      setStakeholders(stakeholdersResult.data || []);
+      setStakeholderFeedback(stakeholderFeedbackResult.data || []);
+      setScores(scoresResult.data || []);
+      setEvidence(evidenceResult.data || []);
 
       // Auto-select topics that are marked as 'core'
-      const coreTopics = (topicsResult.data || []).filter(t => t.status === 'core').map(t => t.id)
-      setSelectedTopics(coreTopics)
+      const coreTopics = (topicsResult.data || [])
+        .filter(t => t.status === 'core')
+        .map(t => t.id);
+      setSelectedTopics(coreTopics);
     } catch (error: any) {
-      console.error('Error fetching data:', error)
-      toast.error('Failed to load data: ' + error.message)
+      console.error('Error fetching data:', error);
+      toast.error('Failed to load data: ' + error.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   // Debounced update function
-  const updateScore = useCallback((topicId: string, impactScore: number, financialScore: number) => {
-    if (debouncedUpdate.current) {
-      clearTimeout(debouncedUpdate.current)
-    }
-
-    // Update local state immediately
-    setScores(prev => {
-      const existing = prev.find(s => s.topic_id === topicId)
-      if (existing) {
-        return prev.map(s => 
-          s.topic_id === topicId 
-            ? { ...s, impact_score: impactScore, financial_score: financialScore }
-            : s
-        )
-      } else {
-        return [...prev, {
-          id: '',
-          topic_id: topicId,
-          impact_score: impactScore,
-          financial_score: financialScore,
-          total_score: (impactScore + financialScore) / 2,
-          rationale: '',
-          scale_score: null,
-          scope_score: null,
-          remediability_score: null,
-          likelihood_score: null,
-          organization_id: '',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }]
+  const updateScore = useCallback(
+    (topicId: string, impactScore: number, financialScore: number) => {
+      if (debouncedUpdate.current) {
+        clearTimeout(debouncedUpdate.current);
       }
-    })
 
-    // Debounce database update
-    debouncedUpdate.current = setTimeout(async () => {
-      setSaving(true)
-      try {
-        const { error } = await supabase
-          .from('scores')
-          .upsert({
+      // Update local state immediately
+      setScores(prev => {
+        const existing = prev.find(s => s.topic_id === topicId);
+        if (existing) {
+          return prev.map(s =>
+            s.topic_id === topicId
+              ? {
+                  ...s,
+                  impact_score: impactScore,
+                  financial_score: financialScore,
+                }
+              : s
+          );
+        } else {
+          return [
+            ...prev,
+            {
+              id: '',
+              topic_id: topicId,
+              impact_score: impactScore,
+              financial_score: financialScore,
+              total_score: (impactScore + financialScore) / 2,
+              rationale: '',
+              scale_score: null,
+              scope_score: null,
+              remediability_score: null,
+              likelihood_score: null,
+              organization_id: '',
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            },
+          ];
+        }
+      });
+
+      // Debounce database update
+      debouncedUpdate.current = setTimeout(async () => {
+        setSaving(true);
+        try {
+          const { error } = await supabase.from('scores').upsert({
             topic_id: topicId,
             impact_score: impactScore,
-            financial_score: financialScore
-          })
+            financial_score: financialScore,
+          });
 
-        if (error) throw error
-        toast.success('Score saved')
-      } catch (error: any) {
-        toast.error('Failed to save score: ' + error.message)
-      } finally {
-        setSaving(false)
-      }
-    }, 1000)
-  }, [supabase])
+          if (error) throw error;
+          toast.success('Score saved');
+        } catch (error: any) {
+          toast.error('Failed to save score: ' + error.message);
+        } finally {
+          setSaving(false);
+        }
+      }, 1000);
+    },
+    [supabase]
+  );
 
   const getScore = (topicId: string) => {
-    return scores.find(s => s.topic_id === topicId)
-  }
+    return scores.find(s => s.topic_id === topicId);
+  };
 
   const getTopicIROs = (topicId: string) => {
-    return iros.filter(i => i.topic_id === topicId)
-  }
+    return iros.filter(i => i.topic_id === topicId);
+  };
 
   const getTopicStakeholderFeedback = (topicId: string) => {
-    return stakeholderFeedback.filter(f => f.topic_id === topicId)
-  }
+    return stakeholderFeedback.filter(f => f.topic_id === topicId);
+  };
 
   const getTopicEvidence = (topicId: string) => {
-    return evidence.filter(e => e.topic_id === topicId)
-  }
+    return evidence.filter(e => e.topic_id === topicId);
+  };
 
   const getValueChain = (topicId: string) => {
-    return valueChains.find(v => v.topic_id === topicId)
-  }
+    return valueChains.find(v => v.topic_id === topicId);
+  };
 
   // Filter topics based on search and category
   const filteredTopics = topics.filter(topic => {
-    if (!topic || !topic.title || !topic.description) return false
-    const matchesSearch = topic.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         topic.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         topic.esrs_code.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = selectedCategory === 'All' || topic.category === selectedCategory
-    return matchesSearch && matchesCategory
-  })
+    if (!topic || !topic.title || !topic.description) return false;
+    const matchesSearch =
+      topic.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      topic.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      topic.esrs_code.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory =
+      selectedCategory === 'All' || topic.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   // Calculate progress
-  const progress = selectedTopics.length > 0 ? (scores.length / selectedTopics.length) * 100 : 0
+  const progress =
+    selectedTopics.length > 0
+      ? (scores.length / selectedTopics.length) * 100
+      : 0;
 
   // Prepare data for visualizations
   const matrixData = scores.map(score => {
-    const topic = topics.find(t => t.id === score.topic_id)
-    const feedback = getTopicStakeholderFeedback(score.topic_id)
-    const avgStakeholderRating = feedback.length > 0 
-      ? feedback.reduce((sum, f) => sum + f.rating, 0) / feedback.length 
-      : 0
-    
+    const topic = topics.find(t => t.id === score.topic_id);
+    const feedback = getTopicStakeholderFeedback(score.topic_id);
+    const avgStakeholderRating =
+      feedback.length > 0
+        ? feedback.reduce((sum, f) => sum + f.rating, 0) / feedback.length
+        : 0;
+
     return {
       name: topic?.title || 'Unknown',
       code: topic?.esrs_code || '',
@@ -328,31 +361,36 @@ export function DoubleMaterialityAssessment() {
       financial: score.financial_score,
       category: topic?.category || 'Unknown',
       stakeholderWeight: avgStakeholderRating,
-      materiality: score.total_score >= 3 ? 'Material' : 'Non-Material'
-    }
-  })
+      materiality: score.total_score >= 3 ? 'Material' : 'Non-Material',
+    };
+  });
 
-  const categoryData = topics.reduce((acc, topic) => {
-    const category = topic.category
-    if (!acc[category]) {
-      acc[category] = { total: 0, selected: 0, scored: 0 }
-    }
-    acc[category].total++
-    if (selectedTopics.includes(topic.id)) {
-      acc[category].selected++
-    }
-    if (scores.find(s => s.topic_id === topic.id)) {
-      acc[category].scored++
-    }
-    return acc
-  }, {} as Record<string, { total: number; selected: number; scored: number }>)
+  const categoryData = topics.reduce(
+    (acc, topic) => {
+      const category = topic.category;
+      if (!acc[category]) {
+        acc[category] = { total: 0, selected: 0, scored: 0 };
+      }
+      acc[category].total++;
+      if (selectedTopics.includes(topic.id)) {
+        acc[category].selected++;
+      }
+      if (scores.find(s => s.topic_id === topic.id)) {
+        acc[category].scored++;
+      }
+      return acc;
+    },
+    {} as Record<string, { total: number; selected: number; scored: number }>
+  );
 
-  const categoryChartData = Object.entries(categoryData).map(([category, data]) => ({
-    category,
-    selected: data.selected,
-    scored: data.scored,
-    remaining: data.total - data.selected
-  }))
+  const categoryChartData = Object.entries(categoryData).map(
+    ([category, data]) => ({
+      category,
+      selected: data.selected,
+      scored: data.scored,
+      remaining: data.total - data.selected,
+    })
+  );
 
   if (loading) {
     return (
@@ -369,7 +407,7 @@ export function DoubleMaterialityAssessment() {
           </div>
         </div>
       </Layout>
-    )
+    );
   }
 
   return (
@@ -378,9 +416,12 @@ export function DoubleMaterialityAssessment() {
         {/* Header */}
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-bold">Double Materiality Assessment</h1>
+            <h1 className="text-3xl font-bold">
+              Double Materiality Assessment
+            </h1>
             <p className="text-gray-600 mt-2">
-              Complete ESRS-compliant materiality assessment with stakeholder engagement
+              Complete ESRS-compliant materiality assessment with stakeholder
+              engagement
             </p>
           </div>
           <div className="flex gap-2">
@@ -414,19 +455,27 @@ export function DoubleMaterialityAssessment() {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="text-center">
-                <div className="text-3xl font-bold text-blue-600">{selectedTopics.length}</div>
+                <div className="text-3xl font-bold text-blue-600">
+                  {selectedTopics.length}
+                </div>
                 <div className="text-sm text-gray-500">Topics Selected</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-green-600">{scores.length}</div>
+                <div className="text-3xl font-bold text-green-600">
+                  {scores.length}
+                </div>
                 <div className="text-sm text-gray-500">Topics Scored</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-orange-600">{stakeholders.length}</div>
+                <div className="text-3xl font-bold text-orange-600">
+                  {stakeholders.length}
+                </div>
                 <div className="text-sm text-gray-500">Stakeholders</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-purple-600">{evidence.length}</div>
+                <div className="text-3xl font-bold text-purple-600">
+                  {evidence.length}
+                </div>
                 <div className="text-sm text-gray-500">Evidence Files</div>
               </div>
             </div>
@@ -457,21 +506,27 @@ export function DoubleMaterialityAssessment() {
                         <Input
                           placeholder="Search topics..."
                           value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
+                          onChange={e => setSearchTerm(e.target.value)}
                           className="pl-10"
                         />
                       </div>
                       <div className="flex gap-2">
-                        {['All', 'Environmental', 'Social', 'Governance'].map(category => (
-                          <Button
-                            key={category}
-                            variant={selectedCategory === category ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => setSelectedCategory(category)}
-                          >
-                            {category}
-                          </Button>
-                        ))}
+                        {['All', 'Environmental', 'Social', 'Governance'].map(
+                          category => (
+                            <Button
+                              key={category}
+                              variant={
+                                selectedCategory === category
+                                  ? 'default'
+                                  : 'outline'
+                              }
+                              size="sm"
+                              onClick={() => setSelectedCategory(category)}
+                            >
+                              {category}
+                            </Button>
+                          )
+                        )}
                       </div>
                     </div>
                   </CardHeader>
@@ -481,13 +536,17 @@ export function DoubleMaterialityAssessment() {
                         <div
                           key={topic.id}
                           className={`p-4 border-b cursor-pointer hover:bg-gray-50 ${
-                            selectedTopics.includes(topic.id) ? 'bg-blue-50 border-blue-200' : ''
+                            selectedTopics.includes(topic.id)
+                              ? 'bg-blue-50 border-blue-200'
+                              : ''
                           }`}
                           onClick={() => {
                             if (selectedTopics.includes(topic.id)) {
-                              setSelectedTopics(prev => prev.filter(id => id !== topic.id))
+                              setSelectedTopics(prev =>
+                                prev.filter(id => id !== topic.id)
+                              );
                             } else {
-                              setSelectedTopics(prev => [...prev, topic.id])
+                              setSelectedTopics(prev => [...prev, topic.id]);
                             }
                           }}
                         >
@@ -501,15 +560,27 @@ export function DoubleMaterialityAssessment() {
                                   className="rounded"
                                 />
                                 <div>
-                                  <div className="font-medium">{topic.title}</div>
-                                  <div className="text-sm text-gray-500">{topic.esrs_code}</div>
+                                  <div className="font-medium">
+                                    {topic.title}
+                                  </div>
+                                  <div className="text-sm text-gray-500">
+                                    {topic.esrs_code}
+                                  </div>
                                 </div>
                               </div>
-                              <div className="text-sm text-gray-600 mt-1">{topic.description}</div>
+                              <div className="text-sm text-gray-600 mt-1">
+                                {topic.description}
+                              </div>
                             </div>
                             <div className="flex items-center gap-2">
                               <Badge variant="outline">{topic.category}</Badge>
-                              <Badge variant={topic.status === 'core' ? 'default' : 'secondary'}>
+                              <Badge
+                                variant={
+                                  topic.status === 'core'
+                                    ? 'default'
+                                    : 'secondary'
+                                }
+                              >
                                 {topic.status.replace('_', ' ')}
                               </Badge>
                             </div>
@@ -527,23 +598,34 @@ export function DoubleMaterialityAssessment() {
                   <Card>
                     <CardHeader>
                       <CardTitle>{selectedTopic.title}</CardTitle>
-                      <CardDescription>{selectedTopic.esrs_code}</CardDescription>
+                      <CardDescription>
+                        {selectedTopic.esrs_code}
+                      </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div>
-                        <h3 className="font-medium mb-2">Value Chain Mapping</h3>
+                        <h3 className="font-medium mb-2">
+                          Value Chain Mapping
+                        </h3>
                         <div className="space-y-2">
-                          {['upstream', 'own_operations', 'downstream'].map(step => (
-                            <div key={step} className="flex items-center gap-2">
-                              <input
-                                type="radio"
-                                name="valueChain"
-                                value={step}
-                                className="rounded"
-                              />
-                              <span className="text-sm capitalize">{step.replace('_', ' ')}</span>
-                            </div>
-                          ))}
+                          {['upstream', 'own_operations', 'downstream'].map(
+                            step => (
+                              <div
+                                key={step}
+                                className="flex items-center gap-2"
+                              >
+                                <input
+                                  type="radio"
+                                  name="valueChain"
+                                  value={step}
+                                  className="rounded"
+                                />
+                                <span className="text-sm capitalize">
+                                  {step.replace('_', ' ')}
+                                </span>
+                              </div>
+                            )
+                          )}
                         </div>
                       </div>
 
@@ -551,7 +633,10 @@ export function DoubleMaterialityAssessment() {
                         <h3 className="font-medium mb-2">IROs</h3>
                         <div className="space-y-2">
                           {getTopicIROs(selectedTopic.id).map(iro => (
-                            <div key={iro.id} className="p-2 border rounded text-sm">
+                            <div
+                              key={iro.id}
+                              className="p-2 border rounded text-sm"
+                            >
                               <div className="flex items-center gap-2">
                                 <Badge variant="outline" className="text-xs">
                                   {iro.type}
@@ -560,7 +645,11 @@ export function DoubleMaterialityAssessment() {
                               </div>
                             </div>
                           ))}
-                          <Button size="sm" variant="outline" className="w-full">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="w-full"
+                          >
                             <Plus className="w-4 h-4 mr-2" />
                             Add IRO
                           </Button>
@@ -573,8 +662,12 @@ export function DoubleMaterialityAssessment() {
                     <CardContent className="flex items-center justify-center h-64">
                       <div className="text-center">
                         <Target className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">Select a Topic</h3>
-                        <p className="text-gray-500">Choose a topic to view details and configure IROs</p>
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">
+                          Select a Topic
+                        </h3>
+                        <p className="text-gray-500">
+                          Choose a topic to view details and configure IROs
+                        </p>
                       </div>
                     </CardContent>
                   </Card>
@@ -625,9 +718,9 @@ export function DoubleMaterialityAssessment() {
           <TabsContent value="scoring" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {selectedTopics.map(topicId => {
-                const topic = topics.find(t => t.id === topicId)
-                const score = getScore(topicId)
-                if (!topic) return null
+                const topic = topics.find(t => t.id === topicId);
+                const score = getScore(topicId);
+                if (!topic) return null;
 
                 return (
                   <Card key={topicId}>
@@ -640,18 +733,29 @@ export function DoubleMaterialityAssessment() {
                     <CardContent className="space-y-6">
                       <div className="grid grid-cols-2 gap-6">
                         <div>
-                          <h3 className="font-medium mb-4">Impact Materiality</h3>
+                          <h3 className="font-medium mb-4">
+                            Impact Materiality
+                          </h3>
                           <p className="text-sm text-gray-600 mb-4">
-                            Inside-out: How your organization affects people and environment
+                            Inside-out: How your organization affects people and
+                            environment
                           </p>
                           <div className="space-y-2">
-                            <label className="text-sm">Impact Level: {score?.impact_score || 1}</label>
+                            <label className="text-sm">
+                              Impact Level: {score?.impact_score || 1}
+                            </label>
                             <input
                               type="range"
                               min="1"
                               max="5"
                               value={score?.impact_score || 1}
-                              onChange={(e) => updateScore(topicId, parseInt(e.target.value), score?.financial_score || 1)}
+                              onChange={e =>
+                                updateScore(
+                                  topicId,
+                                  parseInt(e.target.value),
+                                  score?.financial_score || 1
+                                )
+                              }
                               className="w-full"
                             />
                             <div className="flex justify-between text-xs text-gray-500">
@@ -662,18 +766,29 @@ export function DoubleMaterialityAssessment() {
                         </div>
 
                         <div>
-                          <h3 className="font-medium mb-4">Financial Materiality</h3>
+                          <h3 className="font-medium mb-4">
+                            Financial Materiality
+                          </h3>
                           <p className="text-sm text-gray-600 mb-4">
-                            Outside-in: How sustainability issues affect your organization
+                            Outside-in: How sustainability issues affect your
+                            organization
                           </p>
                           <div className="space-y-2">
-                            <label className="text-sm">Financial Level: {score?.financial_score || 1}</label>
+                            <label className="text-sm">
+                              Financial Level: {score?.financial_score || 1}
+                            </label>
                             <input
                               type="range"
                               min="1"
                               max="5"
                               value={score?.financial_score || 1}
-                              onChange={(e) => updateScore(topicId, score?.impact_score || 1, parseInt(e.target.value))}
+                              onChange={e =>
+                                updateScore(
+                                  topicId,
+                                  score?.impact_score || 1,
+                                  parseInt(e.target.value)
+                                )
+                              }
                               className="w-full"
                             />
                             <div className="flex justify-between text-xs text-gray-500">
@@ -687,19 +802,35 @@ export function DoubleMaterialityAssessment() {
                       <div className="pt-4 border-t">
                         <div className="flex items-center justify-between">
                           <div>
-                            <div className="text-sm text-gray-600">Total Materiality Score</div>
+                            <div className="text-sm text-gray-600">
+                              Total Materiality Score
+                            </div>
                             <div className="text-2xl font-bold">
-                              {score ? ((score.impact_score + score.financial_score) / 2).toFixed(1) : '1.0'}
+                              {score
+                                ? (
+                                    (score.impact_score +
+                                      score.financial_score) /
+                                    2
+                                  ).toFixed(1)
+                                : '1.0'}
                             </div>
                           </div>
-                          <Badge variant={score && score.total_score >= 3 ? 'default' : 'secondary'}>
-                            {score && score.total_score >= 3 ? 'Material' : 'Non-Material'}
+                          <Badge
+                            variant={
+                              score && score.total_score >= 3
+                                ? 'default'
+                                : 'secondary'
+                            }
+                          >
+                            {score && score.total_score >= 3
+                              ? 'Material'
+                              : 'Non-Material'}
                           </Badge>
                         </div>
                       </div>
                     </CardContent>
                   </Card>
-                )
+                );
               })}
             </div>
           </TabsContent>
@@ -718,36 +849,40 @@ export function DoubleMaterialityAssessment() {
                   <ResponsiveContainer width="100%" height="100%">
                     <ScatterChart data={matrixData}>
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis 
-                        type="number" 
-                        dataKey="financial" 
+                      <XAxis
+                        type="number"
+                        dataKey="financial"
                         name="Financial Materiality"
                         domain={[0, 5]}
                         tickCount={6}
                       />
-                      <YAxis 
-                        type="number" 
-                        dataKey="impact" 
+                      <YAxis
+                        type="number"
+                        dataKey="impact"
                         name="Impact Materiality"
                         domain={[0, 5]}
                         tickCount={6}
                       />
-                      <Tooltip 
+                      <Tooltip
                         formatter={(value, name, props) => [
-                          value, 
-                          name === 'impact' ? 'Impact Materiality' : 'Financial Materiality'
+                          value,
+                          name === 'impact'
+                            ? 'Impact Materiality'
+                            : 'Financial Materiality',
                         ]}
-                        labelFormatter={(label, props) => 
+                        labelFormatter={(label, props) =>
                           `${(props as any).payload?.name} (${(props as any).payload?.code})`
                         }
                       />
                       <Scatter dataKey="impact" fill="#8884d8">
                         {matrixData.map((entry, index) => (
-                          <Cell 
-                            key={`cell-${index}`} 
+                          <Cell
+                            key={`cell-${index}`}
                             fill={
-                              entry.materiality === 'Material' ? '#ef4444' : '#10b981'
-                            } 
+                              entry.materiality === 'Material'
+                                ? '#ef4444'
+                                : '#10b981'
+                            }
                           />
                         ))}
                       </Scatter>
@@ -843,5 +978,5 @@ export function DoubleMaterialityAssessment() {
         </Tabs>
       </div>
     </Layout>
-  )
+  );
 }

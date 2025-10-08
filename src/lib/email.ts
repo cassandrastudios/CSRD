@@ -2,23 +2,25 @@
 // This is a stub implementation - in production, you'd use a service like SendGrid, Resend, or AWS SES
 
 export interface InviteEmailData {
-  email: string
-  role: string
-  organizationName: string
-  inviterName: string
-  inviteUrl: string
-  expiresAt: string
+  email: string;
+  role: string;
+  organizationName: string;
+  inviterName: string;
+  inviteUrl: string;
+  expiresAt: string;
 }
 
-export async function sendStakeholderInvite(data: InviteEmailData): Promise<boolean> {
+export async function sendStakeholderInvite(
+  data: InviteEmailData
+): Promise<boolean> {
   try {
     // In production, this would send an actual email
     console.log('📧 Sending stakeholder invitation:', {
       to: data.email,
       role: data.role,
       organization: data.organizationName,
-      inviteUrl: data.inviteUrl
-    })
+      inviteUrl: data.inviteUrl,
+    });
 
     // For now, just log the invitation details
     // In production, you would:
@@ -27,17 +29,17 @@ export async function sendStakeholderInvite(data: InviteEmailData): Promise<bool
     // 3. Handle email delivery status and bounces
     // 4. Add retry logic for failed sends
 
-    return true
+    return true;
   } catch (error) {
-    console.error('Failed to send invitation email:', error)
-    return false
+    console.error('Failed to send invitation email:', error);
+    return false;
   }
 }
 
 export function generateInviteUrl(token: string): string {
   // In production, this would use your actual domain
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:9191'
-  return `${baseUrl}/invite/${token}`
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:9191';
+  return `${baseUrl}/invite/${token}`;
 }
 
 export function generateEmailTemplate(data: InviteEmailData): string {
@@ -66,19 +68,25 @@ export function generateEmailTemplate(data: InviteEmailData): string {
         <div style="background: white; padding: 20px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #3b82f6;">
           <h3 style="margin: 0 0 10px 0; color: #1e40af;">What you'll be able to do:</h3>
           <ul style="margin: 0; padding-left: 20px; color: #374151;">
-            ${data.role === 'admin' ? `
+            ${
+              data.role === 'admin'
+                ? `
               <li>Full access to all areas and features</li>
               <li>Manage all stakeholders and their permissions</li>
               <li>Configure organization settings</li>
-            ` : data.role === 'manager' ? `
+            `
+                : data.role === 'manager'
+                  ? `
               <li>Access to assigned areas with full control</li>
               <li>Invite and manage contributors</li>
               <li>Create and edit content in your areas</li>
-            ` : `
+            `
+                  : `
               <li>Access to assigned areas for editing</li>
               <li>Create and edit content in your areas</li>
               <li>Collaborate with your team</li>
-            `}
+            `
+            }
           </ul>
         </div>
         
@@ -102,5 +110,5 @@ export function generateEmailTemplate(data: InviteEmailData): string {
       </div>
     </body>
     </html>
-  `
+  `;
 }

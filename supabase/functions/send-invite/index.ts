@@ -1,61 +1,60 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+  'Access-Control-Allow-Headers':
+    'authorization, x-client-info, apikey, content-type',
+};
 
-serve(async (req) => {
+serve(async req => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response('ok', { headers: corsHeaders });
   }
 
   try {
-    const { email, role, organizationName, inviterName } = await req.json()
+    const { email, role, organizationName, inviterName } = await req.json();
 
     if (!email || !role) {
       return new Response(
         JSON.stringify({ error: 'Email and role are required' }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         }
-      )
+      );
     }
 
     // Create Supabase client
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
+    );
 
     // Generate invite token
-    const inviteToken = crypto.randomUUID()
-    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
+    const inviteToken = crypto.randomUUID();
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
 
     // Store invite in database
-    const { error: dbError } = await supabase
-      .from('team_invites')
-      .insert({
-        email,
-        role,
-        token: inviteToken,
-        expires_at: expiresAt.toISOString(),
-        organization_name: organizationName || 'Your Organization',
-        inviter_name: inviterName || 'Team Admin'
-      })
+    const { error: dbError } = await supabase.from('team_invites').insert({
+      email,
+      role,
+      token: inviteToken,
+      expires_at: expiresAt.toISOString(),
+      organization_name: organizationName || 'Your Organization',
+      inviter_name: inviterName || 'Team Admin',
+    });
 
     if (dbError) {
-      console.error('Database error:', dbError)
+      console.error('Database error:', dbError);
       return new Response(
         JSON.stringify({ error: 'Failed to create invite' }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         }
-      )
+      );
     }
 
     // Send email using Resend (you'll need to set up Resend API key)
@@ -86,14 +85,14 @@ serve(async (req) => {
           This invitation was sent by ${inviterName || 'a team member'} from ${organizationName || 'your organization'}.
         </p>
       </div>
-    `
+    `;
 
     // For now, we'll use a simple email service
     // In production, you'd use Resend, SendGrid, or similar
     const emailResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${Deno.env.get('RESEND_API_KEY')}`,
+        Authorization: `Bearer ${Deno.env.get('RESEND_API_KEY')}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -102,33 +101,29 @@ serve(async (req) => {
         subject: `You're invited to join ${organizationName || 'our team'} on CSRD Co-Pilot`,
         html: emailContent,
       }),
-    })
+    });
 
     if (!emailResponse.ok) {
-      console.error('Email sending failed:', await emailResponse.text())
+      console.error('Email sending failed:', await emailResponse.text());
       // Don't fail the request if email fails, just log it
     }
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
+      JSON.stringify({
+        success: true,
         message: 'Invitation sent successfully',
-        inviteToken 
+        inviteToken,
       }),
-      { 
-        status: 200, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
-    )
-
+    );
   } catch (error) {
-    console.error('Error:', error)
-    return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
-      { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
-    )
+    console.error('Error:', error);
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
-})
+});

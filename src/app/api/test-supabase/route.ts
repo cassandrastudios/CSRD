@@ -1,34 +1,34 @@
-import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
 
 export async function GET() {
   try {
-    const supabase = createClient()
-    
+    const supabase = createClient();
+
     // Test basic connection
     const { data, error } = await supabase
       .from('esrs_topics')
       .select('count')
-      .limit(1)
+      .limit(1);
 
     if (error) {
-      return NextResponse.json({ 
-        success: false, 
+      return NextResponse.json({
+        success: false,
         error: error.message,
-        details: 'Database connection failed'
-      })
+        details: 'Database connection failed',
+      });
     }
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       message: 'Supabase connection successful',
-      data: data
-    })
+      data: data,
+    });
   } catch (error: any) {
-    return NextResponse.json({ 
-      success: false, 
+    return NextResponse.json({
+      success: false,
       error: error.message,
-      details: 'Server error'
-    })
+      details: 'Server error',
+    });
   }
 }

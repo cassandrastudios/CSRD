@@ -8,6 +8,7 @@ A comprehensive SaaS web application that helps small and mid-sized companies pr
 ## 🚀 Features
 
 ### Core Functionality
+
 - **Onboarding**: Simple company setup with sector, employee count, and reporting year
 - **Roadmap Dashboard**: Visual progress tracking through CSRD milestones
 - **Materiality Assessment**: Interactive ESRS topic assessment with dual-axis sliders
@@ -17,6 +18,7 @@ A comprehensive SaaS web application that helps small and mid-sized companies pr
 - **Settings**: Organization management and API key configuration
 
 ### Technical Features
+
 - **Authentication**: Supabase Auth with email/password
 - **Database**: PostgreSQL via Supabase with real-time subscriptions
 - **AI Integration**: OpenAI GPT API for content generation (placeholder)
@@ -39,22 +41,26 @@ A comprehensive SaaS web application that helps small and mid-sized companies pr
 ## 📦 Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd csrd-co-pilot
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Set up environment variables**
+
    ```bash
    cp env.example .env.local
    ```
-   
+
    Fill in your environment variables:
+
    ```env
    NEXT_PUBLIC_SUPABASE_URL=your_supabase_url_here
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
@@ -68,6 +74,7 @@ A comprehensive SaaS web application that helps small and mid-sized companies pr
    - Enable Row Level Security (RLS) policies as needed
 
 5. **Run the development server**
+
    ```bash
    npm run dev
    ```
@@ -78,6 +85,7 @@ A comprehensive SaaS web application that helps small and mid-sized companies pr
 ## 🗄 Database Schema
 
 ### Core Tables
+
 - **organizations**: Company information and settings
 - **esrs_topics**: ESRS topic definitions and categories
 - **materiality_assessments**: Materiality assessment results
@@ -85,6 +93,7 @@ A comprehensive SaaS web application that helps small and mid-sized companies pr
 - **report_sections**: Report content and drafts
 
 ### Key Relationships
+
 - Organizations have many materiality assessments
 - Organizations have many ESG metrics
 - Organizations have many report sections
@@ -93,6 +102,7 @@ A comprehensive SaaS web application that helps small and mid-sized companies pr
 ## 🎯 Usage
 
 ### Getting Started
+
 1. **Sign Up**: Create an account with email/password
 2. **Onboarding**: Complete company information setup
 3. **Materiality Assessment**: Assess ESRS topics for materiality
@@ -101,6 +111,7 @@ A comprehensive SaaS web application that helps small and mid-sized companies pr
 6. **Compliance Check**: Monitor progress against requirements
 
 ### Key Workflows
+
 - **Materiality Assessment**: Use dual sliders to assess impact and financial materiality
 - **Data Collection**: Add metrics, assign owners, track completion status
 - **Report Building**: Create sections with AI assistance and rich text editing
@@ -109,17 +120,20 @@ A comprehensive SaaS web application that helps small and mid-sized companies pr
 ## 🔧 Configuration
 
 ### Supabase Setup
+
 1. Create a new Supabase project
 2. Run the provided migration SQL
 3. Set up authentication policies
 4. Configure storage buckets for file uploads
 
 ### OpenAI Integration
+
 1. Get an OpenAI API key
 2. Add to environment variables
 3. Implement AI functions in `src/lib/ai.ts` (placeholder)
 
 ### Vercel Deployment
+
 1. Connect your GitHub repository to Vercel
 2. Set environment variables in Vercel dashboard
 3. Deploy automatically on push to main branch
@@ -148,12 +162,14 @@ src/
 ## 🚀 Deployment
 
 ### Vercel (Recommended)
+
 1. Push code to GitHub
 2. Connect repository to Vercel
 3. Set environment variables
 4. Deploy automatically
 
 ### Other Platforms
+
 - **Netlify**: Compatible with Next.js static export
 - **Railway**: Full-stack deployment with database
 - **AWS**: Use Amplify or custom EC2 setup
@@ -181,6 +197,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## 🆘 Support
 
 For support and questions:
+
 - Create an issue in the GitHub repository
 - Check the documentation
 - Contact the development team
@@ -188,18 +205,21 @@ For support and questions:
 ## 🔮 Roadmap
 
 ### Phase 1 (Current)
+
 - ✅ Core CSRD workflow implementation
 - ✅ Basic AI integration placeholder
 - ✅ Materiality assessment tools
 - ✅ Data collection management
 
 ### Phase 2 (Planned)
+
 - 🔄 Advanced AI content generation
 - 🔄 Team collaboration features
 - 🔄 Advanced reporting templates
 - 🔄 Integration with external data sources
 
 ### Phase 3 (Future)
+
 - 🔄 Automated compliance checking
 - 🔄 Advanced analytics and insights
 - 🔄 Multi-language support

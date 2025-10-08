@@ -2,14 +2,14 @@
 // This file contains placeholder functions for OpenAI integration
 
 export interface AIGenerateOptions {
-  companyData: any
-  esrsTopic?: string
-  sectionType?: string
+  companyData: any;
+  esrsTopic?: string;
+  sectionType?: string;
 }
 
 export interface AIAnalysisOptions {
-  reportText: string
-  complianceRequirements: string[]
+  reportText: string;
+  complianceRequirements: string[];
 }
 
 /**
@@ -17,9 +17,11 @@ export interface AIAnalysisOptions {
  * @param options - Configuration for content generation
  * @returns Generated content string
  */
-export async function generateAISection(options: AIGenerateOptions): Promise<string> {
-  const { companyData, esrsTopic, sectionType } = options
-  
+export async function generateAISection(
+  options: AIGenerateOptions
+): Promise<string> {
+  const { companyData, esrsTopic, sectionType } = options;
+
   try {
     const response = await fetch('/api/ai/generate-section', {
       method: 'POST',
@@ -29,19 +31,19 @@ export async function generateAISection(options: AIGenerateOptions): Promise<str
       body: JSON.stringify({
         companyData,
         esrsTopic,
-        sectionType
-      })
-    })
+        sectionType,
+      }),
+    });
 
     if (!response.ok) {
-      throw new Error('Failed to generate AI content')
+      throw new Error('Failed to generate AI content');
     }
 
-    const data = await response.json()
-    return data.content
+    const data = await response.json();
+    return data.content;
   } catch (error) {
-    console.error('AI generation error:', error)
-    
+    console.error('AI generation error:', error);
+
     // Fallback content
     return `AI-generated content for ${sectionType || 'report section'}${esrsTopic ? ` (${esrsTopic})` : ''}:
 
@@ -53,7 +55,7 @@ Based on your organization's data and CSRD requirements, this section should inc
 4. **Risk and Opportunity Analysis**: Current and future considerations
 5. **Future Outlook**: Targets and commitments
 
-[AI content generation failed - using fallback content]`
+[AI content generation failed - using fallback content]`;
   }
 }
 
@@ -63,31 +65,31 @@ Based on your organization's data and CSRD requirements, this section should inc
  * @returns Compliance analysis results
  */
 export async function analyzeCompliance(options: AIAnalysisOptions): Promise<{
-  score: number
-  gaps: string[]
-  recommendations: string[]
+  score: number;
+  gaps: string[];
+  recommendations: string[];
 }> {
   // TODO: Implement OpenAI API integration for compliance analysis
   // This is a placeholder function
-  
-  const { reportText, complianceRequirements } = options
-  
+
+  const { reportText, complianceRequirements } = options;
+
   // Simulate analysis delay
-  await new Promise(resolve => setTimeout(resolve, 1500))
-  
+  await new Promise(resolve => setTimeout(resolve, 1500));
+
   return {
     score: 75, // Placeholder score
     gaps: [
       'Missing quantitative metrics for climate change',
       'Insufficient stakeholder engagement documentation',
-      'No clear future targets defined'
+      'No clear future targets defined',
     ],
     recommendations: [
       'Add specific GHG emission reduction targets',
       'Include stakeholder feedback summary',
-      'Define measurable sustainability goals'
-    ]
-  }
+      'Define measurable sustainability goals',
+    ],
+  };
 }
 
 /**
@@ -98,9 +100,9 @@ export async function analyzeCompliance(options: AIAnalysisOptions): Promise<{
 export async function summarizeESGData(dataSet: any): Promise<string> {
   // TODO: Implement OpenAI API integration
   // This is a placeholder function
-  
-  await new Promise(resolve => setTimeout(resolve, 800))
-  
+
+  await new Promise(resolve => setTimeout(resolve, 800));
+
   return `Executive Summary:
 
 Your organization has made significant progress in ESG data collection and reporting. Key highlights include:
@@ -114,7 +116,7 @@ Areas for improvement:
 • More detailed climate risk assessment
 • Expanded supply chain sustainability tracking
 
-[This is placeholder content - integrate with OpenAI API for actual analysis]`
+[This is placeholder content - integrate with OpenAI API for actual analysis]`;
 }
 
 /**
@@ -122,12 +124,14 @@ Areas for improvement:
  * @param assessments - Materiality assessment data
  * @returns AI-generated insights
  */
-export async function generateMaterialityInsights(assessments: any[]): Promise<string> {
+export async function generateMaterialityInsights(
+  assessments: any[]
+): Promise<string> {
   // TODO: Implement OpenAI API integration
   // This is a placeholder function
-  
-  await new Promise(resolve => setTimeout(resolve, 1200))
-  
+
+  await new Promise(resolve => setTimeout(resolve, 1200));
+
   return `Materiality Assessment Insights:
 
 Based on your assessments, the following topics are most material to your organization:
@@ -146,5 +150,5 @@ Based on your assessments, the following topics are most material to your organi
 • Develop specific targets for climate change
 • Enhance governance documentation
 
-[This is placeholder content - integrate with OpenAI API for actual insights]`
+[This is placeholder content - integrate with OpenAI API for actual insights]`;
 }

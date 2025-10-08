@@ -1,15 +1,21 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { Layout } from './layout'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Progress } from '@/components/ui/progress'
-import { ESGMetric } from '@/types'
-import { Upload, CheckCircle, Clock, XCircle } from 'lucide-react'
-import toast from 'react-hot-toast'
+import { useState, useEffect } from 'react';
+import { createClient } from '@/lib/supabase/client';
+import { Layout } from './layout';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Progress } from '@/components/ui/progress';
+import { ESGMetric } from '@/types';
+import { Upload, CheckCircle, Clock, XCircle } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const sampleMetrics = [
   'Greenhouse Gas Emissions (Scope 1)',
@@ -26,125 +32,123 @@ const sampleMetrics = [
   'Customer Satisfaction Score',
   'Board Diversity',
   'Executive Compensation Ratio',
-  'Anti-Corruption Training Completion'
-]
+  'Anti-Corruption Training Completion',
+];
 
 export function DataHub() {
-  const [metrics, setMetrics] = useState<ESGMetric[]>([])
-  const [loading, setLoading] = useState(true)
-  const [newMetric, setNewMetric] = useState('')
-  const [newOwner, setNewOwner] = useState('')
-  const supabase = createClient()
+  const [metrics, setMetrics] = useState<ESGMetric[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [newMetric, setNewMetric] = useState('');
+  const [newOwner, setNewOwner] = useState('');
+  const supabase = createClient();
 
   useEffect(() => {
-    fetchMetrics()
-  }, [])
+    fetchMetrics();
+  }, []);
 
   const fetchMetrics = async () => {
     try {
       const { data, error } = await supabase
         .from('esg_metrics')
         .select('*')
-        .order('created_at', { ascending: false })
+        .order('created_at', { ascending: false });
 
-      if (error) throw error
-      setMetrics(data || [])
+      if (error) throw error;
+      setMetrics(data || []);
     } catch (error: any) {
-      toast.error('Failed to load metrics: ' + error.message)
+      toast.error('Failed to load metrics: ' + error.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const addMetric = async () => {
     if (!newMetric.trim() || !newOwner.trim()) {
-      toast.error('Please fill in all fields')
-      return
+      toast.error('Please fill in all fields');
+      return;
     }
 
     try {
-      const { error } = await supabase
-        .from('esg_metrics')
-        .insert({
-          metric_name: newMetric,
-          owner: newOwner,
-          status: 'not_started'
-        })
+      const { error } = await supabase.from('esg_metrics').insert({
+        metric_name: newMetric,
+        owner: newOwner,
+        status: 'not_started',
+      });
 
-      if (error) throw error
+      if (error) throw error;
 
-      setNewMetric('')
-      setNewOwner('')
-      fetchMetrics()
-      toast.success('Metric added successfully')
+      setNewMetric('');
+      setNewOwner('');
+      fetchMetrics();
+      toast.success('Metric added successfully');
     } catch (error: any) {
-      toast.error('Failed to add metric: ' + error.message)
+      toast.error('Failed to add metric: ' + error.message);
     }
-  }
+  };
 
-  const updateMetricStatus = async (id: string, status: ESGMetric['status']) => {
+  const updateMetricStatus = async (
+    id: string,
+    status: ESGMetric['status']
+  ) => {
     try {
       const { error } = await supabase
         .from('esg_metrics')
         .update({ status })
-        .eq('id', id)
+        .eq('id', id);
 
-      if (error) throw error
+      if (error) throw error;
 
-      setMetrics(prev => prev.map(m => 
-        m.id === id ? { ...m, status } : m
-      ))
-      toast.success('Status updated')
+      setMetrics(prev => prev.map(m => (m.id === id ? { ...m, status } : m)));
+      toast.success('Status updated');
     } catch (error: any) {
-      toast.error('Failed to update status: ' + error.message)
+      toast.error('Failed to update status: ' + error.message);
     }
-  }
+  };
 
   const addSampleMetrics = async () => {
     try {
       const sampleData = sampleMetrics.map(metric => ({
         metric_name: metric,
         owner: 'TBD',
-        status: 'not_started' as const
-      }))
+        status: 'not_started' as const,
+      }));
 
-      const { error } = await supabase
-        .from('esg_metrics')
-        .insert(sampleData)
+      const { error } = await supabase.from('esg_metrics').insert(sampleData);
 
-      if (error) throw error
+      if (error) throw error;
 
-      fetchMetrics()
-      toast.success('Sample metrics added')
+      fetchMetrics();
+      toast.success('Sample metrics added');
     } catch (error: any) {
-      toast.error('Failed to add sample metrics: ' + error.message)
+      toast.error('Failed to add sample metrics: ' + error.message);
     }
-  }
+  };
 
   const getStatusIcon = (status: ESGMetric['status']) => {
     switch (status) {
       case 'completed':
-        return <CheckCircle className="h-5 w-5 text-green-500" />
+        return <CheckCircle className="h-5 w-5 text-green-500" />;
       case 'in_progress':
-        return <Clock className="h-5 w-5 text-yellow-500" />
+        return <Clock className="h-5 w-5 text-yellow-500" />;
       default:
-        return <XCircle className="h-5 w-5 text-gray-400" />
+        return <XCircle className="h-5 w-5 text-gray-400" />;
     }
-  }
+  };
 
   const getStatusColor = (status: ESGMetric['status']) => {
     switch (status) {
       case 'completed':
-        return 'bg-green-100 text-green-800'
+        return 'bg-green-100 text-green-800';
       case 'in_progress':
-        return 'bg-yellow-100 text-yellow-800'
+        return 'bg-yellow-100 text-yellow-800';
       default:
-        return 'bg-gray-100 text-gray-800'
+        return 'bg-gray-100 text-gray-800';
     }
-  }
+  };
 
-  const completedCount = metrics.filter(m => m.status === 'completed').length
-  const progress = metrics.length > 0 ? (completedCount / metrics.length) * 100 : 0
+  const completedCount = metrics.filter(m => m.status === 'completed').length;
+  const progress =
+    metrics.length > 0 ? (completedCount / metrics.length) * 100 : 0;
 
   if (loading) {
     return (
@@ -153,7 +157,7 @@ export function DataHub() {
           <div className="text-lg">Loading...</div>
         </div>
       </Layout>
-    )
+    );
   }
 
   return (
@@ -161,7 +165,9 @@ export function DataHub() {
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Data Collection Hub</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Data Collection Hub
+          </h1>
           <p className="text-gray-600 mt-2">
             Manage your ESG metrics and data collection progress
           </p>
@@ -178,7 +184,9 @@ export function DataHub() {
           <CardContent>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-2xl font-bold">{Math.round(progress)}%</span>
+                <span className="text-2xl font-bold">
+                  {Math.round(progress)}%
+                </span>
                 <span className="text-sm text-gray-500">
                   {completedCount} of {metrics.length} metrics completed
                 </span>
@@ -192,25 +200,21 @@ export function DataHub() {
         <Card>
           <CardHeader>
             <CardTitle>Add New Metric</CardTitle>
-            <CardDescription>
-              Add a new ESG metric to track
-            </CardDescription>
+            <CardDescription>Add a new ESG metric to track</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Input
                 placeholder="Metric name"
                 value={newMetric}
-                onChange={(e) => setNewMetric(e.target.value)}
+                onChange={e => setNewMetric(e.target.value)}
               />
               <Input
                 placeholder="Owner"
                 value={newOwner}
-                onChange={(e) => setNewOwner(e.target.value)}
+                onChange={e => setNewOwner(e.target.value)}
               />
-              <Button onClick={addMetric}>
-                Add Metric
-              </Button>
+              <Button onClick={addMetric}>Add Metric</Button>
             </div>
             <div className="mt-4">
               <Button variant="outline" onClick={addSampleMetrics}>
@@ -233,29 +237,43 @@ export function DataHub() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">Metric</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">Owner</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">Status</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">Evidence</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">Actions</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-900">
+                      Metric
+                    </th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-900">
+                      Owner
+                    </th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-900">
+                      Status
+                    </th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-900">
+                      Evidence
+                    </th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-900">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {metrics.map((metric) => (
+                  {metrics.map(metric => (
                     <tr key={metric.id} className="border-b hover:bg-gray-50">
                       <td className="py-3 px-4">{metric.metric_name}</td>
                       <td className="py-3 px-4">{metric.owner}</td>
                       <td className="py-3 px-4">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(metric.status)}`}>
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(metric.status)}`}
+                        >
                           {getStatusIcon(metric.status)}
-                          <span className="ml-1 capitalize">{metric.status.replace('_', ' ')}</span>
+                          <span className="ml-1 capitalize">
+                            {metric.status.replace('_', ' ')}
+                          </span>
                         </span>
                       </td>
                       <td className="py-3 px-4">
                         {metric.evidence_url ? (
-                          <a 
-                            href={metric.evidence_url} 
-                            target="_blank" 
+                          <a
+                            href={metric.evidence_url}
+                            target="_blank"
                             rel="noopener noreferrer"
                             className="text-blue-600 hover:text-blue-800"
                           >
@@ -274,7 +292,9 @@ export function DataHub() {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => updateMetricStatus(metric.id, 'in_progress')}
+                              onClick={() =>
+                                updateMetricStatus(metric.id, 'in_progress')
+                              }
                             >
                               Start
                             </Button>
@@ -282,7 +302,9 @@ export function DataHub() {
                           {metric.status === 'in_progress' && (
                             <Button
                               size="sm"
-                              onClick={() => updateMetricStatus(metric.id, 'completed')}
+                              onClick={() =>
+                                updateMetricStatus(metric.id, 'completed')
+                              }
                             >
                               Complete
                             </Button>
@@ -298,5 +320,5 @@ export function DataHub() {
         </Card>
       </div>
     </Layout>
-  )
+  );
 }

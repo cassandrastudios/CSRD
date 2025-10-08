@@ -1,90 +1,101 @@
-'use client'
+'use client';
 
-import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Loader2 } from 'lucide-react'
+import { useEffect, useState } from 'react';
+import { createClient } from '@/lib/supabase/client';
+import { useRouter } from 'next/navigation';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
 
 interface AuthWrapperProps {
-  children: React.ReactNode
+  children: React.ReactNode;
 }
 
 export function AuthWrapper({ children }: AuthWrapperProps) {
-  const [user, setUser] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-  const [authError, setAuthError] = useState<string | null>(null)
-  const supabase = createClient()
-  const router = useRouter()
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const supabase = createClient();
+  const router = useRouter();
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-        
+        const {
+          data: { session },
+          error: sessionError,
+        } = await supabase.auth.getSession();
+
         if (sessionError) {
-          setAuthError(sessionError.message)
-          setLoading(false)
-          return
+          setAuthError(sessionError.message);
+          setLoading(false);
+          return;
         }
 
         if (session?.user) {
-          setUser(session.user)
-          setAuthError(null)
+          setUser(session.user);
+          setAuthError(null);
         } else {
-          setUser(null)
+          setUser(null);
         }
-        
-        setLoading(false)
-      } catch (error: any) {
-        setAuthError(error.message)
-        setLoading(false)
-      }
-    }
 
-    checkAuth()
+        setLoading(false);
+      } catch (error: any) {
+        setAuthError(error.message);
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session?.user) {
-        setUser(session.user)
-        setAuthError(null)
-        setLoading(false)
+        setUser(session.user);
+        setAuthError(null);
+        setLoading(false);
       } else if (event === 'SIGNED_OUT') {
-        setUser(null)
-        setLoading(false)
+        setUser(null);
+        setLoading(false);
       } else if (event === 'TOKEN_REFRESHED' && session?.user) {
-        setUser(session.user)
-        setAuthError(null)
+        setUser(session.user);
+        setAuthError(null);
       }
-    })
+    });
 
-    return () => subscription.unsubscribe()
-  }, [])
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleRetry = () => {
-    setLoading(true)
-    setAuthError(null)
+    setLoading(true);
+    setAuthError(null);
     supabase.auth.getSession().then(({ data: { session }, error }) => {
       if (session?.user) {
-        setUser(session.user)
+        setUser(session.user);
       } else {
-        setUser(null)
+        setUser(null);
       }
-      setLoading(false)
-    })
-  }
+      setLoading(false);
+    });
+  };
 
   const handleSignOut = async () => {
     try {
-      await supabase.auth.signOut()
-      setUser(null)
-      router.push('/auth')
+      await supabase.auth.signOut();
+      setUser(null);
+      router.push('/auth');
     } catch (error) {
       // Handle sign out error silently
     }
-  }
+  };
 
   if (loading) {
     return (
@@ -96,7 +107,7 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
           </CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
   if (authError) {
@@ -115,14 +126,12 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
               <Button onClick={handleRetry} variant="outline">
                 Retry
               </Button>
-              <Button onClick={() => router.push('/auth')}>
-                Go to Login
-              </Button>
+              <Button onClick={() => router.push('/auth')}>Go to Login</Button>
             </div>
           </CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
   if (!user) {
@@ -142,8 +151,8 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
           </CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
-  return <>{children}</>
+  return <>{children}</>;
 }

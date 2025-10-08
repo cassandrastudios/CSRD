@@ -1,30 +1,31 @@
-import { useState, useEffect } from 'react'
-import { createClient } from '../lib/supabase/client'
-import { useAuth } from '../contexts/AuthContext'
+import { useState, useEffect } from 'react';
+import { createClient } from '../lib/supabase/client';
+import { useAuth } from '../contexts/AuthContext';
 
 export function useOrganization() {
-  const { user } = useAuth()
-  const [organization, setOrganization] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
+  const { user } = useAuth();
+  const [organization, setOrganization] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  const supabase = createClient()
+  const supabase = createClient();
 
   useEffect(() => {
     if (user) {
-      loadOrganization()
+      loadOrganization();
     } else {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [user])
+  }, [user]);
 
   const loadOrganization = async () => {
-    if (!user) return
+    if (!user) return;
 
     try {
       // First, try to get organization from stakeholders table
       const { data: stakeholderData } = await supabase
         .from('stakeholders')
-        .select(`
+        .select(
+          `
           organization_id,
           organizations (
             id,
@@ -33,34 +34,35 @@ export function useOrganization() {
             employee_count,
             first_reporting_year
           )
-        `)
+        `
+        )
         .eq('user_id', user.id)
-        .single()
+        .single();
 
       if (stakeholderData?.organizations) {
-        setOrganization(stakeholderData.organizations)
+        setOrganization(stakeholderData.organizations);
       } else {
         // If no stakeholder record, get organization by created_by
         const { data: orgData } = await supabase
           .from('organizations')
           .select('*')
           .eq('created_by', user.id)
-          .single()
+          .single();
 
         if (orgData) {
-          setOrganization(orgData)
+          setOrganization(orgData);
         }
       }
     } catch (error) {
-      console.error('Error loading organization:', error)
+      console.error('Error loading organization:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return {
     organization,
     loading,
-    refresh: loadOrganization
-  }
+    refresh: loadOrganization,
+  };
 }

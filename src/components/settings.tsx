@@ -1,89 +1,194 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { Layout } from './layout'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Organization } from '@/types'
-import { Save, Users, Building, Key, User, Mail, Calendar, Upload, FileText, X, Send, Plus, Clock, Trash2 } from 'lucide-react'
-import toast from 'react-hot-toast'
+import { useState, useEffect } from 'react';
+import { createClient } from '@/lib/supabase/client';
+import { Layout } from './layout';
+import { OrganizationSwitcher } from './OrganizationSwitcher';
+import { useOrganization } from '@/contexts/OrganizationContext';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Organization } from '@/types';
+import {
+  Save,
+  Users,
+  Building,
+  Key,
+  User,
+  Mail,
+  Calendar,
+  Upload,
+  FileText,
+  X,
+  Send,
+  Plus,
+  Clock,
+  Trash2,
+} from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export function Settings() {
-  const [organization, setOrganization] = useState<Organization | null>(null)
-  const [user, setUser] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [savingUser, setSavingUser] = useState(false)
+  const organizationContext = useOrganization()
+  const userJoinedViaInvite = organizationContext?.userJoinedViaInvite
+  const { currentOrganization, setCurrentOrganization } = organizationContext || {}
+  const [organization, setOrganization] = useState<Organization | null>(null);
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [savingUser, setSavingUser] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     sector: '',
     employee_count: '',
-    first_reporting_year: new Date().getFullYear() + 1
-  })
+    website: '',
+    address: '',
+    city: '',
+    country: '',
+    phone: '',
+    first_reporting_year: new Date().getFullYear() + 1,
+  });
+
+  // Update formData when organization changes
+  useEffect(() => {
+    if (organization) {
+      setFormData({
+        name: organization.name || '',
+        sector: organization.sector || '',
+        employee_count: organization.employee_count?.toString() || '',
+        website: organization.website || '',
+        address: organization.address || '',
+        city: organization.city || '',
+        country: organization.country || '',
+        phone: organization.phone || '',
+        first_reporting_year: organization.first_reporting_year || new Date().getFullYear() + 1,
+      });
+    }
+  }, [organization]);
+
+  // Also update formData when currentOrganization changes (from context)
+  useEffect(() => {
+    if (currentOrganization && currentOrganization.name !== formData.name) {
+      setFormData({
+        name: currentOrganization.name || '',
+        sector: currentOrganization.sector || '',
+        employee_count: currentOrganization.employee_count?.toString() || '',
+        website: currentOrganization.website || '',
+        address: currentOrganization.address || '',
+        city: currentOrganization.city || '',
+        country: currentOrganization.country || '',
+        phone: currentOrganization.phone || '',
+        first_reporting_year: currentOrganization.first_reporting_year || new Date().getFullYear() + 1,
+      });
+    }
+  }, [currentOrganization]);
+
+  // Update organization context when formData changes
+  useEffect(() => {
+    if (organization && formData.name && formData.name !== organization.name) {
+      // Update the organization context with the current form data
+      const updatedOrg = {
+        ...organization,
+        name: formData.name,
+        sector: formData.sector,
+        employee_count: formData.employee_count,
+        website: formData.website,
+        address: formData.address,
+        city: formData.city,
+        country: formData.country,
+        phone: formData.phone,
+        first_reporting_year: formData.first_reporting_year,
+      };
+      setOrganization(updatedOrg);
+      
+      // Also update the organization context
+      if (setCurrentOrganization) {
+        setCurrentOrganization(updatedOrg);
+      }
+    }
+  }, [formData, setCurrentOrganization]);
   const [userFormData, setUserFormData] = useState({
     display_name: '',
-    email: ''
-  })
-  const [uploadedFiles, setUploadedFiles] = useState<Array<{
-    id: string
-    name: string
-    size: number
-    type: string
-    url?: string
-  }>>([])
-  const [uploading, setUploading] = useState(false)
-  const [showInviteForm, setShowInviteForm] = useState(false)
+    email: '',
+  });
+  const [uploadedFiles, setUploadedFiles] = useState<
+    Array<{
+      id: string;
+      name: string;
+      size: number;
+      type: string;
+      url?: string;
+    }>
+  >([]);
+  const [uploading, setUploading] = useState(false);
+  const [showInviteForm, setShowInviteForm] = useState(false);
   const [inviteData, setInviteData] = useState({
     email: '',
-    role: 'contributor' as 'admin' | 'manager' | 'contributor' | 'viewer'
-  })
-  const [sendingInvite, setSendingInvite] = useState(false)
-  const [pendingInvites, setPendingInvites] = useState<Array<{
-    id: string
-    email: string
-    role: string
-    sentAt: Date
-    expiresAt: Date
-  }>>([])
-  const supabase = createClient()
+    role: 'contributor' as 'admin' | 'manager' | 'contributor' | 'viewer',
+  });
+  const [sendingInvite, setSendingInvite] = useState(false);
+  const [pendingInvites, setPendingInvites] = useState<
+    Array<{
+      id: string;
+      email: string;
+      role: string;
+      sentAt: Date;
+      expiresAt: Date;
+    }>
+  >([]);
+  const supabase = createClient();
 
   useEffect(() => {
-    fetchUser()
-    fetchOrganization()
-  }, [])
+    fetchUser();
+    fetchOrganization();
+  }, []);
 
   const fetchUser = async () => {
     try {
-      const { data: { user }, error } = await supabase.auth.getUser()
-      
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
+
       if (error) {
-        console.error('Error fetching user:', error)
-        return
+        console.error('Error fetching user:', error);
+        return;
       }
 
       if (user) {
-        setUser(user)
+        setUser(user);
         setUserFormData({
-          display_name: user.user_metadata?.display_name || user.user_metadata?.full_name || '',
-          email: user.email || ''
-        })
+          display_name:
+            user.user_metadata?.display_name ||
+            user.user_metadata?.full_name ||
+            '',
+          email: user.email || '',
+        });
       }
     } catch (error) {
-      console.error('Failed to fetch user:', error)
+      console.error('Failed to fetch user:', error);
     }
-  }
+  };
 
   const fetchOrganization = async () => {
     try {
       // First, try to get the current user
-      const { data: { user }, error: userError } = await supabase.auth.getUser()
-      
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
       if (userError || !user) {
-        console.log('No authenticated user, creating default organization')
-        await createDefaultOrganization()
-        return
+        console.log('No authenticated user, creating default organization');
+        await createDefaultOrganization();
+        return;
       }
 
       // Try to fetch organizations with error handling
@@ -91,55 +196,60 @@ export function Settings() {
         .from('organizations')
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(1)
+        .limit(1);
 
       if (error) {
-        console.error('Organization fetch error:', error)
+        console.error('Organization fetch error:', error);
         // For any error, create a default organization
-        await createDefaultOrganization()
-        return
+        await createDefaultOrganization();
+        return;
       }
 
       if (data && data.length > 0) {
-        const org = data[0]
-        setOrganization(org)
+        const org = data[0];
+        setOrganization(org);
         setFormData({
           name: org.name,
-          sector: org.sector,
-          employee_count: org.employee_count.toString(),
-          first_reporting_year: org.first_reporting_year
-        })
+          sector: org.sector || '',
+          employee_count: org.employee_count || '',
+          website: org.website || '',
+          address: org.address || '',
+          city: org.city || '',
+          country: org.country || '',
+          phone: org.phone || '',
+          first_reporting_year: org.first_reporting_year || new Date().getFullYear() + 1,
+        });
       } else {
         // No organization found, create a default one
-        await createDefaultOrganization()
+        await createDefaultOrganization();
       }
     } catch (error: any) {
-      console.error('Failed to load organization:', error)
-      toast.error('Failed to load organization. Creating a new one...')
-      await createDefaultOrganization()
+      console.error('Failed to load organization:', error);
+      toast.error('Failed to load organization. Creating a new one...');
+      await createDefaultOrganization();
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const createDefaultOrganization = async () => {
     try {
       // Create a default organization with a unique name to avoid conflicts
-      const orgName = `My Organization ${Date.now()}`
-      
+      const orgName = `My Organization ${Date.now()}`;
+
       const { data, error } = await supabase
         .from('organizations')
         .insert({
           name: orgName,
           sector: 'Other',
           employee_count: 1,
-          first_reporting_year: new Date().getFullYear() + 1
+          first_reporting_year: new Date().getFullYear() + 1,
         })
         .select()
-        .single()
+        .single();
 
       if (error) {
-        console.error('Failed to create organization:', error)
+        console.error('Failed to create organization:', error);
         // If we can't create in database, use local state
         const localOrg = {
           id: 'local-' + Date.now(),
@@ -148,30 +258,40 @@ export function Settings() {
           employee_count: 1,
           first_reporting_year: new Date().getFullYear() + 1,
           created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }
-        setOrganization(localOrg)
+          updated_at: new Date().toISOString(),
+        };
+        setOrganization(localOrg);
         setFormData({
           name: localOrg.name,
-          sector: localOrg.sector,
-          employee_count: localOrg.employee_count.toString(),
-          first_reporting_year: localOrg.first_reporting_year
-        })
-        toast.success('Created local organization (database unavailable)')
-        return
+          sector: localOrg.sector || '',
+          employee_count: localOrg.employee_count || '',
+          website: localOrg.website || '',
+          address: localOrg.address || '',
+          city: localOrg.city || '',
+          country: localOrg.country || '',
+          phone: localOrg.phone || '',
+          first_reporting_year: localOrg.first_reporting_year || new Date().getFullYear() + 1,
+        });
+        toast.success('Created local organization (database unavailable)');
+        return;
       }
 
-      setOrganization(data)
+      setOrganization(data);
       setFormData({
         name: data.name,
-        sector: data.sector,
-        employee_count: data.employee_count.toString(),
-        first_reporting_year: data.first_reporting_year
-      })
-      
-      toast.success('Created default organization')
+        sector: data.sector || '',
+        employee_count: data.employee_count || '',
+        website: data.website || '',
+        address: data.address || '',
+        city: data.city || '',
+        country: data.country || '',
+        phone: data.phone || '',
+        first_reporting_year: data.first_reporting_year || new Date().getFullYear() + 1,
+      });
+
+      toast.success('Created default organization');
     } catch (error: any) {
-      console.error('Failed to create default organization:', error)
+      console.error('Failed to create default organization:', error);
       // Fallback to local state
       const localOrg = {
         id: 'local-' + Date.now(),
@@ -180,26 +300,31 @@ export function Settings() {
         employee_count: 1,
         first_reporting_year: new Date().getFullYear() + 1,
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }
-      setOrganization(localOrg)
+        updated_at: new Date().toISOString(),
+      };
+      setOrganization(localOrg);
       setFormData({
         name: localOrg.name,
-        sector: localOrg.sector,
-        employee_count: localOrg.employee_count.toString(),
-        first_reporting_year: localOrg.first_reporting_year
-      })
-      toast.success('Created local organization (database unavailable)')
+        sector: localOrg.sector || '',
+        employee_count: localOrg.employee_count || '',
+        website: localOrg.website || '',
+        address: localOrg.address || '',
+        city: localOrg.city || '',
+        country: localOrg.country || '',
+        phone: localOrg.phone || '',
+        first_reporting_year: localOrg.first_reporting_year || new Date().getFullYear() + 1,
+      });
+      toast.success('Created local organization (database unavailable)');
     }
-  }
+  };
 
   const saveOrganization = async () => {
-    if (!formData.name.trim() || !formData.sector.trim() || !formData.employee_count.trim()) {
-      toast.error('Please fill in all required fields')
-      return
+    if (!formData.name.trim()) {
+      toast.error('Please enter an organization name');
+      return;
     }
 
-    setSaving(true)
+    setSaving(true);
     try {
       // If it's a local organization, just update local state
       if (organization?.id?.startsWith('local-')) {
@@ -207,13 +332,24 @@ export function Settings() {
           ...organization,
           name: formData.name,
           sector: formData.sector,
-          employee_count: parseInt(formData.employee_count),
-          first_reporting_year: formData.first_reporting_year
+          employee_count: formData.employee_count,
+          website: formData.website,
+          address: formData.address,
+          city: formData.city,
+          country: formData.country,
+          phone: formData.phone,
+          first_reporting_year: formData.first_reporting_year,
+        };
+        setOrganization(updatedOrg);
+        
+        // Update the organization context
+        if (setCurrentOrganization) {
+          setCurrentOrganization(updatedOrg);
         }
-        setOrganization(updatedOrg)
-        toast.success('Organization updated locally')
-        setSaving(false)
-        return
+        
+        toast.success('Organization updated locally');
+        setSaving(false);
+        return;
       }
 
       // Try to save to database
@@ -223,82 +359,160 @@ export function Settings() {
           id: organization?.id,
           name: formData.name,
           sector: formData.sector,
-          employee_count: parseInt(formData.employee_count),
-          first_reporting_year: formData.first_reporting_year
+          employee_count: formData.employee_count,
+          website: formData.website,
+          address: formData.address,
+          city: formData.city,
+          country: formData.country,
+          phone: formData.phone,
+          first_reporting_year: formData.first_reporting_year,
         })
         .select()
-        .single()
+        .single();
 
       if (error) {
-        console.error('Save organization error:', error)
+        console.error('Save organization error:', error);
         // If there's any error, fall back to local state
         const updatedOrg = {
           id: organization?.id || 'local-' + Date.now(),
           name: formData.name,
           sector: formData.sector,
-          employee_count: parseInt(formData.employee_count),
+          employee_count: formData.employee_count,
+          website: formData.website,
+          address: formData.address,
+          city: formData.city,
+          country: formData.country,
+          phone: formData.phone,
           first_reporting_year: formData.first_reporting_year,
           created_at: organization?.created_at || new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
+        };
+        setOrganization(updatedOrg);
+        
+        // Update the organization context
+        if (setCurrentOrganization) {
+          setCurrentOrganization(updatedOrg);
         }
-        setOrganization(updatedOrg)
-        toast.success('Organization updated locally (database unavailable)')
-        return
+        
+        toast.success('Organization updated locally (database unavailable)');
+        return;
       }
 
       if (data) {
-        setOrganization(data)
-        toast.success('Organization updated successfully')
+        setOrganization(data);
+        
+        // Update the organization context
+        if (setCurrentOrganization) {
+          setCurrentOrganization(data);
+        }
+        
+        toast.success('Organization updated successfully');
       }
     } catch (error: any) {
-      console.error('Failed to save organization:', error)
+      console.error('Failed to save organization:', error);
       // Fallback to local state
       const updatedOrg = {
         ...organization,
         name: formData.name,
         sector: formData.sector,
         employee_count: parseInt(formData.employee_count),
-        first_reporting_year: formData.first_reporting_year
+        first_reporting_year: formData.first_reporting_year,
+      };
+      setOrganization(updatedOrg);
+      
+      // Update the organization context
+      if (setCurrentOrganization) {
+        setCurrentOrganization(updatedOrg);
       }
-      setOrganization(updatedOrg)
-      toast.success('Organization updated locally (database unavailable)')
+      
+      toast.success('Organization updated locally (database unavailable)');
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   const saveUser = async () => {
     if (!userFormData.display_name.trim()) {
-      toast.error('Please enter a display name')
-      return
+      toast.error('Please enter a display name');
+      return;
     }
 
-    setSavingUser(true)
+    setSavingUser(true);
     try {
       const { error } = await supabase.auth.updateUser({
         data: {
-          display_name: userFormData.display_name
-        }
-      })
+          display_name: userFormData.display_name,
+        },
+      });
 
-      if (error) throw error
+      if (error) throw error;
 
-      toast.success('Profile updated successfully')
-      fetchUser() // Refresh user data
+      toast.success('Profile updated successfully');
+      fetchUser(); // Refresh user data
     } catch (error: any) {
-      console.error('Failed to save user:', error)
-      toast.error('Failed to save profile: ' + error.message)
+      console.error('Failed to save user:', error);
+      toast.error('Failed to save profile: ' + error.message);
     } finally {
-      setSavingUser(false)
+      setSavingUser(false);
     }
-  }
+  };
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files
-    if (!files || files.length === 0) return
+  const deleteAccount = async () => {
+    if (!user) return;
 
-    setUploading(true)
-    
+    setDeletingAccount(true);
+    try {
+      // First, try to delete user data from database
+      try {
+        // Delete user roles
+        await supabase
+          .from('user_roles')
+          .delete()
+          .eq('user_id', user.id);
+
+        // Delete organizations owned by user
+        await supabase
+          .from('organizations')
+          .delete()
+          .eq('id', user.id); // Assuming user ID is the organization owner
+
+        // Delete other user-related data
+        await supabase
+          .from('team_invites')
+          .delete()
+          .eq('inviter_id', user.id);
+      } catch (dbError) {
+        console.log('Database cleanup failed, continuing with account deletion:', dbError);
+      }
+
+      // For now, we'll just sign out the user since we can't delete the account directly
+      // In a production app, you'd need to implement a server-side function to delete users
+      // or use Supabase Admin API with proper permissions
+      
+      toast.success('Account data cleared. Signing out...');
+      
+      // Sign out and redirect to sign-up page
+      await supabase.auth.signOut();
+      setTimeout(() => {
+        window.location.href = '/auth';
+      }, 2000);
+    } catch (error: any) {
+      console.error('Failed to delete account:', error);
+      toast.error(error.message || 'Failed to delete account. Please contact support.');
+    } finally {
+      setDeletingAccount(false);
+      setShowDeleteConfirm(false);
+    }
+  };
+
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploading(true);
+
     try {
       for (const file of Array.from(files)) {
         // Validate file type
@@ -308,39 +522,39 @@ export function Settings() {
           'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
           'text/plain',
           'application/vnd.ms-excel',
-          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        ]
-        
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ];
+
         if (!allowedTypes.includes(file.type)) {
-          toast.error(`File type not supported: ${file.name}`)
-          continue
+          toast.error(`File type not supported: ${file.name}`);
+          continue;
         }
 
         // Validate file size (10MB limit)
         if (file.size > 10 * 1024 * 1024) {
-          toast.error(`File too large: ${file.name} (max 10MB)`)
-          continue
+          toast.error(`File too large: ${file.name} (max 10MB)`);
+          continue;
         }
 
         // Upload to Supabase Storage
-        const fileExt = file.name.split('.').pop()
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
-        const filePath = `organization-documents/${organization?.id || 'temp'}/${fileName}`
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const filePath = `organization-documents/${organization?.id || 'temp'}/${fileName}`;
 
         const { data, error } = await supabase.storage
           .from('organization-documents')
-          .upload(filePath, file)
+          .upload(filePath, file);
 
         if (error) {
-          console.error('Upload error:', error)
-          toast.error(`Failed to upload ${file.name}`)
-          continue
+          console.error('Upload error:', error);
+          toast.error(`Failed to upload ${file.name}`);
+          continue;
         }
 
         // Get public URL
         const { data: urlData } = supabase.storage
           .from('organization-documents')
-          .getPublicUrl(filePath)
+          .getPublicUrl(filePath);
 
         // Add to uploaded files list
         const newFile = {
@@ -348,47 +562,47 @@ export function Settings() {
           name: file.name,
           size: file.size,
           type: file.type,
-          url: urlData.publicUrl
-        }
+          url: urlData.publicUrl,
+        };
 
-        setUploadedFiles(prev => [...prev, newFile])
-        toast.success(`Uploaded ${file.name}`)
+        setUploadedFiles(prev => [...prev, newFile]);
+        toast.success(`Uploaded ${file.name}`);
       }
     } catch (error) {
-      console.error('File upload error:', error)
-      toast.error('Failed to upload files')
+      console.error('File upload error:', error);
+      toast.error('Failed to upload files');
     } finally {
-      setUploading(false)
+      setUploading(false);
       // Reset file input
-      event.target.value = ''
+      event.target.value = '';
     }
-  }
+  };
 
   const removeFile = (fileId: string) => {
-    setUploadedFiles(prev => prev.filter(file => file.id !== fileId))
-    toast.success('File removed')
-  }
+    setUploadedFiles(prev => prev.filter(file => file.id !== fileId));
+    toast.success('File removed');
+  };
 
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes'
-    const k = 1024
-    const sizes = ['Bytes', 'KB', 'MB', 'GB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-  }
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
 
   const sendInvite = async () => {
     if (!inviteData.email.trim()) {
-      toast.error('Please enter an email address')
-      return
+      toast.error('Please enter an email address');
+      return;
     }
 
     if (!inviteData.email.includes('@')) {
-      toast.error('Please enter a valid email address')
-      return
+      toast.error('Please enter a valid email address');
+      return;
     }
 
-    setSendingInvite(true)
+    setSendingInvite(true);
     try {
       // Call the API endpoint to send the invite
       const response = await fetch('/api/invite-member', {
@@ -398,100 +612,107 @@ export function Settings() {
         },
         body: JSON.stringify({
           email: inviteData.email,
-          role: inviteData.role
-        })
-      })
+          role: inviteData.role,
+        }),
+      });
 
-      const result = await response.json()
+      const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || 'Failed to send invite')
+        throw new Error(result.error || 'Failed to send invite');
       }
-      
+
       // Add to pending invites (expires in 7 days)
-      const now = new Date()
-      const expiresAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000) // 7 days from now
-      
+      const now = new Date();
+      const expiresAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days from now
+
       const newInvite = {
         id: `invite-${Date.now()}-${Math.random().toString(36).substring(2)}`,
         email: inviteData.email,
         role: inviteData.role,
         sentAt: now,
-        expiresAt: expiresAt
-      }
-      
-      setPendingInvites(prev => [...prev, newInvite])
-      toast.success(`Invite sent to ${inviteData.email} as ${inviteData.role}`)
-      
+        expiresAt: expiresAt,
+      };
+
+      setPendingInvites(prev => [...prev, newInvite]);
+      toast.success(`Invite sent to ${inviteData.email} as ${inviteData.role}`);
+
       // Reset form
       setInviteData({
         email: '',
-        role: 'contributor'
-      })
-      setShowInviteForm(false)
+        role: 'contributor',
+      });
+      setShowInviteForm(false);
     } catch (error) {
-      console.error('Failed to send invite:', error)
-      toast.error('Failed to send invite. Please try again.')
+      console.error('Failed to send invite:', error);
+      toast.error('Failed to send invite. Please try again.');
     } finally {
-      setSendingInvite(false)
+      setSendingInvite(false);
     }
-  }
+  };
 
   const cancelInvite = () => {
     setInviteData({
       email: '',
-      role: 'contributor'
-    })
-    setShowInviteForm(false)
-  }
+      role: 'contributor',
+    });
+    setShowInviteForm(false);
+  };
 
   const removePendingInvite = (inviteId: string) => {
-    setPendingInvites(prev => prev.filter(invite => invite.id !== inviteId))
-    toast.success('Invite removed')
-  }
+    setPendingInvites(prev => prev.filter(invite => invite.id !== inviteId));
+    toast.success('Invite removed');
+  };
 
   const getTimeRemaining = (expiresAt: Date) => {
-    const now = new Date()
-    const diff = expiresAt.getTime() - now.getTime()
-    
+    const now = new Date();
+    const diff = expiresAt.getTime() - now.getTime();
+
     if (diff <= 0) {
-      return { expired: true, text: 'Expired' }
+      return { expired: true, text: 'Expired' };
     }
-    
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
-    
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
     if (days > 0) {
-      return { expired: false, text: `${days}d ${hours}h remaining` }
+      return { expired: false, text: `${days}d ${hours}h remaining` };
     } else if (hours > 0) {
-      return { expired: false, text: `${hours}h ${minutes}m remaining` }
+      return { expired: false, text: `${hours}h ${minutes}m remaining` };
     } else {
-      return { expired: false, text: `${minutes}m remaining` }
+      return { expired: false, text: `${minutes}m remaining` };
     }
-  }
+  };
 
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'admin': return 'text-blue-600 bg-blue-100'
-      case 'manager': return 'text-purple-600 bg-purple-100'
-      case 'contributor': return 'text-green-600 bg-green-100'
-      case 'viewer': return 'text-orange-600 bg-orange-100'
-      default: return 'text-gray-600 bg-gray-100'
+      case 'admin':
+        return 'text-blue-600 bg-blue-100';
+      case 'manager':
+        return 'text-purple-600 bg-purple-100';
+      case 'contributor':
+        return 'text-green-600 bg-green-100';
+      case 'viewer':
+        return 'text-orange-600 bg-orange-100';
+      default:
+        return 'text-gray-600 bg-gray-100';
     }
-  }
+  };
 
   // Clean up expired invites
   useEffect(() => {
     const interval = setInterval(() => {
-      setPendingInvites(prev => prev.filter(invite => {
-        const timeRemaining = getTimeRemaining(invite.expiresAt)
-        return !timeRemaining.expired
-      }))
-    }, 60000) // Check every minute
+      setPendingInvites(prev =>
+        prev.filter(invite => {
+          const timeRemaining = getTimeRemaining(invite.expiresAt);
+          return !timeRemaining.expired;
+        })
+      );
+    }, 60000); // Check every minute
 
-    return () => clearInterval(interval)
-  }, [])
+    return () => clearInterval(interval);
+  }, []);
 
   if (loading) {
     return (
@@ -500,7 +721,7 @@ export function Settings() {
           <div className="text-lg">Loading...</div>
         </div>
       </Layout>
-    )
+    );
   }
 
   return (
@@ -533,7 +754,12 @@ export function Settings() {
                 </label>
                 <Input
                   value={userFormData.display_name}
-                  onChange={(e) => setUserFormData({ ...userFormData, display_name: e.target.value })}
+                  onChange={e =>
+                    setUserFormData({
+                      ...userFormData,
+                      display_name: e.target.value,
+                    })
+                  }
                   placeholder="Enter your display name"
                 />
               </div>
@@ -552,20 +778,28 @@ export function Settings() {
                 </p>
               </div>
             </div>
-            
+
             {user && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
                 <div className="flex items-center">
                   <Calendar className="h-4 w-4 mr-2" />
-                  <span>Member since: {new Date(user.created_at).toLocaleDateString()}</span>
+                  <span>
+                    Member since:{' '}
+                    {new Date(user.created_at).toLocaleDateString()}
+                  </span>
                 </div>
                 <div className="flex items-center">
                   <Mail className="h-4 w-4 mr-2" />
-                  <span>Last sign in: {user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleDateString() : 'Unknown'}</span>
+                  <span>
+                    Last sign in:{' '}
+                    {user.last_sign_in_at
+                      ? new Date(user.last_sign_in_at).toLocaleDateString()
+                      : 'Unknown'}
+                  </span>
                 </div>
               </div>
             )}
-            
+
             <Button onClick={saveUser} disabled={savingUser}>
               <Save className="h-4 w-4 mr-2" />
               {savingUser ? 'Saving...' : 'Save Profile'}
@@ -580,11 +814,23 @@ export function Settings() {
               <Building className="h-5 w-5 mr-2" />
               Organization Information
             </CardTitle>
-            <CardDescription>
-              Update your organization details
-            </CardDescription>
+            <CardDescription>Update your organization details</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Organization Switcher */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Current Organization
+              </label>
+              <OrganizationSwitcher />
+              <p className="text-xs text-gray-500 mt-1">
+                {userJoinedViaInvite 
+                  ? 'You joined this organization via invitation. You can create additional organizations if needed.'
+                  : 'This is your organization. You can create additional organizations if needed.'
+                }
+              </p>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -592,9 +838,38 @@ export function Settings() {
                 </label>
                 <Input
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={e => {
+                    const newName = e.target.value;
+                    setFormData({ ...formData, name: newName });
+                    
+                    // Update the organization context in real-time
+                    if (currentOrganization && setCurrentOrganization) {
+                      const updatedOrg = {
+                        ...currentOrganization,
+                        name: newName
+                      };
+                      setCurrentOrganization(updatedOrg);
+                      
+                      // Save to localStorage for persistence
+                      localStorage.setItem('currentOrganization', JSON.stringify(updatedOrg));
+                    }
+                  }}
                   placeholder="Enter organization name"
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Organization ID
+                </label>
+                <Input
+                  value={organization?.id || 'Not available'}
+                  disabled
+                  className="bg-gray-50 text-gray-600"
+                  placeholder="Organization ID"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Unique identifier for your organization
+                </p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -602,7 +877,9 @@ export function Settings() {
                 </label>
                 <Input
                   value={formData.sector}
-                  onChange={(e) => setFormData({ ...formData, sector: e.target.value })}
+                  onChange={e =>
+                    setFormData({ ...formData, sector: e.target.value })
+                  }
                   placeholder="Enter industry sector"
                 />
               </div>
@@ -613,7 +890,9 @@ export function Settings() {
                 <Input
                   type="number"
                   value={formData.employee_count}
-                  onChange={(e) => setFormData({ ...formData, employee_count: e.target.value })}
+                  onChange={e =>
+                    setFormData({ ...formData, employee_count: e.target.value })
+                  }
                   placeholder="Enter number of employees"
                 />
               </div>
@@ -624,13 +903,78 @@ export function Settings() {
                 <Input
                   type="number"
                   value={formData.first_reporting_year}
-                  onChange={(e) => setFormData({ ...formData, first_reporting_year: parseInt(e.target.value) })}
+                  onChange={e =>
+                    setFormData({
+                      ...formData,
+                      first_reporting_year: parseInt(e.target.value),
+                    })
+                  }
                   min={2024}
                   max={2030}
                 />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Website
+                </label>
+                <Input
+                  value={formData.website}
+                  onChange={e =>
+                    setFormData({ ...formData, website: e.target.value })
+                  }
+                  placeholder="https://yourcompany.com"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Address
+                </label>
+                <Input
+                  value={formData.address}
+                  onChange={e =>
+                    setFormData({ ...formData, address: e.target.value })
+                  }
+                  placeholder="Street address"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  City
+                </label>
+                <Input
+                  value={formData.city}
+                  onChange={e =>
+                    setFormData({ ...formData, city: e.target.value })
+                  }
+                  placeholder="City"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Country
+                </label>
+                <Input
+                  value={formData.country}
+                  onChange={e =>
+                    setFormData({ ...formData, country: e.target.value })
+                  }
+                  placeholder="Country"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Phone Number
+                </label>
+                <Input
+                  value={formData.phone}
+                  onChange={e =>
+                    setFormData({ ...formData, phone: e.target.value })
+                  }
+                  placeholder="+1 (555) 123-4567"
+                />
+              </div>
             </div>
-            
+
             {/* File Upload Section */}
             <div className="space-y-4">
               <div>
@@ -638,9 +982,11 @@ export function Settings() {
                   Add files for context about your company
                 </h4>
                 <p className="text-sm text-gray-500 mb-4">
-                  Upload annual reports, sustainability reports, or other company documents to help our AI provide more personalized recommendations.
+                  Upload annual reports, sustainability reports, or other
+                  company documents to help our AI provide more personalized
+                  recommendations.
                 </p>
-                
+
                 {/* File Upload Area */}
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
                   <input
@@ -660,20 +1006,22 @@ export function Settings() {
                     <div className="text-sm text-gray-600">
                       <span className="font-medium text-blue-600 hover:text-blue-500">
                         Click to upload
-                      </span>
-                      {' '}or drag and drop
+                      </span>{' '}
+                      or drag and drop
                     </div>
                     <div className="text-xs text-gray-500">
                       PDF, DOC, DOCX, TXT, XLS, XLSX (max 10MB each)
                     </div>
                   </label>
                 </div>
-                
+
                 {/* Uploaded Files List */}
                 {uploadedFiles.length > 0 && (
                   <div className="space-y-2">
-                    <h5 className="text-sm font-medium text-gray-700">Uploaded Files:</h5>
-                    {uploadedFiles.map((file) => (
+                    <h5 className="text-sm font-medium text-gray-700">
+                      Uploaded Files:
+                    </h5>
+                    {uploadedFiles.map(file => (
                       <div
                         key={file.id}
                         className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
@@ -681,8 +1029,12 @@ export function Settings() {
                         <div className="flex items-center space-x-3">
                           <FileText className="h-5 w-5 text-gray-400" />
                           <div>
-                            <p className="text-sm font-medium text-gray-900">{file.name}</p>
-                            <p className="text-xs text-gray-500">{formatFileSize(file.size)}</p>
+                            <p className="text-sm font-medium text-gray-900">
+                              {file.name}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {formatFileSize(file.size)}
+                            </p>
                           </div>
                         </div>
                         <button
@@ -697,7 +1049,7 @@ export function Settings() {
                 )}
               </div>
             </div>
-            
+
             <Button onClick={saveOrganization} disabled={saving}>
               <Save className="h-4 w-4 mr-2" />
               {saving ? 'Saving...' : 'Save Changes'}
@@ -725,8 +1077,8 @@ export function Settings() {
                     Add team members with different access levels
                   </p>
                 </div>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="sm"
                   onClick={() => setShowInviteForm(!showInviteForm)}
                 >
@@ -734,7 +1086,7 @@ export function Settings() {
                   {showInviteForm ? 'Cancel' : 'Invite Member'}
                 </Button>
               </div>
-              
+
               {/* Invite Form */}
               {showInviteForm && (
                 <div className="border rounded-lg p-4 bg-gray-50">
@@ -747,38 +1099,54 @@ export function Settings() {
                       <Input
                         type="email"
                         value={inviteData.email}
-                        onChange={(e) => setInviteData({ ...inviteData, email: e.target.value })}
+                        onChange={e =>
+                          setInviteData({
+                            ...inviteData,
+                            email: e.target.value,
+                          })
+                        }
                         placeholder="colleague@company.com"
                       />
                     </div>
-                    
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Role
                       </label>
                       <select
                         value={inviteData.role}
-                        onChange={(e) => setInviteData({ ...inviteData, role: e.target.value as any })}
+                        onChange={e =>
+                          setInviteData({
+                            ...inviteData,
+                            role: e.target.value as any,
+                          })
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
-                        <option value="viewer">Viewer - Read-only access</option>
-                        <option value="contributor">Contributor - Edit reports and data</option>
-                        <option value="manager">Manager - Manage team and settings</option>
+                        <option value="viewer">
+                          Viewer - Read-only access
+                        </option>
+                        <option value="contributor">
+                          Contributor - Edit reports and data
+                        </option>
+                        <option value="manager">
+                          Manager - Manage team and settings
+                        </option>
                         <option value="admin">Admin - Full access</option>
                       </select>
                     </div>
-                    
+
                     <div className="flex space-x-2">
-                      <Button 
-                        onClick={sendInvite} 
+                      <Button
+                        onClick={sendInvite}
                         disabled={sendingInvite}
                         size="sm"
                       >
                         <Send className="h-4 w-4 mr-2" />
                         {sendingInvite ? 'Sending...' : 'Send Invite'}
                       </Button>
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         onClick={cancelInvite}
                         size="sm"
                       >
@@ -788,7 +1156,7 @@ export function Settings() {
                   </div>
                 </div>
               )}
-              
+
               <div className="space-y-2">
                 <h4 className="font-medium">Current Team</h4>
                 <div className="space-y-2">
@@ -796,11 +1164,20 @@ export function Settings() {
                     <div className="flex items-center justify-between p-3 border rounded-lg">
                       <div className="flex items-center space-x-3">
                         <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                          {(user.user_metadata?.display_name || user.user_metadata?.full_name || user.email || 'U').charAt(0).toUpperCase()}
+                          {(
+                            user.user_metadata?.display_name ||
+                            user.user_metadata?.full_name ||
+                            user.email ||
+                            'U'
+                          )
+                            .charAt(0)
+                            .toUpperCase()}
                         </div>
                         <div>
                           <p className="font-medium">
-                            {user.user_metadata?.display_name || user.user_metadata?.full_name || 'User'}
+                            {user.user_metadata?.display_name ||
+                              user.user_metadata?.full_name ||
+                              'User'}
                           </p>
                           <p className="text-sm text-gray-500">{user.email}</p>
                         </div>
@@ -821,7 +1198,9 @@ export function Settings() {
                           ?
                         </div>
                         <div>
-                          <p className="font-medium text-gray-500">Loading user...</p>
+                          <p className="font-medium text-gray-500">
+                            Loading user...
+                          </p>
                           <p className="text-sm text-gray-400">Please wait</p>
                         </div>
                       </div>
@@ -835,30 +1214,43 @@ export function Settings() {
                 <div className="space-y-2">
                   <h4 className="font-medium">Pending Invites</h4>
                   <div className="space-y-2">
-                    {pendingInvites.map((invite) => {
-                      const timeRemaining = getTimeRemaining(invite.expiresAt)
+                    {pendingInvites.map(invite => {
+                      const timeRemaining = getTimeRemaining(invite.expiresAt);
                       return (
                         <div
                           key={invite.id}
                           className={`flex items-center justify-between p-3 border rounded-lg ${
-                            timeRemaining.expired ? 'bg-red-50 border-red-200' : 'bg-yellow-50 border-yellow-200'
+                            timeRemaining.expired
+                              ? 'bg-red-50 border-red-200'
+                              : 'bg-yellow-50 border-yellow-200'
                           }`}
                         >
                           <div className="flex items-center space-x-3">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium ${
-                              timeRemaining.expired ? 'bg-red-500' : 'bg-yellow-500'
-                            }`}>
+                            <div
+                              className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium ${
+                                timeRemaining.expired
+                                  ? 'bg-red-500'
+                                  : 'bg-yellow-500'
+                              }`}
+                            >
                               <Clock className="h-4 w-4" />
                             </div>
                             <div>
                               <p className="font-medium">{invite.email}</p>
                               <div className="flex items-center space-x-2">
-                                <span className={`px-2 py-1 text-xs rounded-full ${getRoleColor(invite.role)}`}>
-                                  {invite.role.charAt(0).toUpperCase() + invite.role.slice(1)}
+                                <span
+                                  className={`px-2 py-1 text-xs rounded-full ${getRoleColor(invite.role)}`}
+                                >
+                                  {invite.role.charAt(0).toUpperCase() +
+                                    invite.role.slice(1)}
                                 </span>
-                                <span className={`text-xs ${
-                                  timeRemaining.expired ? 'text-red-600' : 'text-yellow-600'
-                                }`}>
+                                <span
+                                  className={`text-xs ${
+                                    timeRemaining.expired
+                                      ? 'text-red-600'
+                                      : 'text-yellow-600'
+                                  }`}
+                                >
                                   {timeRemaining.text}
                                 </span>
                               </div>
@@ -877,7 +1269,7 @@ export function Settings() {
                             </button>
                           </div>
                         </div>
-                      )
+                      );
                     })}
                   </div>
                 </div>
@@ -976,9 +1368,7 @@ export function Settings() {
         <Card>
           <CardHeader>
             <CardTitle>Account Settings</CardTitle>
-            <CardDescription>
-              Manage your account preferences
-            </CardDescription>
+            <CardDescription>Manage your account preferences</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -1007,7 +1397,81 @@ export function Settings() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Delete Account */}
+        <Card className="border-red-200">
+          <CardHeader>
+            <CardTitle className="flex items-center text-red-600">
+              <Trash2 className="h-5 w-5 mr-2" />
+              Delete Account
+            </CardTitle>
+            <CardDescription>
+              Permanently delete your account and all associated data. This action cannot be undone.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {!showDeleteConfirm ? (
+              <div className="space-y-4">
+                <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <h4 className="font-medium text-red-800 mb-2">Warning</h4>
+                  <ul className="text-sm text-red-700 space-y-1">
+                    <li>• All your personal data will be cleared from the database</li>
+                    <li>• All organizations you own will be deleted</li>
+                    <li>• All team members will lose access to your organizations</li>
+                    <li>• You will be signed out and redirected to the sign-up page</li>
+                    <li>• This action cannot be undone</li>
+                  </ul>
+                </div>
+                <Button
+                  variant="destructive"
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="w-full"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete My Account
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <h4 className="font-medium text-red-800 mb-2">Are you absolutely sure?</h4>
+                  <p className="text-sm text-red-700">
+                    This will clear all your data from the database and sign you out. You'll be redirected to the sign-up page. This action cannot be undone.
+                  </p>
+                </div>
+                <div className="flex space-x-3">
+                  <Button
+                    variant="destructive"
+                    onClick={deleteAccount}
+                    disabled={deletingAccount}
+                    className="flex-1"
+                  >
+                    {deletingAccount ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Deleting...
+                      </>
+                    ) : (
+                      <>
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Yes, Delete My Account
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowDeleteConfirm(false)}
+                    disabled={deletingAccount}
+                    className="flex-1"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </Layout>
-  )
+  );
 }

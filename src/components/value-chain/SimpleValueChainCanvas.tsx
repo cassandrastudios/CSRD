@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { useState } from 'react';
 import { useValueChainStore } from '@/store/useValueChainStore';
@@ -8,9 +8,23 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
-import { Truck, Building2, Users, Edit, GripVertical, Save, X } from 'lucide-react';
+import {
+  Truck,
+  Building2,
+  Users,
+  Edit,
+  GripVertical,
+  Save,
+  X,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export function SimpleValueChainCanvas() {
@@ -81,7 +95,7 @@ export function SimpleValueChainCanvas() {
   const handleDragOver = (e: React.DragEvent, index: number) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     // Only allow reordering within the same category
     if (draggedPlayer && allPlayers[index]) {
       const targetPlayer = allPlayers[index];
@@ -89,12 +103,20 @@ export function SimpleValueChainCanvas() {
         e.dataTransfer.dropEffect = 'move';
         setDraggedOverIndex(index);
         setDragFeedback('');
-        console.log('Drag over index:', index, 'draggedPlayer:', draggedPlayer?.name, 'same category');
+        console.log(
+          'Drag over index:',
+          index,
+          'draggedPlayer:',
+          draggedPlayer?.name,
+          'same category'
+        );
       } else {
         // Show "not allowed" cursor when dragging over different category
         e.dataTransfer.dropEffect = 'none';
         setDraggedOverIndex(null);
-        setDragFeedback('Cards can only be reordered within their own category');
+        setDragFeedback(
+          'Cards can only be reordered within their own category'
+        );
         console.log('Drag over different category - not allowed');
       }
     }
@@ -109,64 +131,74 @@ export function SimpleValueChainCanvas() {
     e.preventDefault();
     e.stopPropagation();
     setDraggedOverIndex(null);
-    
+
     console.log('🎯 DROP EVENT TRIGGERED at index:', targetIndex);
     console.log('Current draggedPlayer:', draggedPlayer?.name);
-    
+
     if (!draggedPlayer) {
       console.log('❌ No dragged player found');
       return;
     }
-    
+
     const players = [...valueChain.players];
     const draggedIndex = players.findIndex(p => p.id === draggedPlayer.id);
     const targetPlayer = players[targetIndex];
-    
-    console.log('Dragged player index:', draggedIndex, 'Target index:', targetIndex);
-    
+
+    console.log(
+      'Dragged player index:',
+      draggedIndex,
+      'Target index:',
+      targetIndex
+    );
+
     if (draggedIndex === -1) {
       console.log('❌ Dragged player not found in players array');
       return;
     }
-    
+
     // Only allow reordering within the same category
     if (targetPlayer && draggedPlayer.category !== targetPlayer.category) {
-      console.log('❌ Cannot move between categories - only reordering within same category allowed');
+      console.log(
+        '❌ Cannot move between categories - only reordering within same category allowed'
+      );
       setDraggedPlayer(null);
       return;
     }
-    
+
     if (draggedIndex === targetIndex) {
       console.log('ℹ️ Same position, no reordering needed');
       setDraggedPlayer(null);
       return;
     }
-    
+
     console.log('✅ Starting reorder process...');
-    
+
     // Remove dragged player
     const [draggedItem] = players.splice(draggedIndex, 1);
-    
+
     // Insert at new position
     players.splice(targetIndex, 0, draggedItem);
-    
+
     // Update x positions based on new order
     const updatedPlayers = players.map((player, index) => ({
       ...player,
-      x: index * 10
+      x: index * 10,
     }));
-    
-    console.log('🔄 Reordering players:', updatedPlayers.map(p => p.name));
-    
+
+    console.log(
+      '🔄 Reordering players:',
+      updatedPlayers.map(p => p.name)
+    );
+
     // Update the store directly
     useValueChainStore.setState({
       valueChain: {
         ...valueChain,
         players: updatedPlayers,
         updatedAt: new Date().toISOString(),
-      }
+      },
     });
-    
+
     console.log('✅ Reorder complete!');
     setDraggedPlayer(null);
   };
@@ -184,7 +216,9 @@ export function SimpleValueChainCanvas() {
     });
   };
 
-  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleEditChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setEditFormData(prev => ({ ...prev, [name]: value }));
   };
@@ -194,12 +228,15 @@ export function SimpleValueChainCanvas() {
   };
 
   const handleEditSelectChange = (name: string, value: string) => {
-    setEditFormData(prev => ({ ...prev, [name]: value as 'upstream' | 'own_operations' | 'downstream' }));
+    setEditFormData(prev => ({
+      ...prev,
+      [name]: value as 'upstream' | 'own_operations' | 'downstream',
+    }));
   };
 
   const handleSaveEdit = () => {
     if (!editingPlayer) return;
-    
+
     updatePlayer(editingPlayer.id, editFormData);
     setEditingPlayer(null);
     setEditFormData({
@@ -236,13 +273,13 @@ export function SimpleValueChainCanvas() {
       .sort((a, b) => (a.x || 0) - (b.x || 0)),
     downstream: valueChain.players
       .filter(p => p.category === 'downstream')
-      .sort((a, b) => (a.x || 0) - (b.x || 0))
+      .sort((a, b) => (a.x || 0) - (b.x || 0)),
   };
 
   const allPlayers = [
     ...groupedPlayers.upstream,
     ...groupedPlayers.own_operations,
-    ...groupedPlayers.downstream
+    ...groupedPlayers.downstream,
   ];
 
   const renderCardContent = (player: Player) => {
@@ -268,7 +305,9 @@ export function SimpleValueChainCanvas() {
               <Select
                 name="category"
                 value={editFormData.category}
-                onValueChange={(value: string) => handleEditSelectChange('category', value)}
+                onValueChange={(value: string) =>
+                  handleEditSelectChange('category', value)
+                }
               >
                 <SelectTrigger className="mt-1">
                   <SelectValue placeholder="Select a category" />
@@ -323,7 +362,10 @@ export function SimpleValueChainCanvas() {
             {/* Impact Sliders */}
             <div className="space-y-4">
               <div>
-                <Label htmlFor="edit-impact-on" className="flex items-center justify-between">
+                <Label
+                  htmlFor="edit-impact-on"
+                  className="flex items-center justify-between"
+                >
                   Impact ON Company: {editFormData.impactOnCompany}
                 </Label>
                 <Slider
@@ -333,13 +375,18 @@ export function SimpleValueChainCanvas() {
                   max={10}
                   step={1}
                   value={[editFormData.impactOnCompany]}
-                  onValueChange={(value: number[]) => handleEditSliderChange('impactOnCompany', value)}
+                  onValueChange={(value: number[]) =>
+                    handleEditSliderChange('impactOnCompany', value)
+                  }
                   className="mt-2"
                 />
               </div>
 
               <div>
-                <Label htmlFor="edit-impact-from" className="flex items-center justify-between">
+                <Label
+                  htmlFor="edit-impact-from"
+                  className="flex items-center justify-between"
+                >
                   Impact FROM Company: {editFormData.impactFromCompany}
                 </Label>
                 <Slider
@@ -349,7 +396,9 @@ export function SimpleValueChainCanvas() {
                   max={10}
                   step={1}
                   value={[editFormData.impactFromCompany]}
-                  onValueChange={(value: number[]) => handleEditSliderChange('impactFromCompany', value)}
+                  onValueChange={(value: number[]) =>
+                    handleEditSliderChange('impactFromCompany', value)
+                  }
                   className="mt-2"
                 />
               </div>
@@ -393,7 +442,7 @@ export function SimpleValueChainCanvas() {
               variant="ghost"
               size="sm"
               className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0"
-              onClick={(e) => {
+              onClick={e => {
                 e.stopPropagation();
                 handleEditClick(player);
               }}
@@ -402,28 +451,34 @@ export function SimpleValueChainCanvas() {
             </Button>
           </div>
         </div>
-        
+
         {player.description && (
           <p className="text-sm text-gray-600 mb-3 line-clamp-2">
             {player.description}
           </p>
         )}
-        
+
         <div className="grid grid-cols-3 gap-2 mb-3">
           <div className="text-center p-2 bg-gray-50 rounded">
-            <div className="text-lg font-bold text-blue-600">{player.impactOnCompany}</div>
+            <div className="text-lg font-bold text-blue-600">
+              {player.impactOnCompany}
+            </div>
             <div className="text-xs text-gray-500">Impact On</div>
           </div>
           <div className="text-center p-2 bg-gray-50 rounded">
-            <div className="text-lg font-bold text-green-600">{player.impactFromCompany}</div>
+            <div className="text-lg font-bold text-green-600">
+              {player.impactFromCompany}
+            </div>
             <div className="text-xs text-gray-500">Impact From</div>
           </div>
           <div className="text-center p-2 bg-gray-100 rounded">
-            <div className="text-lg font-bold text-gray-700">{player.impactOnCompany + player.impactFromCompany}</div>
+            <div className="text-lg font-bold text-gray-700">
+              {player.impactOnCompany + player.impactFromCompany}
+            </div>
             <div className="text-xs text-gray-500">Total</div>
           </div>
         </div>
-        
+
         {player.industry && (
           <div className="flex items-center gap-2 text-xs text-gray-500">
             <span className="font-medium">Industry:</span>
@@ -438,7 +493,9 @@ export function SimpleValueChainCanvas() {
     <div className="h-full flex flex-col bg-gray-50">
       {/* Header */}
       <div className="p-4 bg-white border-b border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-900">{valueChain.name}</h2>
+        <h2 className="text-lg font-semibold text-gray-900">
+          {valueChain.name}
+        </h2>
         {valueChain.description && (
           <p className="text-sm text-gray-600 mt-1">{valueChain.description}</p>
         )}
@@ -469,288 +526,380 @@ export function SimpleValueChainCanvas() {
                 </div>
               </div>
             )}
-            
+
             <div className="flex gap-6 h-full overflow-x-auto pb-4">
-            {/* Upstream Section */}
-            {groupedPlayers.upstream.length > 0 && (
-              <div className="flex flex-col gap-3 flex-shrink-0">
-                {/* Upstream Header - spans full width of all upstream cards */}
-                <div 
-                  className="flex-shrink-0"
-                  style={{ width: `${groupedPlayers.upstream.length * 320 + (groupedPlayers.upstream.length - 1) * 16}px` }}
-                >
-                  <div className="flex items-center justify-between p-4 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg border border-orange-200 shadow-sm w-full">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-orange-200 rounded-lg">
-                        <Truck className="h-5 w-5 text-orange-700" />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-bold text-gray-900">Upstream</h3>
-                        <p className="text-sm text-orange-700">Suppliers & Partners</p>
-                      </div>
-                    </div>
-                    <Badge variant="secondary" className="bg-orange-200 text-orange-800 font-semibold px-3 py-1">
-                      {groupedPlayers.upstream.length}
-                    </Badge>
-                  </div>
-                </div>
-                
-                {/* Upstream Cards */}
-                <div className="flex gap-4">
-                  {groupedPlayers.upstream.map((player, index) => (
-                <div key={player.id} className="flex items-center">
-                  {/* Drop zone before each card - only show if same category */}
-                  {draggedPlayer && draggedPlayer.category === player.category && (
-                    <div
-                      className={`w-2 h-32 rounded transition-colors ${
-                        draggedOverIndex === index && draggedPlayer?.id !== player.id
-                          ? 'bg-blue-500' : 'bg-transparent'
-                      }`}
-                      onDragOver={(e) => handleDragOver(e, index)}
-                      onDragLeave={handleDragLeave}
-                      onDrop={(e) => handleDrop(e, index)}
-                    />
-                  )}
-                  
-                  <Card
-                    className={`cursor-grab hover:shadow-lg transition-all duration-200 flex-shrink-0 w-80 group border-2 hover:border-orange-300 ${
-                      draggedPlayer?.id === player.id ? 'opacity-50' : ''
-                    } ${
-                      draggedPlayer && draggedPlayer.category !== player.category ? 'opacity-30' : ''
-                    }`}
-                    draggable={editingPlayer?.id !== player.id}
-                    onDragStart={(e) => {
-                      if (editingPlayer?.id === player.id) {
-                        e.preventDefault();
-                        return;
-                      }
-                      console.log('Card drag start triggered for:', player.name);
-                      handleDragStart(e, player);
-                    }}
-                    onDragOver={(e) => {
-                      if (editingPlayer?.id === player.id) return;
-                      e.preventDefault();
-                      e.dataTransfer.dropEffect = 'move';
-                      setDraggedOverIndex(index);
-                    }}
-                    onDragLeave={() => {
-                      if (editingPlayer?.id === player.id) return;
-                      setDraggedOverIndex(null);
-                    }}
-                    onDrop={(e) => {
-                      if (editingPlayer?.id === player.id) return;
-                      e.preventDefault();
-                      handleDrop(e, index);
+              {/* Upstream Section */}
+              {groupedPlayers.upstream.length > 0 && (
+                <div className="flex flex-col gap-3 flex-shrink-0">
+                  {/* Upstream Header - spans full width of all upstream cards */}
+                  <div
+                    className="flex-shrink-0"
+                    style={{
+                      width: `${groupedPlayers.upstream.length * 320 + (groupedPlayers.upstream.length - 1) * 16}px`,
                     }}
                   >
-                    {renderCardContent(player)}
-                  </Card>
-                </div>
-              ))}
-              
-                  {/* Drop zone after upstream cards - only show if same category */}
-                  {groupedPlayers.upstream.length > 0 && draggedPlayer && draggedPlayer.category === 'upstream' && (
-                    <div
-                      className={`w-2 h-32 rounded transition-colors ${
-                        draggedOverIndex === groupedPlayers.upstream.length && draggedPlayer
-                          ? 'bg-blue-500' : 'bg-transparent'
-                      }`}
-                      onDragOver={(e) => handleDragOver(e, groupedPlayers.upstream.length)}
-                      onDragLeave={handleDragLeave}
-                      onDrop={(e) => handleDrop(e, groupedPlayers.upstream.length)}
-                    />
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Own Operations Section */}
-            {groupedPlayers.own_operations.length > 0 && (
-              <div className="flex flex-col gap-3 flex-shrink-0">
-                {/* Own Operations Header - spans full width of all own operations cards */}
-                <div 
-                  className="flex-shrink-0"
-                  style={{ width: `${groupedPlayers.own_operations.length * 320 + (groupedPlayers.own_operations.length - 1) * 16}px` }}
-                >
-                  <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-lg border border-green-200 shadow-sm w-full">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-green-200 rounded-lg">
-                        <Building2 className="h-5 w-5 text-green-700" />
+                    <div className="flex items-center justify-between p-4 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg border border-orange-200 shadow-sm w-full">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-orange-200 rounded-lg">
+                          <Truck className="h-5 w-5 text-orange-700" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-bold text-gray-900">
+                            Upstream
+                          </h3>
+                          <p className="text-sm text-orange-700">
+                            Suppliers & Partners
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="text-lg font-bold text-gray-900">Own Operations</h3>
-                        <p className="text-sm text-green-700">Internal Processes</p>
-                      </div>
+                      <Badge
+                        variant="secondary"
+                        className="bg-orange-200 text-orange-800 font-semibold px-3 py-1"
+                      >
+                        {groupedPlayers.upstream.length}
+                      </Badge>
                     </div>
-                    <Badge variant="secondary" className="bg-green-200 text-green-800 font-semibold px-3 py-1">
-                      {groupedPlayers.own_operations.length}
-                    </Badge>
                   </div>
-                </div>
-                
-                {/* Own Operations Cards */}
-                <div className="flex gap-4">
-              {groupedPlayers.own_operations.map((player, index) => {
-                const globalIndex = groupedPlayers.upstream.length + index;
-                return (
-                  <div key={player.id} className="flex items-center">
-                    {/* Drop zone before each card - only show if same category */}
-                    {draggedPlayer && draggedPlayer.category === player.category && (
-                      <div
-                        className={`w-2 h-32 rounded transition-colors ${
-                          draggedOverIndex === globalIndex && draggedPlayer?.id !== player.id
-                            ? 'bg-blue-500' : 'bg-transparent'
-                        }`}
-                        onDragOver={(e) => handleDragOver(e, globalIndex)}
-                        onDragLeave={handleDragLeave}
-                        onDrop={(e) => handleDrop(e, globalIndex)}
-                      />
-                    )}
-                    
-                    <Card
-                      className={`cursor-grab hover:shadow-md transition-shadow flex-shrink-0 w-80 group ${
-                        draggedPlayer?.id === player.id ? 'opacity-50' : ''
-                      } ${
-                        draggedPlayer && draggedPlayer.category !== player.category ? 'opacity-30' : ''
-                      }`}
-                      draggable={editingPlayer?.id !== player.id}
-                      onDragStart={(e) => {
-                        if (editingPlayer?.id === player.id) {
-                          e.preventDefault();
-                          return;
-                        }
-                        console.log('Card drag start triggered for:', player.name);
-                        handleDragStart(e, player);
-                      }}
-                      onDragOver={(e) => {
-                        if (editingPlayer?.id === player.id) return;
-                        handleDragOver(e, globalIndex);
-                      }}
-                      onDragLeave={() => {
-                        if (editingPlayer?.id === player.id) return;
-                        setDraggedOverIndex(null);
-                      }}
-                      onDrop={(e) => {
-                        if (editingPlayer?.id === player.id) return;
-                        e.preventDefault();
-                        handleDrop(e, globalIndex);
-                      }}
-                    >
-                      {renderCardContent(player)}
-                    </Card>
-                  </div>
-                );
-              })}
-              
-                  {/* Drop zone after own operations cards - only show if same category */}
-                  {groupedPlayers.own_operations.length > 0 && draggedPlayer && draggedPlayer.category === 'own_operations' && (
-                    <div
-                      className={`w-2 h-32 rounded transition-colors ${
-                        draggedOverIndex === groupedPlayers.upstream.length + groupedPlayers.own_operations.length && draggedPlayer
-                          ? 'bg-blue-500' : 'bg-transparent'
-                      }`}
-                      onDragOver={(e) => handleDragOver(e, groupedPlayers.upstream.length + groupedPlayers.own_operations.length)}
-                      onDragLeave={handleDragLeave}
-                      onDrop={(e) => handleDrop(e, groupedPlayers.upstream.length + groupedPlayers.own_operations.length)}
-                    />
-                  )}
-                </div>
-              </div>
-            )}
 
-            {/* Downstream Section */}
-            {groupedPlayers.downstream.length > 0 && (
-              <div className="flex flex-col gap-3 flex-shrink-0">
-                {/* Downstream Header - spans full width of all downstream cards */}
-                <div 
-                  className="flex-shrink-0"
-                  style={{ width: `${groupedPlayers.downstream.length * 320 + (groupedPlayers.downstream.length - 1) * 16}px` }}
-                >
-                  <div className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg border border-purple-200 shadow-sm w-full">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-purple-200 rounded-lg">
-                        <Users className="h-5 w-5 text-purple-700" />
+                  {/* Upstream Cards */}
+                  <div className="flex gap-4">
+                    {groupedPlayers.upstream.map((player, index) => (
+                      <div key={player.id} className="flex items-center">
+                        {/* Drop zone before each card - only show if same category */}
+                        {draggedPlayer &&
+                          draggedPlayer.category === player.category && (
+                            <div
+                              className={`w-2 h-32 rounded transition-colors ${
+                                draggedOverIndex === index &&
+                                draggedPlayer?.id !== player.id
+                                  ? 'bg-blue-500'
+                                  : 'bg-transparent'
+                              }`}
+                              onDragOver={e => handleDragOver(e, index)}
+                              onDragLeave={handleDragLeave}
+                              onDrop={e => handleDrop(e, index)}
+                            />
+                          )}
+
+                        <Card
+                          className={`cursor-grab hover:shadow-lg transition-all duration-200 flex-shrink-0 w-80 group border-2 hover:border-orange-300 ${
+                            draggedPlayer?.id === player.id ? 'opacity-50' : ''
+                          } ${
+                            draggedPlayer &&
+                            draggedPlayer.category !== player.category
+                              ? 'opacity-30'
+                              : ''
+                          }`}
+                          draggable={editingPlayer?.id !== player.id}
+                          onDragStart={e => {
+                            if (editingPlayer?.id === player.id) {
+                              e.preventDefault();
+                              return;
+                            }
+                            console.log(
+                              'Card drag start triggered for:',
+                              player.name
+                            );
+                            handleDragStart(e, player);
+                          }}
+                          onDragOver={e => {
+                            if (editingPlayer?.id === player.id) return;
+                            e.preventDefault();
+                            e.dataTransfer.dropEffect = 'move';
+                            setDraggedOverIndex(index);
+                          }}
+                          onDragLeave={() => {
+                            if (editingPlayer?.id === player.id) return;
+                            setDraggedOverIndex(null);
+                          }}
+                          onDrop={e => {
+                            if (editingPlayer?.id === player.id) return;
+                            e.preventDefault();
+                            handleDrop(e, index);
+                          }}
+                        >
+                          {renderCardContent(player)}
+                        </Card>
                       </div>
-                      <div>
-                        <h3 className="text-lg font-bold text-gray-900">Downstream</h3>
-                        <p className="text-sm text-purple-700">Customers & End Users</p>
+                    ))}
+
+                    {/* Drop zone after upstream cards - only show if same category */}
+                    {groupedPlayers.upstream.length > 0 &&
+                      draggedPlayer &&
+                      draggedPlayer.category === 'upstream' && (
+                        <div
+                          className={`w-2 h-32 rounded transition-colors ${
+                            draggedOverIndex ===
+                              groupedPlayers.upstream.length && draggedPlayer
+                              ? 'bg-blue-500'
+                              : 'bg-transparent'
+                          }`}
+                          onDragOver={e =>
+                            handleDragOver(e, groupedPlayers.upstream.length)
+                          }
+                          onDragLeave={handleDragLeave}
+                          onDrop={e =>
+                            handleDrop(e, groupedPlayers.upstream.length)
+                          }
+                        />
+                      )}
+                  </div>
+                </div>
+              )}
+
+              {/* Own Operations Section */}
+              {groupedPlayers.own_operations.length > 0 && (
+                <div className="flex flex-col gap-3 flex-shrink-0">
+                  {/* Own Operations Header - spans full width of all own operations cards */}
+                  <div
+                    className="flex-shrink-0"
+                    style={{
+                      width: `${groupedPlayers.own_operations.length * 320 + (groupedPlayers.own_operations.length - 1) * 16}px`,
+                    }}
+                  >
+                    <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-lg border border-green-200 shadow-sm w-full">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-green-200 rounded-lg">
+                          <Building2 className="h-5 w-5 text-green-700" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-bold text-gray-900">
+                            Own Operations
+                          </h3>
+                          <p className="text-sm text-green-700">
+                            Internal Processes
+                          </p>
+                        </div>
                       </div>
+                      <Badge
+                        variant="secondary"
+                        className="bg-green-200 text-green-800 font-semibold px-3 py-1"
+                      >
+                        {groupedPlayers.own_operations.length}
+                      </Badge>
                     </div>
-                    <Badge variant="secondary" className="bg-purple-200 text-purple-800 font-semibold px-3 py-1">
-                      {groupedPlayers.downstream.length}
-                    </Badge>
+                  </div>
+
+                  {/* Own Operations Cards */}
+                  <div className="flex gap-4">
+                    {groupedPlayers.own_operations.map((player, index) => {
+                      const globalIndex =
+                        groupedPlayers.upstream.length + index;
+                      return (
+                        <div key={player.id} className="flex items-center">
+                          {/* Drop zone before each card - only show if same category */}
+                          {draggedPlayer &&
+                            draggedPlayer.category === player.category && (
+                              <div
+                                className={`w-2 h-32 rounded transition-colors ${
+                                  draggedOverIndex === globalIndex &&
+                                  draggedPlayer?.id !== player.id
+                                    ? 'bg-blue-500'
+                                    : 'bg-transparent'
+                                }`}
+                                onDragOver={e => handleDragOver(e, globalIndex)}
+                                onDragLeave={handleDragLeave}
+                                onDrop={e => handleDrop(e, globalIndex)}
+                              />
+                            )}
+
+                          <Card
+                            className={`cursor-grab hover:shadow-md transition-shadow flex-shrink-0 w-80 group ${
+                              draggedPlayer?.id === player.id
+                                ? 'opacity-50'
+                                : ''
+                            } ${
+                              draggedPlayer &&
+                              draggedPlayer.category !== player.category
+                                ? 'opacity-30'
+                                : ''
+                            }`}
+                            draggable={editingPlayer?.id !== player.id}
+                            onDragStart={e => {
+                              if (editingPlayer?.id === player.id) {
+                                e.preventDefault();
+                                return;
+                              }
+                              console.log(
+                                'Card drag start triggered for:',
+                                player.name
+                              );
+                              handleDragStart(e, player);
+                            }}
+                            onDragOver={e => {
+                              if (editingPlayer?.id === player.id) return;
+                              handleDragOver(e, globalIndex);
+                            }}
+                            onDragLeave={() => {
+                              if (editingPlayer?.id === player.id) return;
+                              setDraggedOverIndex(null);
+                            }}
+                            onDrop={e => {
+                              if (editingPlayer?.id === player.id) return;
+                              e.preventDefault();
+                              handleDrop(e, globalIndex);
+                            }}
+                          >
+                            {renderCardContent(player)}
+                          </Card>
+                        </div>
+                      );
+                    })}
+
+                    {/* Drop zone after own operations cards - only show if same category */}
+                    {groupedPlayers.own_operations.length > 0 &&
+                      draggedPlayer &&
+                      draggedPlayer.category === 'own_operations' && (
+                        <div
+                          className={`w-2 h-32 rounded transition-colors ${
+                            draggedOverIndex ===
+                              groupedPlayers.upstream.length +
+                                groupedPlayers.own_operations.length &&
+                            draggedPlayer
+                              ? 'bg-blue-500'
+                              : 'bg-transparent'
+                          }`}
+                          onDragOver={e =>
+                            handleDragOver(
+                              e,
+                              groupedPlayers.upstream.length +
+                                groupedPlayers.own_operations.length
+                            )
+                          }
+                          onDragLeave={handleDragLeave}
+                          onDrop={e =>
+                            handleDrop(
+                              e,
+                              groupedPlayers.upstream.length +
+                                groupedPlayers.own_operations.length
+                            )
+                          }
+                        />
+                      )}
                   </div>
                 </div>
-                
-                {/* Downstream Cards */}
-                <div className="flex gap-4">
-              {groupedPlayers.downstream.map((player, index) => {
-                const globalIndex = groupedPlayers.upstream.length + groupedPlayers.own_operations.length + index;
-                return (
-                  <div key={player.id} className="flex items-center">
-                    {/* Drop zone before each card - only show if same category */}
-                    {draggedPlayer && draggedPlayer.category === player.category && (
-                      <div
-                        className={`w-2 h-32 rounded transition-colors ${
-                          draggedOverIndex === globalIndex && draggedPlayer?.id !== player.id
-                            ? 'bg-blue-500' : 'bg-transparent'
-                        }`}
-                        onDragOver={(e) => handleDragOver(e, globalIndex)}
-                        onDragLeave={handleDragLeave}
-                        onDrop={(e) => handleDrop(e, globalIndex)}
-                      />
-                    )}
-                    
-                    <Card
-                      className={`cursor-grab hover:shadow-md transition-shadow flex-shrink-0 w-80 group ${
-                        draggedPlayer?.id === player.id ? 'opacity-50' : ''
-                      } ${
-                        draggedPlayer && draggedPlayer.category !== player.category ? 'opacity-30' : ''
-                      }`}
-                      draggable={editingPlayer?.id !== player.id}
-                      onDragStart={(e) => {
-                        if (editingPlayer?.id === player.id) {
-                          e.preventDefault();
-                          return;
-                        }
-                        console.log('Card drag start triggered for:', player.name);
-                        handleDragStart(e, player);
-                      }}
-                      onDragOver={(e) => {
-                        if (editingPlayer?.id === player.id) return;
-                        handleDragOver(e, globalIndex);
-                      }}
-                      onDragLeave={() => {
-                        if (editingPlayer?.id === player.id) return;
-                        setDraggedOverIndex(null);
-                      }}
-                      onDrop={(e) => {
-                        if (editingPlayer?.id === player.id) return;
-                        e.preventDefault();
-                        handleDrop(e, globalIndex);
-                      }}
-                    >
-                      {renderCardContent(player)}
-                    </Card>
+              )}
+
+              {/* Downstream Section */}
+              {groupedPlayers.downstream.length > 0 && (
+                <div className="flex flex-col gap-3 flex-shrink-0">
+                  {/* Downstream Header - spans full width of all downstream cards */}
+                  <div
+                    className="flex-shrink-0"
+                    style={{
+                      width: `${groupedPlayers.downstream.length * 320 + (groupedPlayers.downstream.length - 1) * 16}px`,
+                    }}
+                  >
+                    <div className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg border border-purple-200 shadow-sm w-full">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-purple-200 rounded-lg">
+                          <Users className="h-5 w-5 text-purple-700" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-bold text-gray-900">
+                            Downstream
+                          </h3>
+                          <p className="text-sm text-purple-700">
+                            Customers & End Users
+                          </p>
+                        </div>
+                      </div>
+                      <Badge
+                        variant="secondary"
+                        className="bg-purple-200 text-purple-800 font-semibold px-3 py-1"
+                      >
+                        {groupedPlayers.downstream.length}
+                      </Badge>
+                    </div>
                   </div>
-                );
-              })}
-              
-                  {/* Drop zone after downstream cards - only show if same category */}
-                  {groupedPlayers.downstream.length > 0 && draggedPlayer && draggedPlayer.category === 'downstream' && (
-                    <div
-                      className={`w-2 h-32 rounded transition-colors ${
-                        draggedOverIndex === allPlayers.length && draggedPlayer
-                          ? 'bg-blue-500' : 'bg-transparent'
-                      }`}
-                      onDragOver={(e) => handleDragOver(e, allPlayers.length)}
-                      onDragLeave={handleDragLeave}
-                      onDrop={(e) => handleDrop(e, allPlayers.length)}
-                    />
-                  )}
+
+                  {/* Downstream Cards */}
+                  <div className="flex gap-4">
+                    {groupedPlayers.downstream.map((player, index) => {
+                      const globalIndex =
+                        groupedPlayers.upstream.length +
+                        groupedPlayers.own_operations.length +
+                        index;
+                      return (
+                        <div key={player.id} className="flex items-center">
+                          {/* Drop zone before each card - only show if same category */}
+                          {draggedPlayer &&
+                            draggedPlayer.category === player.category && (
+                              <div
+                                className={`w-2 h-32 rounded transition-colors ${
+                                  draggedOverIndex === globalIndex &&
+                                  draggedPlayer?.id !== player.id
+                                    ? 'bg-blue-500'
+                                    : 'bg-transparent'
+                                }`}
+                                onDragOver={e => handleDragOver(e, globalIndex)}
+                                onDragLeave={handleDragLeave}
+                                onDrop={e => handleDrop(e, globalIndex)}
+                              />
+                            )}
+
+                          <Card
+                            className={`cursor-grab hover:shadow-md transition-shadow flex-shrink-0 w-80 group ${
+                              draggedPlayer?.id === player.id
+                                ? 'opacity-50'
+                                : ''
+                            } ${
+                              draggedPlayer &&
+                              draggedPlayer.category !== player.category
+                                ? 'opacity-30'
+                                : ''
+                            }`}
+                            draggable={editingPlayer?.id !== player.id}
+                            onDragStart={e => {
+                              if (editingPlayer?.id === player.id) {
+                                e.preventDefault();
+                                return;
+                              }
+                              console.log(
+                                'Card drag start triggered for:',
+                                player.name
+                              );
+                              handleDragStart(e, player);
+                            }}
+                            onDragOver={e => {
+                              if (editingPlayer?.id === player.id) return;
+                              handleDragOver(e, globalIndex);
+                            }}
+                            onDragLeave={() => {
+                              if (editingPlayer?.id === player.id) return;
+                              setDraggedOverIndex(null);
+                            }}
+                            onDrop={e => {
+                              if (editingPlayer?.id === player.id) return;
+                              e.preventDefault();
+                              handleDrop(e, globalIndex);
+                            }}
+                          >
+                            {renderCardContent(player)}
+                          </Card>
+                        </div>
+                      );
+                    })}
+
+                    {/* Drop zone after downstream cards - only show if same category */}
+                    {groupedPlayers.downstream.length > 0 &&
+                      draggedPlayer &&
+                      draggedPlayer.category === 'downstream' && (
+                        <div
+                          className={`w-2 h-32 rounded transition-colors ${
+                            draggedOverIndex === allPlayers.length &&
+                            draggedPlayer
+                              ? 'bg-blue-500'
+                              : 'bg-transparent'
+                          }`}
+                          onDragOver={e => handleDragOver(e, allPlayers.length)}
+                          onDragLeave={handleDragLeave}
+                          onDrop={e => handleDrop(e, allPlayers.length)}
+                        />
+                      )}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
             </div>
           </div>
         )}

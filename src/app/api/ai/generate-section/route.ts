@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { generateAISection } from '@/lib/ai'
+import { NextRequest, NextResponse } from 'next/server';
+import { generateAISection } from '@/lib/ai';
 
 export async function POST(request: NextRequest) {
   try {
-    const { companyData, esrsTopic, sectionType } = await request.json()
-    
+    const { companyData, esrsTopic, sectionType } = await request.json();
+
     // For now, return enhanced placeholder content
     // In production, integrate with OpenAI API using the provided key
     const content = `# ${sectionType || 'Report Section'}${esrsTopic ? ` - ${esrsTopic}` : ''}
@@ -80,14 +80,14 @@ This section demonstrates our commitment to transparent and comprehensive sustai
 
 ---
 
-*This content was generated using AI assistance and should be reviewed and customized based on your specific organizational data and requirements.*`
+*This content was generated using AI assistance and should be reviewed and customized based on your specific organizational data and requirements.*`;
 
-    return NextResponse.json({ content })
+    return NextResponse.json({ content });
   } catch (error) {
-    console.error('AI generation error:', error)
+    console.error('AI generation error:', error);
     return NextResponse.json(
       { error: 'Failed to generate content' },
       { status: 500 }
-    )
+    );
   }
 }
